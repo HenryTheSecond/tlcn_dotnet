@@ -1,20 +1,20 @@
 {
   "format": 1,
   "restore": {
-    "D:\\testing\\tlcn_dotnet\\tlcn_dotnet\\tlcn_dotnet.csproj": {}
+    "E:\\dotnet\\tlcn_dotnet\\tlcn_dotnet\\tlcn_dotnet.csproj": {}
   },
   "projects": {
-    "D:\\testing\\tlcn_dotnet\\tlcn_dotnet\\tlcn_dotnet.csproj": {
+    "E:\\dotnet\\tlcn_dotnet\\tlcn_dotnet\\tlcn_dotnet.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "D:\\testing\\tlcn_dotnet\\tlcn_dotnet\\tlcn_dotnet.csproj",
+        "projectUniqueName": "E:\\dotnet\\tlcn_dotnet\\tlcn_dotnet\\tlcn_dotnet.csproj",
         "projectName": "tlcn_dotnet",
-        "projectPath": "D:\\testing\\tlcn_dotnet\\tlcn_dotnet\\tlcn_dotnet.csproj",
-        "packagesPath": "C:\\Users\\intern.vctuyen\\.nuget\\packages\\",
-        "outputPath": "D:\\testing\\tlcn_dotnet\\tlcn_dotnet\\obj\\",
+        "projectPath": "E:\\dotnet\\tlcn_dotnet\\tlcn_dotnet\\tlcn_dotnet.csproj",
+        "packagesPath": "C:\\Users\\tuyen\\.nuget\\packages\\",
+        "outputPath": "E:\\dotnet\\tlcn_dotnet\\tlcn_dotnet\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
-          "C:\\Users\\intern.vctuyen\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Users\\tuyen\\AppData\\Roaming\\NuGet\\NuGet.Config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
         "originalTargetFrameworks": [
@@ -40,6 +40,22 @@
         "net6.0": {
           "targetAlias": "net6.0",
           "dependencies": {
+            "AutoMapper.Extensions.Microsoft.DependencyInjection": {
+              "target": "Package",
+              "version": "[12.0.0, )"
+            },
+            "BCrypt.Net-Next": {
+              "target": "Package",
+              "version": "[4.0.3, )"
+            },
+            "MailKit": {
+              "target": "Package",
+              "version": "[3.4.2, )"
+            },
+            "Microsoft.AspNetCore.Authentication.JwtBearer": {
+              "target": "Package",
+              "version": "[6.0.10, )"
+            },
             "Microsoft.EntityFrameworkCore": {
               "target": "Package",
               "version": "[6.0.10, )"
@@ -54,9 +70,17 @@
               "target": "Package",
               "version": "[6.0.10, )"
             },
+            "Newtonsoft.Json": {
+              "target": "Package",
+              "version": "[13.0.1, )"
+            },
             "Swashbuckle.AspNetCore": {
               "target": "Package",
               "version": "[6.2.3, )"
+            },
+            "Swashbuckle.AspNetCore.Filters": {
+              "target": "Package",
+              "version": "[7.0.5, )"
             }
           },
           "imports": [

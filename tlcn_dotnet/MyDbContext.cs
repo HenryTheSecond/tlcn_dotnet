@@ -15,6 +15,8 @@ namespace tlcn_dotnet
             
         }
 
+        public DbSet<Account> Account { get; set; }
+        public DbSet<ConfirmToken> ConfirmToken { get; set; }
         public DbSet<Bill> Bill { get; set; }
         public DbSet<BillDetail> BillDetail { get; set; }
         public DbSet<Category> Category { get; set; }

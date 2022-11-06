@@ -54,8 +54,9 @@ namespace tlcn_dotnet.Migrations
                         .IsRequired()
                         .HasColumnType("varchar(30)");
 
-                    b.Property<int>("Status")
-                        .HasColumnType("int");
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("varchar(30)");
 
                     b.Property<string>("WardId")
                         .HasColumnType("nvarchar(max)");
@@ -227,6 +228,37 @@ namespace tlcn_dotnet.Migrations
                         .IsUnique();
 
                     b.ToTable("Category");
+                });
+
+            modelBuilder.Entity("tlcn_dotnet.Entity.ConfirmToken", b =>
+                {
+                    b.Property<long?>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long?>("Id"), 1L, 1);
+
+                    b.Property<long>("AccountId")
+                        .HasColumnType("bigint");
+
+                    b.Property<DateTime?>("ConfirmAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("CreateAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("ExpireAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Token")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AccountId");
+
+                    b.ToTable("ConfirmToken");
                 });
 
             modelBuilder.Entity("tlcn_dotnet.Entity.Employee", b =>
@@ -436,6 +468,17 @@ namespace tlcn_dotnet.Migrations
                     b.Navigation("Cart");
 
                     b.Navigation("Product");
+                });
+
+            modelBuilder.Entity("tlcn_dotnet.Entity.ConfirmToken", b =>
+                {
+                    b.HasOne("tlcn_dotnet.Entity.Account", "Account")
+                        .WithMany()
+                        .HasForeignKey("AccountId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Account");
                 });
 
             modelBuilder.Entity("tlcn_dotnet.Entity.Employee", b =>

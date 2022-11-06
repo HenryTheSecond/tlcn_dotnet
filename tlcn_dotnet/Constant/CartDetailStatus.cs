@@ -2,6 +2,6 @@
 {
     public enum CartDetailStatus
     {
-
+        PAID, UNPAID
     }
 }

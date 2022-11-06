@@ -17,6 +17,7 @@ namespace tlcn_dotnet.Entity
 
         public string Email { get; set; }
 
+        [Column(TypeName = "varchar(30)")]
         public UserStatus Status { get; set; }
 
         public string? CityId { get; set; }

@@ -2,6 +2,6 @@
 {
     public enum CartStatus
     {
-
+        PENDING, DELIVERIED, CANCELLED
     }
 }

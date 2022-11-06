@@ -2,6 +2,6 @@
 {
     public enum ProductUnit
     {
-        Unit, Weight
+        WEIGHT, UNIT
     }
 }
