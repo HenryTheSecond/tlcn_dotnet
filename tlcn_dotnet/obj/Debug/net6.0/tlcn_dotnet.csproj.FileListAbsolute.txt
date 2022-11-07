@@ -136,3 +136,17 @@ E:\dotnet\tlcn_dotnet\tlcn_dotnet\bin\Debug\net6.0\Scrutor.dll
 E:\dotnet\tlcn_dotnet\tlcn_dotnet\bin\Debug\net6.0\Swashbuckle.AspNetCore.Filters.dll
 E:\dotnet\tlcn_dotnet\tlcn_dotnet\bin\Debug\net6.0\Swashbuckle.AspNetCore.Filters.Abstractions.dll
 E:\dotnet\tlcn_dotnet\tlcn_dotnet\bin\Debug\net6.0\BCrypt.Net-Next.dll
+D:\testing\tlcn_dotnet\tlcn_dotnet\bin\Debug\net6.0\Properties\country_and_city.json
+D:\testing\tlcn_dotnet\tlcn_dotnet\bin\Debug\net6.0\Properties\vietnam_city_district_ward.json
+D:\testing\tlcn_dotnet\tlcn_dotnet\bin\Debug\net6.0\AutoMapper.dll
+D:\testing\tlcn_dotnet\tlcn_dotnet\bin\Debug\net6.0\AutoMapper.Extensions.Microsoft.DependencyInjection.dll
+D:\testing\tlcn_dotnet\tlcn_dotnet\bin\Debug\net6.0\BCrypt.Net-Next.dll
+D:\testing\tlcn_dotnet\tlcn_dotnet\bin\Debug\net6.0\MailKit.dll
+D:\testing\tlcn_dotnet\tlcn_dotnet\bin\Debug\net6.0\Microsoft.AspNetCore.Authentication.JwtBearer.dll
+D:\testing\tlcn_dotnet\tlcn_dotnet\bin\Debug\net6.0\Microsoft.Extensions.DependencyModel.dll
+D:\testing\tlcn_dotnet\tlcn_dotnet\bin\Debug\net6.0\MimeKit.dll
+D:\testing\tlcn_dotnet\tlcn_dotnet\bin\Debug\net6.0\Newtonsoft.Json.dll
+D:\testing\tlcn_dotnet\tlcn_dotnet\bin\Debug\net6.0\BouncyCastle.Crypto.dll
+D:\testing\tlcn_dotnet\tlcn_dotnet\bin\Debug\net6.0\Scrutor.dll
+D:\testing\tlcn_dotnet\tlcn_dotnet\bin\Debug\net6.0\Swashbuckle.AspNetCore.Filters.dll
+D:\testing\tlcn_dotnet\tlcn_dotnet\bin\Debug\net6.0\Swashbuckle.AspNetCore.Filters.Abstractions.dll

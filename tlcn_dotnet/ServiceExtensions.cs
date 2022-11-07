@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.IdentityModel.Tokens;
 using Newtonsoft.Json;
+using System.ComponentModel.DataAnnotations;
 using System.Text;
 using tlcn_dotnet.CustomException;
 
@@ -19,7 +20,8 @@ namespace tlcn_dotnet
                     context.Response.ContentType = "application/json";
                     var contextFeature = context.Features.Get<IExceptionHandlerPathFeature>();
                     DataResponse dataResponse = new DataResponse();
-                    if (contextFeature.Error.GetType() == typeof(GeneralException))
+                    Type errorType = contextFeature.Error.GetType();
+                    if (errorType == typeof(GeneralException))
                     {
                         GeneralException generalException = (GeneralException)contextFeature.Error;
                         dataResponse.Message = generalException.Message;

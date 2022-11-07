@@ -31,20 +31,24 @@ namespace tlcn_dotnet.ServicesImpl
 
         public async Task<DataResponse> DeleteCategory(long? id)
         {
-            Category categoryDb = _dbContext.Category.Find(id);
-            if (categoryDb == null)
-                throw new GeneralException("Category not found", ApplicationConstant.NOT_FOUND_CODE);
-            _dbContext.Category.Remove(categoryDb);
-            _dbContext.SaveChangesAsync();
-            return new DataResponse(true);
+            try
+            {
+                _dbContext.Remove(_dbContext.Category.Single(category => category.Id == id));
+                await _dbContext.SaveChangesAsync();
+                return new DataResponse(true);
+            }
+            catch (InvalidOperationException e) // exception throw by Single() method
+            {
+                throw new GeneralException("CATEGORY NOT FOUND", ApplicationConstant.NOT_FOUND_CODE);
+            }
         }
 
         public async Task<DataResponse> EditCategory(long? id, SimpleCategoryDto simpleCategoryDto)
         {
             Category categoryDb = _dbContext.Category.Find(id);
             if (categoryDb == null)
-                throw new GeneralException("Category not found", ApplicationConstant.NOT_FOUND_CODE);
-            categoryDb.Name = simpleCategoryDto.Name == null? categoryDb.Name: simpleCategoryDto.Name;
+                throw new GeneralException("CATEGORY NOT FOUND", ApplicationConstant.NOT_FOUND_CODE);
+            categoryDb.Name = (simpleCategoryDto.Name == null || simpleCategoryDto.Name.Trim() == "")? categoryDb.Name: simpleCategoryDto.Name;
             _dbContext.SaveChangesAsync();
             return new DataResponse(_mapper.Map<SimpleCategoryDto>(categoryDb));
         }

@@ -16,8 +16,8 @@ namespace tlcn_dotnet.Entity
 
         public Decimal ImportPrice { get; set; }
 
-        [Column(TypeName = "varchar(255)")]
-        public ProductUnit unit;
+        [Column(TypeName = "varchar(30)")]
+        public ProductUnit Unit { get; set; }
 
         public DateTime? DeliveryDate { get; set; }
         public DateTime? ExpireDate { get; set; }
