@@ -23,7 +23,7 @@ namespace tlcn_dotnet.Utils
         public static async Task<string> CheckVietnameseAddress(string cityId, string districtId, string wardId)
         {
             if (cityId == null || cityId.Trim() == "" || districtId == null || districtId.Trim() == "" || wardId == null || wardId == "")
-                return "Address is invalid";
+                return null;
             JsonNode vietnameseLocation = (JsonNode)(await _locationService.GetVietnamLocation()).Data;
             foreach (JsonNode city in vietnameseLocation.AsArray())
             {
@@ -48,6 +48,27 @@ namespace tlcn_dotnet.Utils
 
             }
             return "City is invalid";
+        }
+
+        //Return null if address is correct, other wise return error message
+        public static async Task<string> CheckGlobalCountryAndCity(string countryCode, string cityCode)
+        {
+            if (countryCode == null || countryCode.Trim() == "" || cityCode == null || cityCode.Trim() == "")
+                return null;
+            JsonNode countries = (JsonNode)(await _locationService.GetAllCountryAndCity()).Data;
+            foreach (JsonNode country in countries.AsArray())
+            {
+                if (countryCode == country["countryShortCode"].ToString())
+                {
+                    foreach (JsonNode city in country["regions"].AsArray())
+                    {
+                        if (cityCode == city["shortCode"].ToString())
+                            return null;
+                    }
+                    return "City Code is invalid";
+                }
+            }
+            return "Country Code is invalid";
         }
     }
 }

@@ -10,7 +10,7 @@ namespace tlcn_dotnet.Entity
         public long? Id { get; set; }
         public DateTime? PurchaseDate { get; set; }
 
-        public Decimal? total { get; set; }
+        public Decimal? Total { get; set; }
 
         [Column(TypeName = "varchar(255)")]
         public PaymentMethod PaymentMethod { get; set; }

@@ -50,13 +50,12 @@ namespace tlcn_dotnet.ServicesImpl
             return new DataResponse(_mapper.Map<AccountResponse>(confirmToken.Account));
         }
 
-        public async Task<DataResponse> CreateToken()
+        private string CreateJwtToken(Account account)
         {
             List<Claim> claims = new List<Claim>()
             {
-                new Claim(ClaimTypes.Name, "congtuyen2032001@gmail.com"),
-                new Claim(ClaimTypes.Role, Role.ROLE_ADMIN.ToString()),
-                new Claim(ClaimTypes.Role, Role.ROLE_EMPLOYEE.ToString())
+                new Claim(ClaimTypes.Email, account.Email),
+                new Claim(ClaimTypes.Role, account.Role.ToString()),
             };
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration.GetSection("Jwt:Key").Value));
             var cred = new SigningCredentials(key, SecurityAlgorithms.HmacSha512Signature);
@@ -66,19 +65,49 @@ namespace tlcn_dotnet.ServicesImpl
                     expires: DateTime.Now.AddMinutes(Double.Parse(_configuration.GetSection("Jwt:Lifetime").Value)),
                     signingCredentials: cred
                 );
-            var jwt = new JwtSecurityTokenHandler().WriteToken(token);
-            return new DataResponse(jwt);
+            return new JwtSecurityTokenHandler().WriteToken(token);
         }
 
-        public async Task<DataResponse> RegisterUser(RegisterAccountDto registerAccountDto)
+        public async Task<DataResponse> Login(LoginRequest loginRequest)
         {
-            if (_dbContext.Account.FirstOrDefault(account => account.Email == registerAccountDto.Email) != null)
+            Account accountDb = await _dbContext.Account.Where(account => account.Email == loginRequest.Email).FirstOrDefaultAsync();
+            if (accountDb == null || !BCrypt.Net.BCrypt.Verify(loginRequest.Password, accountDb.Password))
             {
+                throw new GeneralException(ApplicationConstant.EMAIL_OR_PASSWORD_INCORRECT, ApplicationConstant.FAILED_CODE);
+            }
+           
+            if (accountDb.Status == UserStatus.INACTIVE)
+            {
+                throw new GeneralException(ApplicationConstant.USER_INACTIVE, ApplicationConstant.FAILED_CODE);
+            }
+            return new DataResponse(CreateJwtToken(accountDb));
+        }
+        
+
+        public async Task<DataResponse> RegisterAccount(RegisterAccountDto registerAccountDto, Role role = Role.ROLE_USER)
+        {
+            Account accountDb = _dbContext.Account.FirstOrDefault(account => account.Email == registerAccountDto.Email);
+            ConfirmToken confirmToken;
+            if (accountDb != null)
+            {
+                //if employee or admin has created a account as user role before, just need to change the role
+                if (role == Role.ROLE_EMPLOYEE || role == Role.ROLE_ADMIN)
+                {
+                    accountDb.Role = role;
+                    if (accountDb.Status == UserStatus.INACTIVE)
+                    {
+                        confirmToken = await _confirmTokenService.CreateConfirmToken(accountDb);
+                        _emailService.SendRegisterConfirmationToken(confirmToken);
+                    }
+                    _dbContext.SaveChanges();
+                    return new DataResponse(_mapper.Map<AccountResponse>(accountDb));
+                }
+
                 throw new GeneralException("Account already existed", ApplicationConstant.FAILED_CODE);
             }
             registerAccountDto.Password = BCrypt.Net.BCrypt.HashPassword(registerAccountDto.Password);
             Account account = _mapper.Map<Account>(registerAccountDto);
-            account.Role = Role.ROLE_USER;
+            account.Role = role;
             account.Status = UserStatus.INACTIVE;
 
             string checkLocation = await Util.CheckVietnameseAddress(account.CityId, account.DistrictId, account.WardId);
@@ -86,15 +115,11 @@ namespace tlcn_dotnet.ServicesImpl
             { 
                 throw new GeneralException(checkLocation, ApplicationConstant.BAD_REQUEST_CODE);
             }
-            Account accountDb = _dbContext.Account.Add(account).Entity;
+            accountDb = _dbContext.Account.Add(account).Entity;
             await _dbContext.SaveChangesAsync();
-            ConfirmToken confirmToken = await _confirmTokenService.CreateConfirmToken(accountDb);
 
-            var watch = System.Diagnostics.Stopwatch.StartNew();
+            confirmToken = await _confirmTokenService.CreateConfirmToken(accountDb);
             _emailService.SendRegisterConfirmationToken(confirmToken);
-            watch.Stop();
-            var elapsedMs = watch.ElapsedMilliseconds;
-            Console.WriteLine(elapsedMs);
 
             return new DataResponse(_mapper.Map<AccountResponse>(accountDb));
         }

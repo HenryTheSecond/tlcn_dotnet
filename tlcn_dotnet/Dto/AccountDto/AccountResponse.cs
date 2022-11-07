@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.Text.RegularExpressions;
+using tlcn_dotnet.Constant;
 
 namespace tlcn_dotnet.Dto.AccountDto
 {
@@ -14,7 +15,7 @@ namespace tlcn_dotnet.Dto.AccountDto
         [Required(ErrorMessage = "Email is required")]
         [EmailAddress(ErrorMessage = "Email is invalid")]
         public string Email { get; set; }
-
+        public Role role { get; set; }
         public string CityId { get; set; }
         public string DistrictId { get; set; }
         public string WardId { get; set; }

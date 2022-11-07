@@ -27,6 +27,7 @@
         public static readonly string TOKEN_NOT_FOUND = "TOKEN NOT FOUND";
         public static readonly string EMAIL_HAS_BEEN_CONFIRMED = "EMAIL HAS BEEN CONFIRMED";
         public static readonly string TOKEN_EXPIRED = "TOKEN EXPIRED";
+        public static readonly string USER_INACTIVE = "USER IS INACTIVE";
 
         public static readonly long JWT_ACCESS_TOKEN_EXPIRATION = 600000L; // 10 minutes in milliseconds
         public static readonly string JWT_SECRET = "HenryTheSecond";

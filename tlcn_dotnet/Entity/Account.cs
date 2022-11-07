@@ -1,10 +1,12 @@
-﻿using Microsoft.EntityFrameworkCore.Metadata.Internal;
+﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using tlcn_dotnet.Constant;
 
 namespace tlcn_dotnet.Entity
 {
+    [Index(nameof(Email), IsUnique = true)]
     public class Account
     {
         [Key]

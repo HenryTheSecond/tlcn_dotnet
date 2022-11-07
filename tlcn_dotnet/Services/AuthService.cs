@@ -1,11 +1,12 @@
-﻿using tlcn_dotnet.Dto.AccountDto;
+﻿using tlcn_dotnet.Constant;
+using tlcn_dotnet.Dto.AccountDto;
 
 namespace tlcn_dotnet.Services
 {
     public interface AuthService
     {
-        public Task<DataResponse> CreateToken();
-        public Task<DataResponse> RegisterUser(RegisterAccountDto registerAccountDto);
+        public Task<DataResponse> RegisterAccount(RegisterAccountDto registerAccountDto, Role role = Role.ROLE_USER);
         public Task<DataResponse> ConfirmAccount(string token);
+        public Task<DataResponse> Login(LoginRequest loginRequest);
     }
 }

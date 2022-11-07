@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using tlcn_dotnet;
 
@@ -11,9 +12,10 @@ using tlcn_dotnet;
 namespace tlcn_dotnet.Migrations
 {
     [DbContext(typeof(MyDbContext))]
-    partial class MyDbContextModelSnapshot : ModelSnapshot
+    [Migration("20221107065601_account_email_unique")]
+    partial class account_email_unique
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -87,7 +89,7 @@ namespace tlcn_dotnet.Migrations
                     b.Property<DateTime?>("PurchaseDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<decimal?>("Total")
+                    b.Property<decimal?>("total")
                         .HasColumnType("decimal(18,2)");
 
                     b.HasKey("Id");
@@ -306,10 +308,6 @@ namespace tlcn_dotnet.Migrations
                     b.Property<long?>("SupplierId")
                         .HasColumnType("bigint");
 
-                    b.Property<string>("Unit")
-                        .IsRequired()
-                        .HasColumnType("varchar(30)");
-
                     b.HasKey("Id");
 
                     b.HasIndex("ProductId");
@@ -415,17 +413,14 @@ namespace tlcn_dotnet.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long?>("Id"), 1L, 1);
 
-                    b.Property<string>("CityCode")
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<string>("CountryCode")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("DetailLocation")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Name")
                         .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("detailLocation")
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");

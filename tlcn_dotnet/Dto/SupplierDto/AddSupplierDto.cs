@@ -1,20 +1,13 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace tlcn_dotnet.Entity
+namespace tlcn_dotnet.Dto.SupplierDto
 {
-    public class Supplier
+    public class AddSupplierDto
     {
-        [Key]
-        public long? Id { get; set; }
-
+        [Required(ErrorMessage = "Supplier name is required")]
         public string Name { get; set; }
-
         public string? CountryCode { get; set; }
-
         public string? CityCode { get; set; }
-
         public string? DetailLocation { get; set; }
-
-        public virtual ICollection<Inventory> Inventories { get; set; }
     }
 }
