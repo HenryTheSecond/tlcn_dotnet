@@ -25,7 +25,7 @@ namespace tlcn_dotnet.ServicesImpl
             product.Category = await _dbContext.Category.FindAsync(addProductDto.CategoryId);
             Product productDb = (await _dbContext.Product.AddAsync(product)).Entity;
             await _dbContext.SaveChangesAsync();
-            var productImages = _productImageService.AddProductImages(images, productDb);
+            var productImages = await _productImageService.AddProductImages(images, productDb);
             var simpleProductDto = _mapper.Map<SimpleProductDto>(productDb);
             return new DataResponse(new {
                 product = simpleProductDto,
@@ -42,8 +42,8 @@ namespace tlcn_dotnet.ServicesImpl
             return new DataResponse(new
             {
                 product = simpleProductDto,
-                images = _productImageService.GetImageByProduct(id)
-            });
+                images = await _productImageService.GetImageByProduct(id)
+            }); ;
         }
     }
 }

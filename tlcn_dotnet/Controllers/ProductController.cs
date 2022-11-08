@@ -36,5 +36,11 @@ namespace tlcn_dotnet.Controllers
             if (id == null) throw new GeneralException(ApplicationConstant.INVALID_ID, ApplicationConstant.BAD_REQUEST_CODE);
             return await _productService.GetProductById(id);
         }
+
+        [HttpPut("{strId}")]
+        public async Task<DataResponse> EditProduct()
+        {
+            return null;
+        }
     }
 }

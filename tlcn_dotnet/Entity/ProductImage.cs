@@ -9,6 +9,8 @@ namespace tlcn_dotnet.Entity
 
         public string Url { get; set; }
 
+        //public string FileName { get; set; }
+
         public virtual Product? Product { get; set; }
     }
 }
