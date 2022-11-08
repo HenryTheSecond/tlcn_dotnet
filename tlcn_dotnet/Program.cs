@@ -40,6 +40,8 @@ builder.Services.AddScoped<AuthService, AuthServiceImpl>();
 builder.Services.AddScoped<ConfirmTokenService, ConfirmTokenServiceImpl>();
 builder.Services.AddScoped<EmailService, EmailServiceImpl>();
 builder.Services.AddScoped<SupplierService, SupplierServiceImpl>();
+builder.Services.AddScoped<ProductService, ProductServiceImpl>();
+builder.Services.AddScoped<ProductImageService, ProductImageServiceImpl>();
 
 /*builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options => {

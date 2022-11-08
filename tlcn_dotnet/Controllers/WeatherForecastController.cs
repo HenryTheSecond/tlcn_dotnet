@@ -1,3 +1,5 @@
+using CloudinaryDotNet;
+using CloudinaryDotNet.Actions;
 using MailKit.Net.Smtp;
 using Microsoft.AspNetCore.Mvc;
 using MimeKit;
@@ -6,6 +8,9 @@ using System.Text.Json;
 using System.Text.Json.Nodes;
 using System.Text.Json.Serialization;
 using JsonSerializer = System.Text.Json.JsonSerializer;
+using CloudinaryDotNet;
+using CloudinaryDotNet.Actions;
+using System.Drawing;
 
 namespace tlcn_dotnet.Controllers
 {
@@ -74,9 +79,25 @@ namespace tlcn_dotnet.Controllers
                 }
                 return Ok(result["data"].AsArray());
 
-            }
+            }  
+        }
 
-            
+        [HttpGet("test-upload-image")]
+        public IActionResult TestUploadImage()
+        {
+            Account account = new Account("dihg72ez8", "778719834247269", "PDLuJVbklhnMWwR9p-GPo5gX2rA");
+            Cloudinary cloudinary = new Cloudinary(account);
+            cloudinary.Api.Secure = true;
+
+            var uploadParams = new ImageUploadParams()
+            {
+                File = new FileDescription(@"https://cloudinary-devs.github.io/cld-docs-assets/assets/images/cld-sample.jpg"),
+                UseFilename = true,
+                UniqueFilename = false,
+                Overwrite = true
+            };
+            var uploadResult = cloudinary.Upload(uploadParams);
+            return Ok(uploadResult.Url);
         }
     }
 }
