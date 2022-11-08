@@ -24,11 +24,7 @@ namespace tlcn_dotnet.Mapper
             CreateMap<AddProductDto, Product>();
             CreateMap<Product, SimpleProductDto>();
 
-            //CreateMap<IList<ProductImage>, IList<SimpleProductImageDto>>();
-            CreateMap<ProductImage, SimpleProductImageDto>()
-                .ForMember(dest => dest.Id, src => src.MapFrom(_ => _.Id))
-                .ForMember(dest => dest.Url, src => src.MapFrom(_ => _.Url))
-                .ForPath(dest => dest.ProductId, src => src.MapFrom(_ => _.Product.Id));
+            CreateMap<ProductImage, SimpleProductImageDto>();
         }
     }
 }

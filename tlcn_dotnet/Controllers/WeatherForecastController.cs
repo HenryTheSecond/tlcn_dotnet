@@ -89,7 +89,7 @@ namespace tlcn_dotnet.Controllers
             Cloudinary cloudinary = new Cloudinary(account);
             cloudinary.Api.Secure = true;
 
-            var uploadParams = new ImageUploadParams()
+            /*var uploadParams = new ImageUploadParams()
             {
                 File = new FileDescription(@"https://cloudinary-devs.github.io/cld-docs-assets/assets/images/cld-sample.jpg"),
                 UseFilename = true,
@@ -97,7 +97,11 @@ namespace tlcn_dotnet.Controllers
                 Overwrite = true
             };
             var uploadResult = cloudinary.Upload(uploadParams);
-            return Ok(uploadResult.Url);
+            return Ok(uploadResult.Url);*/
+
+            var deletionParams = new DeletionParams("fc958c53-09ab-448b-aaeb-abd931623c76");
+            var deletionResult = cloudinary.Destroy(deletionParams);
+            return Ok(deletionResult);
         }
     }
 }
