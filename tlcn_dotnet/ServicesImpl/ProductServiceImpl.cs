@@ -2,6 +2,7 @@
 using tlcn_dotnet.Constant;
 using tlcn_dotnet.CustomException;
 using tlcn_dotnet.Dto.ProductDto;
+using tlcn_dotnet.Dto.ProductImageDto;
 using tlcn_dotnet.Entity;
 using tlcn_dotnet.Services;
 
@@ -29,6 +30,32 @@ namespace tlcn_dotnet.ServicesImpl
             var simpleProductDto = _mapper.Map<SimpleProductDto>(productDb);
             return new DataResponse(new {
                 product = simpleProductDto,
+                images = productImages
+            });
+        }
+
+        public async Task<DataResponse> EditProduct(long id, EditProductDto editProductDto, IFormFileCollection files)
+        {
+            Product product = await _dbContext.Product.FindAsync(id);
+            if(product == null) throw new GeneralException("PRODUCT NOT FOUND", ApplicationConstant.NOT_FOUND_CODE);
+
+            Category category = await _dbContext.Category.FindAsync(editProductDto.CategoryId);
+            if(category == null) throw new GeneralException("CATEGORY NOT FOUND", ApplicationConstant.NOT_FOUND_CODE);
+
+            product.Name = editProductDto.Name;
+            product.Price = editProductDto.Price != null ? editProductDto.Price : product.Price;
+            product.Quantity = editProductDto.Quantity != null ? editProductDto.Quantity : product.Quantity;
+            product.Unit = editProductDto.Unit;
+            product.MinPurchase = editProductDto.MinPurchase != null ? editProductDto.MinPurchase : product.MinPurchase;
+            product.Description = editProductDto.Description != null ? editProductDto.Description : product.Description;
+            product.Category = category;
+
+            //TODO edit image
+            IEnumerable<SimpleProductImageDto> productImages = await _productImageService.EditProductImage(product, editProductDto.EditImageStatus, files);
+
+            await _dbContext.SaveChangesAsync();
+            return new DataResponse(new { 
+                product = _mapper.Map<SimpleProductDto>(product),
                 images = productImages
             });
         }

@@ -38,9 +38,15 @@ namespace tlcn_dotnet.Controllers
         }
 
         [HttpPut("{strId}")]
-        public async Task<DataResponse> EditProduct()
+        public async Task<DataResponse> EditProduct(string strId)
         {
-            return null;
+            long? id = Util.ParseId(strId);
+            if(id == null) throw new GeneralException(ApplicationConstant.INVALID_ID, ApplicationConstant.BAD_REQUEST_CODE);
+            var files = HttpContext.Request.Form.Files;
+            var strEditProduct = HttpContext.Request.Form["editProduct"][0];
+
+            EditProductDto editProductDto = JsonConvert.DeserializeObject<EditProductDto>(strEditProduct);
+            return await _productService.EditProduct(id.Value, editProductDto, files);
         }
     }
 }

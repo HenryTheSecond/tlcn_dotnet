@@ -4,9 +4,11 @@ using CloudinaryDotNet.Actions;
 using Microsoft.EntityFrameworkCore;
 using System.Collections;
 using System.Security.Principal;
+using tlcn_dotnet.Constant;
 using tlcn_dotnet.Dto.ProductImageDto;
 using tlcn_dotnet.Entity;
 using tlcn_dotnet.Services;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace tlcn_dotnet.ServicesImpl
 {
@@ -47,6 +49,53 @@ namespace tlcn_dotnet.ServicesImpl
             return _mapper.Map<IEnumerable<SimpleProductImageDto>>(productImageCollection);
         }
 
+        public async Task<IEnumerable<SimpleProductImageDto>> EditProductImage(Product product, IList<ProductImageEditStatus> editStatus, IFormFileCollection files)
+        {
+            var productImages = await _dbContext.ProductImage.Where(image => image.Product.Id == product.Id).ToListAsync();
+            int indexFiles = 0;
+            for (int i = 0; i < productImages.Count; i++)
+            {
+                switch (editStatus[i])
+                {
+                    case ProductImageEditStatus.DELETE:
+                        DeleteSingleProductImage(productImages[i]);
+                        _dbContext.ProductImage.Remove(productImages[i]);
+                        productImages.RemoveAt(i);
+                        i--;
+                        break;
+                    case ProductImageEditStatus.EDIT:
+
+                        break;
+                }
+            }
+            await _dbContext.SaveChangesAsync();
+            return _mapper.Map<IEnumerable<SimpleProductImageDto>>(productImages);
+        }
+
+        private async Task DeleteSingleProductImage(ProductImage imageDb)
+        {
+            var deletionParams = new DeletionParams(imageDb.FileName);
+            _cloudinary.DestroyAsync(deletionParams);
+        }
+        private async Task<ProductImage> EditSingleProductImage(ProductImage imageDb, IFormFile imageUpload)
+        {
+            using (var ms = new MemoryStream())
+            {
+                await imageUpload.CopyToAsync(ms);
+                ms.Seek(0, SeekOrigin.Begin);
+                ImageUploadParams uploadParams = new ImageUploadParams()
+                {
+                    File = new FileDescription(imageDb.FileName, ms),
+                    UseFilename = true,
+                    UniqueFilename = false,
+                    Overwrite = true
+                };
+                ImageUploadResult result = await _cloudinary.UploadAsync(uploadParams);
+                imageDb.Url = result.Url.ToString();
+                return imageDb;
+            }
+        }
+
         public async Task<IEnumerable<SimpleProductImageDto>> GetImageByProduct(long? productId)
         {
             return await _dbContext.ProductImage
@@ -60,9 +109,10 @@ namespace tlcn_dotnet.ServicesImpl
             {
                 await image.CopyToAsync(ms);
                 ms.Seek(0, SeekOrigin.Begin);
+                string fileName = Guid.NewGuid().ToString();
                 ImageUploadParams uploadParams = new ImageUploadParams()
                 {
-                    File = new FileDescription(Guid.NewGuid().ToString(), ms),
+                    File = new FileDescription(fileName, ms),
                     UseFilename = true,
                     UniqueFilename = false,
                     Overwrite = true
@@ -71,10 +121,13 @@ namespace tlcn_dotnet.ServicesImpl
                 ProductImage productImage = new ProductImage()
                 {
                     Url = result.Url.ToString(),
-                    Product = product
+                    Product = product,
+                    FileName = fileName
                 };
                 return (await _dbContext.ProductImage.AddAsync(productImage)).Entity;
             }
         }
+
+
     }
 }

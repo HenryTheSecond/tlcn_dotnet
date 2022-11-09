@@ -151,3 +151,4 @@ D:\testing\tlcn_dotnet\tlcn_dotnet\obj\Debug\net6.0\refint\tlcn_dotnet.dll
 D:\testing\tlcn_dotnet\tlcn_dotnet\obj\Debug\net6.0\tlcn_dotnet.pdb
 D:\testing\tlcn_dotnet\tlcn_dotnet\obj\Debug\net6.0\tlcn_dotnet.genruntimeconfig.cache
 D:\testing\tlcn_dotnet\tlcn_dotnet\obj\Debug\net6.0\ref\tlcn_dotnet.dll
+E:\dotnet\tlcn_dotnet\tlcn_dotnet\bin\Debug\net6.0\CloudinaryDotNet.dll

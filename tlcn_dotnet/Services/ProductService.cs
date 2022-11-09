@@ -7,5 +7,6 @@ namespace tlcn_dotnet.Services
     {
         public Task<DataResponse> AddProduct(AddProductDto addProductDto, IFormFileCollection images);
         public Task<DataResponse> GetProductById(long? id);
+        public Task<DataResponse> EditProduct(long id, EditProductDto editProductDto, IFormFileCollection files);
     }
 }
