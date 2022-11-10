@@ -13,5 +13,7 @@ namespace tlcn_dotnet.Entity
         public double? Rating { get; set; }
 
         public DateTime PostDate { get; set; }
+
+        public Product Product { get; set; }
     }
 }

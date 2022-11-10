@@ -33,5 +33,7 @@ namespace tlcn_dotnet.Entity
         public virtual ICollection<BillDetail> BillDetails { get; set; }
 
         public virtual ICollection<CartDetail> CartDetails { get; set; }
+
+        public virtual ICollection<Review> Reviews { get; set; }
     }
 }

@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Microsoft.EntityFrameworkCore;
 using tlcn_dotnet.Constant;
 using tlcn_dotnet.CustomException;
 using tlcn_dotnet.Dto.ProductDto;
@@ -34,6 +35,23 @@ namespace tlcn_dotnet.ServicesImpl
             });
         }
 
+        public async Task<DataResponse> DeleteProduct(long? id)
+        {
+            try
+            {
+                _dbContext.Remove(_dbContext.Product.Single(product => product.Id == id));
+
+                await _productImageService.DeleteAllImageOfProduct(id);
+
+                await _dbContext.SaveChangesAsync();
+                return new DataResponse(true);
+            }
+            catch (InvalidOperationException e)
+            {
+                throw new GeneralException("PRODUCT NOT FOUND", ApplicationConstant.NOT_FOUND_CODE);
+            }
+        }
+
         public async Task<DataResponse> EditProduct(long id, EditProductDto editProductDto, IFormFileCollection files)
         {
             Product product = await _dbContext.Product.FindAsync(id);
@@ -58,6 +76,32 @@ namespace tlcn_dotnet.ServicesImpl
                 product = _mapper.Map<SimpleProductDto>(product),
                 images = productImages
             });
+        }
+
+        public async Task<DataResponse> FilterProduct(string? keyword, decimal? minPrice, decimal? maxPrice, long? categoryId, int page)
+        {
+            IQueryable<Product> queryProduct = _dbContext.Product
+                .Include(product => product.Category)
+                .Include(product => product.ProductImages);
+
+            if (keyword != null)
+                queryProduct = queryProduct.Where(product => product.Name.Contains(keyword) || product.Description.Contains(keyword));
+            if (minPrice != null)
+                queryProduct = queryProduct.Where(product => product.Price >= minPrice);
+            if (maxPrice != null)
+                queryProduct = queryProduct.Where(product => product.Price <= maxPrice);
+            if (categoryId != null)
+                queryProduct = queryProduct.Where(product => product.Category.Id == categoryId);
+
+
+            return new DataResponse(await queryProduct
+                .Skip((page - 1) * 2).Take(2)
+                .Select(product => new
+                {
+                    product = _mapper.Map<SimpleProductDto>(product),
+                    image = _mapper.Map<SimpleProductImageDto>(product.ProductImages.FirstOrDefault())
+                })
+                .ToListAsync());
         }
 
         public async Task<DataResponse> GetProductById(long? id)

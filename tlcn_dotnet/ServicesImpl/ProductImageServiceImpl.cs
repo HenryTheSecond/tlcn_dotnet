@@ -53,6 +53,9 @@ namespace tlcn_dotnet.ServicesImpl
         {
             var productImages = await _dbContext.ProductImage.Where(image => image.Product.Id == product.Id).ToListAsync();
             int indexFiles = 0;
+
+            IList<Task<ProductImage>> listEditTasks = new List<Task<ProductImage>>();
+            IList<Task<ProductImage>> listAddTasks = new List<Task<ProductImage>>();
             for (int i = 0; i < productImages.Count; i++)
             {
                 switch (editStatus[i])
@@ -61,13 +64,31 @@ namespace tlcn_dotnet.ServicesImpl
                         DeleteSingleProductImage(productImages[i]);
                         _dbContext.ProductImage.Remove(productImages[i]);
                         productImages.RemoveAt(i);
+                        editStatus.RemoveAt(i);
                         i--;
                         break;
                     case ProductImageEditStatus.EDIT:
-
+                        try
+                        {
+                            listEditTasks.Add(EditSingleProductImage(productImages[i], files[indexFiles]));
+                            indexFiles++;
+                        }
+                        catch (ArgumentOutOfRangeException e) //Throw if image file index is out of range
+                        {
+                            continue;
+                        }
                         break;
+                    case ProductImageEditStatus.NONE:
+                        continue;
                 }
             }
+            //Add all the remaining images
+            for (; indexFiles < files.Count; indexFiles++)
+            {
+                listAddTasks.Add(AddSingleProductImage(files[indexFiles], product));
+            }
+            await Task.WhenAll(listEditTasks);
+            productImages.AddRange(Task.WhenAll<ProductImage>(listAddTasks).Result);
             await _dbContext.SaveChangesAsync();
             return _mapper.Map<IEnumerable<SimpleProductImageDto>>(productImages);
         }
@@ -128,6 +149,15 @@ namespace tlcn_dotnet.ServicesImpl
             }
         }
 
-
+        public async Task DeleteAllImageOfProduct(long? id)
+        {
+            var images = await _dbContext.ProductImage.Where(image => image.Product.Id == id).ToListAsync();
+            images.ForEach(image =>
+            {
+                _dbContext.Remove(image);
+                DeleteSingleProductImage(image);
+            });
+            await _dbContext.SaveChangesAsync();
+        }
     }
 }
