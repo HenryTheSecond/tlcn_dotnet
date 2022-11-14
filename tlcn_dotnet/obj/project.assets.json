@@ -75,6 +75,23 @@
           }
         }
       },
+      "Dapper-QueryBuilder/1.2.7": {
+        "type": "package",
+        "dependencies": {
+          "Dapper": "2.0.123",
+          "Microsoft.CSharp": "4.7.0"
+        },
+        "compile": {
+          "lib/net5.0/DapperQueryBuilder.dll": {
+            "related": ".xml"
+          }
+        },
+        "runtime": {
+          "lib/net5.0/DapperQueryBuilder.dll": {
+            "related": ".xml"
+          }
+        }
+      },
       "Humanizer.Core/2.8.26": {
         "type": "package",
         "compile": {
@@ -2629,6 +2646,24 @@
         "lib/net5.0/Dapper.xml",
         "lib/netstandard2.0/Dapper.dll",
         "lib/netstandard2.0/Dapper.xml"
+      ]
+    },
+    "Dapper-QueryBuilder/1.2.7": {
+      "sha512": "YGHr0oCsx7q/xgd6ggZgr1JsuFRNPh1z9PLzpMNcq+sPNPQdlun9ZdBxBG9QVf5pzUInETuP8nFaDfk4NILvwg==",
+      "type": "package",
+      "path": "dapper-querybuilder/1.2.7",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "NuGetReadMe.md",
+        "dapper-querybuilder.1.2.7.nupkg.sha512",
+        "dapper-querybuilder.nuspec",
+        "lib/net461/DapperQueryBuilder.dll",
+        "lib/net461/DapperQueryBuilder.xml",
+        "lib/net5.0/DapperQueryBuilder.dll",
+        "lib/net5.0/DapperQueryBuilder.xml",
+        "lib/netstandard2.0/DapperQueryBuilder.dll",
+        "lib/netstandard2.0/DapperQueryBuilder.xml"
       ]
     },
     "Humanizer.Core/2.8.26": {
@@ -7722,6 +7757,7 @@
       "BCrypt.Net-Next >= 4.0.3",
       "CloudinaryDotNet >= 1.20.0",
       "Dapper >= 2.0.123",
+      "Dapper-QueryBuilder >= 1.2.7",
       "MailKit >= 3.4.2",
       "Microsoft.AspNet.WebApi.Core >= 5.2.9",
       "Microsoft.AspNetCore.Authentication.JwtBearer >= 6.0.10",
@@ -7735,19 +7771,19 @@
     ]
   },
   "packageFolders": {
-    "C:\\Users\\tuyen\\.nuget\\packages\\": {}
+    "C:\\Users\\intern.vctuyen\\.nuget\\packages\\": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "E:\\dotnet\\tlcn_dotnet\\tlcn_dotnet\\tlcn_dotnet.csproj",
+      "projectUniqueName": "D:\\testing\\tlcn_dotnet\\tlcn_dotnet\\tlcn_dotnet.csproj",
       "projectName": "tlcn_dotnet",
-      "projectPath": "E:\\dotnet\\tlcn_dotnet\\tlcn_dotnet\\tlcn_dotnet.csproj",
-      "packagesPath": "C:\\Users\\tuyen\\.nuget\\packages\\",
-      "outputPath": "E:\\dotnet\\tlcn_dotnet\\tlcn_dotnet\\obj\\",
+      "projectPath": "D:\\testing\\tlcn_dotnet\\tlcn_dotnet\\tlcn_dotnet.csproj",
+      "packagesPath": "C:\\Users\\intern.vctuyen\\.nuget\\packages\\",
+      "outputPath": "D:\\testing\\tlcn_dotnet\\tlcn_dotnet\\obj\\",
       "projectStyle": "PackageReference",
       "configFilePaths": [
-        "C:\\Users\\tuyen\\AppData\\Roaming\\NuGet\\NuGet.Config",
+        "C:\\Users\\intern.vctuyen\\AppData\\Roaming\\NuGet\\NuGet.Config",
         "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
       ],
       "originalTargetFrameworks": [
@@ -7788,6 +7824,10 @@
           "Dapper": {
             "target": "Package",
             "version": "[2.0.123, )"
+          },
+          "Dapper-QueryBuilder": {
+            "target": "Package",
+            "version": "[1.2.7, )"
           },
           "MailKit": {
             "target": "Package",

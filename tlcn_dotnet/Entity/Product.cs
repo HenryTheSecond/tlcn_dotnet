@@ -28,6 +28,8 @@ namespace tlcn_dotnet.Entity
         public ProductUnit Unit { get; set; }
 
         public double? MinPurchase { get; set; } = 0;
+        [Column(TypeName = "varchar(50)")]
+        public ProductStatus Status { get; set; }
 
         public string? Description { get; set; }
 

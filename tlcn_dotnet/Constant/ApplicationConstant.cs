@@ -17,6 +17,9 @@
         public static readonly string NOT_FOUND = "NOT FOUND";
         public static readonly int NOT_FOUND_CODE = 404;
         public static readonly string INVALID_ID = "ID IS INVALID";
+        public static readonly int SQL_ERROR_CODE = 470;
+        public static readonly string SQL_ERROR = "SQL ERROR";
+
 
         public static readonly string VALIDATE_ERROR = "VALIDATE ERROR";
 

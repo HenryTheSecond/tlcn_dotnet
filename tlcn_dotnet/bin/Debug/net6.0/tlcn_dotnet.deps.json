@@ -12,6 +12,7 @@
           "BCrypt.Net-Next": "4.0.3",
           "CloudinaryDotNet": "1.20.0",
           "Dapper": "2.0.123",
+          "Dapper-QueryBuilder": "1.2.7",
           "MailKit": "3.4.2",
           "Microsoft.AspNet.WebApi.Core": "5.2.9",
           "Microsoft.AspNetCore.Authentication.JwtBearer": "6.0.10",
@@ -76,6 +77,18 @@
           "lib/net5.0/Dapper.dll": {
             "assemblyVersion": "2.0.0.0",
             "fileVersion": "2.0.123.33578"
+          }
+        }
+      },
+      "Dapper-QueryBuilder/1.2.7": {
+        "dependencies": {
+          "Dapper": "2.0.123",
+          "Microsoft.CSharp": "4.7.0"
+        },
+        "runtime": {
+          "lib/net5.0/DapperQueryBuilder.dll": {
+            "assemblyVersion": "1.2.7.0",
+            "fileVersion": "1.2.7.0"
           }
         }
       },
@@ -1448,6 +1461,13 @@
       "sha512": "sha512-RDFF4rBLLmbpi6pwkY7q/M6UXHRJEOerplDGE5jwEkP/JGJnBauAClYavNKJPW1yOTWRPIyfj4is3EaJxQXILQ==",
       "path": "dapper/2.0.123",
       "hashPath": "dapper.2.0.123.nupkg.sha512"
+    },
+    "Dapper-QueryBuilder/1.2.7": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-YGHr0oCsx7q/xgd6ggZgr1JsuFRNPh1z9PLzpMNcq+sPNPQdlun9ZdBxBG9QVf5pzUInETuP8nFaDfk4NILvwg==",
+      "path": "dapper-querybuilder/1.2.7",
+      "hashPath": "dapper-querybuilder.1.2.7.nupkg.sha512"
     },
     "Humanizer.Core/2.8.26": {
       "type": "package",

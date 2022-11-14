@@ -4,6 +4,6 @@ namespace tlcn_dotnet.Dto.ProductDto
 {
     public class ProductWithImageDto: SimpleProductDto
     {
-        public ICollection<SimpleProductImageDto> ProductImages { get; set; }
+        public IEnumerable<SimpleProductImageDto> ProductImages { get; set; }
     }
 }

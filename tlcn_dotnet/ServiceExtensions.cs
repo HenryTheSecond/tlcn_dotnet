@@ -3,8 +3,10 @@ using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.IdentityModel.Tokens;
 using Newtonsoft.Json;
 using System.ComponentModel.DataAnnotations;
+using System.Data.SqlClient;
 using System.Text;
 using tlcn_dotnet.CustomException;
+using tlcn_dotnet.Utils;
 
 namespace tlcn_dotnet
 {
@@ -28,6 +30,11 @@ namespace tlcn_dotnet
                         dataResponse.Status = generalException.Status == null ? dataResponse.Status : generalException.Status.Value;
                         dataResponse.DetailMessage = generalException.DetailMessage == null ? dataResponse.DetailMessage : generalException.DetailMessage;
                         dataResponse.Data = generalException.Data == null ? dataResponse.Data : generalException.Data;
+                    }
+                    else if (errorType == typeof(SqlException))
+                    {
+                        SqlException sqlException = (SqlException)contextFeature.Error;
+                        dataResponse = ExceptionUtil.SqlExceptionHandle(sqlException);
                     }
                     else
                     {
