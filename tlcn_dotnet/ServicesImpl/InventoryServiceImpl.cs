@@ -17,6 +17,27 @@ namespace tlcn_dotnet.ServicesImpl
             _inventoryRepository = inventoryRepository;
             _mapper = mapper;
         }
+
+        public async Task<DataResponse> AddInventory(AddInventoryDto addInventoryDto)
+        {
+            return new DataResponse(
+                _mapper.Map<SimpleInventoryDto>(
+                    await _inventoryRepository.AddInventory(addInventoryDto)));
+        }
+
+        public async Task<DataResponse> FilterInventory(string? keyword, long? productId, double? minQuantity,
+            double? maxQuantity, decimal? minImportPrice, decimal? maxImportPrice,
+            DateTime? fromDeliveryDate, DateTime? toDeliveryDate, DateTime? fromExpireDate,
+            DateTime? toExpireDate, long? supplierId, string? unit, InventoryOrderBy inventoryOrderBy, SortOrder sortOrder,
+            int page = 1)
+        {
+            var inventories = _mapper.Map<IEnumerable<SimpleInventoryDto>>(
+                    await _inventoryRepository.SearchInventory(keyword, productId, minQuantity,
+                    maxQuantity, minImportPrice, maxImportPrice, fromDeliveryDate, toDeliveryDate,
+                    fromExpireDate, toExpireDate, supplierId, unit, inventoryOrderBy, sortOrder, page));
+            return new DataResponse(inventories);
+        }
+
         public async Task<DataResponse> GetInventoryById(long id)
         {
             Inventory inventory = await _inventoryRepository.GetInventoryById(id);

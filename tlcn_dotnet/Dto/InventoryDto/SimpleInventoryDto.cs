@@ -12,7 +12,7 @@ namespace tlcn_dotnet.Dto.InventoryDto
     {
         public long? Id { get; set; }
 
-        public ProductWithImageDto Product { get; set; }
+        public SingleImageProductDto Product { get; set; }
 
         public double Quantity { get; set; }
 

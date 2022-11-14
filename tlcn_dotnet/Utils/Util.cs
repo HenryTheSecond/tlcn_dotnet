@@ -70,5 +70,22 @@ namespace tlcn_dotnet.Utils
             }
             return "Country Code is invalid";
         }
+
+        public static long CalculateMaxPage(long quantity, int pageSize)
+        {
+            long maxPage = quantity / pageSize;
+            long remainingItem = quantity % pageSize;
+            if (remainingItem > 0)
+                maxPage++;
+            return maxPage;
+        }
+
+        public static T? ConvertStringToDataType<T>(string source) where T: struct
+        {
+            if (source == null || source.Trim() == "")
+                return null;
+            return (T?)Convert.ChangeType(source, typeof(T));
+
+        }
     }
 }
