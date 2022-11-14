@@ -93,15 +93,8 @@ namespace tlcn_dotnet.ServicesImpl
             if (categoryId != null)
                 queryProduct = queryProduct.Where(product => product.Category.Id == categoryId);
 
-
-            return new DataResponse(await queryProduct
-                .Skip((page - 1) * 2).Take(2)
-                .Select(product => new
-                {
-                    product = _mapper.Map<SimpleProductDto>(product),
-                    image = _mapper.Map<SimpleProductImageDto>(product.ProductImages.FirstOrDefault())
-                })
-                .ToListAsync());
+            return new DataResponse(
+                _mapper.Map<List<SingleImageProductDto>>(await queryProduct.Skip((page - 1) * 2).Take(2).ToListAsync()));
         }
 
         public async Task<DataResponse> GetProductById(long? id)

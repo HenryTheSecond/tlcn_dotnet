@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using tlcn_dotnet.Dto.AccountDto;
 using tlcn_dotnet.Dto.CategoryDto;
+using tlcn_dotnet.Dto.InventoryDto;
 using tlcn_dotnet.Dto.ProductDto;
 using tlcn_dotnet.Dto.ProductImageDto;
 using tlcn_dotnet.Dto.SupplierDto;
@@ -23,11 +24,26 @@ namespace tlcn_dotnet.Mapper
 
             CreateMap<AddProductDto, Product>();
             CreateMap<Product, SimpleProductDto>();
-            CreateMap<Product, SingleImageProductDto>();
-            /*CreateMap<Product, SingleImageProductDto>()
-                .ForMember(dest => dest.Image, b => b.MapFrom(src => src.ProductImages.FirstOrDefault()));*/
+            CreateMap<Product, ProductWithImageDto>();
+            //CreateMap<Product, SingleImageProductDto>();
+            CreateMap<Product, SingleImageProductDto>()
+                .AfterMap((src, dest) =>
+                {
+                    ProductImage image = src.ProductImages.FirstOrDefault();
+                    if (image == null)
+                        return;
+                    dest.Image = new SimpleProductImageDto
+                    {
+                        Id = image.Id,
+                        FileName = image.FileName,
+                        ProductId = src.Id,
+                        Url = image.Url
+                    };
+                });
 
             CreateMap<ProductImage, SimpleProductImageDto>();
+
+            CreateMap<Inventory, SimpleInventoryDto>();
         }
     }
 }

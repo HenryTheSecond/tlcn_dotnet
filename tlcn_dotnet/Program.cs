@@ -6,6 +6,9 @@ using Swashbuckle.AspNetCore.Filters;
 using System.Configuration;
 using System.Text;
 using tlcn_dotnet;
+using tlcn_dotnet.DatabaseContext;
+using tlcn_dotnet.Repositories;
+using tlcn_dotnet.RepositoriesImpl;
 using tlcn_dotnet.Services;
 using tlcn_dotnet.ServicesImpl;
 
@@ -16,6 +19,8 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers();
 
 builder.Services.AddDbContext<MyDbContext>(options => options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+builder.Services.AddSingleton<DapperContext>();
+
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
@@ -42,6 +47,10 @@ builder.Services.AddScoped<EmailService, EmailServiceImpl>();
 builder.Services.AddScoped<SupplierService, SupplierServiceImpl>();
 builder.Services.AddScoped<ProductService, ProductServiceImpl>();
 builder.Services.AddScoped<ProductImageService, ProductImageServiceImpl>();
+builder.Services.AddScoped<InventoryService, InventoryServiceImpl>();
+
+//Add repositories
+builder.Services.AddScoped<InventoryRepository, InventoryRepositoryImpl>();
 
 /*builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options => {

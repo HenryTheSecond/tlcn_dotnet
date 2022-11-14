@@ -1,4 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore.Metadata.Internal;
+using System.Collections;
+using System.Collections.ObjectModel;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using tlcn_dotnet.Constant;
@@ -7,6 +9,11 @@ namespace tlcn_dotnet.Entity
 {
     public class Product
     {
+        public Product()
+        {
+            ProductImages = new List<ProductImage>();
+        }
+
         [Key]
         public long? Id { get; set; }
 
