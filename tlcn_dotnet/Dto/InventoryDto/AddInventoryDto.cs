@@ -11,6 +11,7 @@ namespace tlcn_dotnet.Dto.InventoryDto
         public DateTime ExpireDate { get; set; }
         public string Description { get; set; }
         public long? SupplierId { get; set; }
-        public ProductUnit Unit { get; set; }
+        [IsEnum(EnumType = typeof(ProductUnit), ErrorMessage = "UNIT IS INVALID")]
+        public string Unit { get; set; }
     }
 }

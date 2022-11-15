@@ -7,6 +7,7 @@ using System.Configuration;
 using System.Text;
 using tlcn_dotnet;
 using tlcn_dotnet.DatabaseContext;
+using tlcn_dotnet.IRepositories;
 using tlcn_dotnet.Repositories;
 using tlcn_dotnet.RepositoriesImpl;
 using tlcn_dotnet.Services;
@@ -39,18 +40,22 @@ builder.Services.AddSwaggerGen(options => {
 builder.Services.AddAutoMapper(typeof(Program).Assembly); 
 
 //Add services
-builder.Services.AddScoped<LocationService, LocationServiceImpl>(); //Should AddSingleton instead maybe
-builder.Services.AddScoped<CategoryService, CategoryServiceImpl>();
-builder.Services.AddScoped<AuthService, AuthServiceImpl>();
-builder.Services.AddScoped<ConfirmTokenService, ConfirmTokenServiceImpl>();
-builder.Services.AddScoped<EmailService, EmailServiceImpl>();
-builder.Services.AddScoped<SupplierService, SupplierServiceImpl>();
-builder.Services.AddScoped<ProductService, ProductServiceImpl>();
-builder.Services.AddScoped<ProductImageService, ProductImageServiceImpl>();
-builder.Services.AddScoped<InventoryService, InventoryServiceImpl>();
+builder.Services.AddScoped<ILocationService, LocationService>(); //Should AddSingleton instead maybe
+builder.Services.AddScoped<ICategoryService, CategoryService>();
+builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<IConfirmTokenService, ConfirmTokenService>();
+builder.Services.AddScoped<IEmailService, EmailService>();
+builder.Services.AddScoped<ISupplierService, SupplierService>();
+builder.Services.AddScoped<IProductService, ProductService>();
+builder.Services.AddScoped<IProductImageService, ProductImageService>();
+builder.Services.AddScoped<IInventoryService, InventoryService>();
 
 //Add repositories
-builder.Services.AddScoped<InventoryRepository, InventoryRepositoryImpl>();
+builder.Services.AddScoped<IInventoryRepository, InventoryRepository>();
+builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
+builder.Services.AddScoped<ISupplierRepository, SupplierRepository>();
+builder.Services.AddScoped<IProductRepository, ProductRepository>();
+builder.Services.AddScoped<IProductImageRepository, ProductImageRepository>();
 
 /*builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options => {
