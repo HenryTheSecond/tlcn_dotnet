@@ -18,6 +18,10 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 
 builder.Services.AddControllers();
+builder.Services.AddCors(p => p.AddPolicy("FrontEnd", build =>
+{
+    build.WithOrigins("http://localhost:3000").AllowAnyMethod().AllowAnyHeader();
+}));
 
 builder.Services.AddDbContext<MyDbContext>(options => options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 builder.Services.AddSingleton<DapperContext>();
@@ -81,7 +85,7 @@ if (app.Environment.IsDevelopment())
 app.ConfigureExceptionHandler(); //Exception Handler
 
 app.UseHttpsRedirection();
-
+app.UseCors("FrontEnd");
 app.UseAuthentication();
 app.UseAuthorization();
 
