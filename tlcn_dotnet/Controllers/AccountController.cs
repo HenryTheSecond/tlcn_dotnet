@@ -12,9 +12,9 @@ namespace tlcn_dotnet.Controllers
     [ApiController]
     public class AccountController : ControllerBase
     {
-        private readonly AuthService _authService;
+        private readonly IAuthService _authService;
 
-        public AccountController(AuthService authService)
+        public AccountController(IAuthService authService)
         {
                _authService = authService;
         }

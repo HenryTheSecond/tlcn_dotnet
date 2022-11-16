@@ -6,7 +6,7 @@ namespace tlcn_dotnet.Utils
 {
     public class Util
     {
-        private static readonly LocationService _locationService = new LocationServiceImpl();
+        private static readonly ILocationService _locationService = new LocationService();
         public static long? ParseId(string strId)
         {
             try

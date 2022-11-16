@@ -12,8 +12,8 @@ namespace tlcn_dotnet.Controllers
     [ApiController]
     public class SupplierController : ControllerBase
     {
-        private readonly SupplierService _supplierService;
-        public SupplierController(SupplierService supplierService)
+        private readonly ISupplierService _supplierService;
+        public SupplierController(ISupplierService supplierService)
         {
             _supplierService = supplierService;
         }

@@ -1,8 +1,26 @@
-﻿namespace tlcn_dotnet.Services
+﻿using System.Text.Json;
+using System.Text.Json.Nodes;
+using tlcn_dotnet.Constant;
+using tlcn_dotnet.Services;
+
+namespace tlcn_dotnet.ServicesImpl
 {
-    public interface LocationService
+    public class LocationService : ILocationService
     {
-        public Task<DataResponse> GetAllCountryAndCity();
-        public Task<DataResponse> GetVietnamLocation();
+        public async Task<DataResponse> GetAllCountryAndCity()
+        {
+            using (StreamReader r = new StreamReader(ApplicationConstant.COUNTRY_AND_CITY_DIRECTORY))
+            {
+                return new DataResponse(JsonSerializer.Deserialize<JsonNode>(r.ReadToEnd()));
+            }
+        }
+
+        public async Task<DataResponse> GetVietnamLocation()
+        {
+            using (StreamReader r = new StreamReader(ApplicationConstant.VIETNAM_REGION))
+            {
+                return new DataResponse(JsonSerializer.Deserialize<JsonNode>(r.ReadToEnd())["data"]);
+            }
+        }
     }
 }

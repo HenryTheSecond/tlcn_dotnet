@@ -12,8 +12,8 @@ namespace tlcn_dotnet.Controllers
     [ApiController]
     public class InventoryController : ControllerBase
     {
-        private readonly InventoryService _inventoryService;
-        public InventoryController(InventoryService inventoryService)
+        private readonly IInventoryService _inventoryService;
+        public InventoryController(IInventoryService inventoryService)
         {
             _inventoryService = inventoryService;
         }
@@ -78,6 +78,15 @@ namespace tlcn_dotnet.Controllers
             return new DataResponse(await _inventoryService.FilterInventory(keyword, numberProductId,
                 numberMinQuantity, numberMaxQuantity, numberMinImportPrice, numberMaxImportPrice, dateFromDeliveryDate,
                 dateToDeliveryDate, dateFromExpireDate, dateToDeliveryDate, numberSupplierId, unit, inventoryOrderBy, sortOrder, numberPage.Value));
+        }
+
+        [HttpPut("{strId}")]
+        public async Task<DataResponse> EditInventory(string strId, EditInventoryDto editInventoryDto)
+        {
+            long? id = Util.ParseId(strId);
+            if (id == null)
+                throw new GeneralException(ApplicationConstant.INVALID_ID, ApplicationConstant.BAD_REQUEST_CODE);
+            return await _inventoryService.EditInventory(id.Value, editInventoryDto);
         }
     }
 }
