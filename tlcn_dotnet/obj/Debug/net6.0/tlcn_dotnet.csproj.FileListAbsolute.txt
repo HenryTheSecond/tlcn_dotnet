@@ -173,3 +173,4 @@ D:\testing\tlcn_dotnet\tlcn_dotnet\bin\Debug\net6.0\runtimes\win-x86\native\sni.
 D:\testing\tlcn_dotnet\tlcn_dotnet\bin\Debug\net6.0\runtimes\unix\lib\netcoreapp2.1\System.Data.SqlClient.dll
 D:\testing\tlcn_dotnet\tlcn_dotnet\bin\Debug\net6.0\runtimes\win\lib\netcoreapp2.1\System.Data.SqlClient.dll
 D:\testing\tlcn_dotnet\tlcn_dotnet\bin\Debug\net6.0\DapperQueryBuilder.dll
+E:\dotnet\tlcn_dotnet\tlcn_dotnet\bin\Debug\net6.0\DapperQueryBuilder.dll
