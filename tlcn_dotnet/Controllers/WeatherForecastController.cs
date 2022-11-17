@@ -11,6 +11,7 @@ using JsonSerializer = System.Text.Json.JsonSerializer;
 using CloudinaryDotNet;
 using CloudinaryDotNet.Actions;
 using System.Drawing;
+using tlcn_dotnet.Dto.ProductDto;
 
 namespace tlcn_dotnet.Controllers
 {
@@ -102,6 +103,16 @@ namespace tlcn_dotnet.Controllers
             var deletionParams = new DeletionParams("fc958c53-09ab-448b-aaeb-abd931623c76");
             var deletionResult = cloudinary.Destroy(deletionParams);
             return Ok(deletionResult);
+        }
+
+        [HttpPost]
+        public IActionResult TestUnitValidator()
+        {
+            var product = HttpContext.Request.Form["product"][0];
+            AddProductDto addProductDto = JsonConvert.DeserializeObject<AddProductDto>(product);
+            this.TryValidateModel(addProductDto, "product validate");
+
+            return Ok(ModelState["product validate"].Errors[0].ErrorMessage);
         }
     }
 }

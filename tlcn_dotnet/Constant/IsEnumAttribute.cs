@@ -2,7 +2,7 @@
 
 namespace tlcn_dotnet.Constant
 {
-    [AttributeUsage(AttributeTargets.Property | AttributeTargets.Field)]
+    [AttributeUsage(AttributeTargets.Property | AttributeTargets.Field | AttributeTargets.Parameter)]
     public class IsEnumAttribute: ValidationAttribute
     {
         public Type EnumType { get; set; }
@@ -11,7 +11,7 @@ namespace tlcn_dotnet.Constant
         {
             try
             {
-                Enum.Parse(EnumType, value.ToString());
+                Enum.Parse(EnumType, value.ToString(), true);
             }
             catch (Exception e)
             {

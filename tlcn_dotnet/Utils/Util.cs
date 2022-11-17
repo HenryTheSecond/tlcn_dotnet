@@ -80,10 +80,12 @@ namespace tlcn_dotnet.Utils
             return maxPage;
         }
 
-        public static T? ConvertStringToDataType<T>(string source) where T: struct
+        public static T? ConvertStringToDataType<T>(string source, T? defaultValue = null) where T: struct
         {
             if (source == null || source.Trim() == "")
-                return null;
+                return defaultValue;
+            if (typeof(T).IsEnum)
+                return Enum.Parse<T>(source, true);
             return (T?)Convert.ChangeType(source, typeof(T));
 
         }

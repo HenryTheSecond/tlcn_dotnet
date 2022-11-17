@@ -1,7 +1,9 @@
 ﻿using tlcn_dotnet.Constant;
+using tlcn_dotnet.Utils;
 
 namespace tlcn_dotnet.Dto.InventoryDto
 {
+    [UnitValidator]
     public class AddInventoryDto
     {
         public long? ProductId { get; set; }

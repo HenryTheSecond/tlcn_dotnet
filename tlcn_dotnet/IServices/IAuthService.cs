@@ -8,5 +8,6 @@ namespace tlcn_dotnet.Services
         public Task<DataResponse> RegisterAccount(RegisterAccountDto registerAccountDto, Role role = Role.ROLE_USER);
         public Task<DataResponse> ConfirmAccount(string token);
         public Task<DataResponse> Login(LoginRequest loginRequest);
+        public Task<DataResponse> FilterAccount(string keyword, AccountKeywordType keywordType, string role, int page);
     }
 }

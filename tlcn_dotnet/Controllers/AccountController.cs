@@ -50,5 +50,33 @@ namespace tlcn_dotnet.Controllers
             throw new GeneralException("ROLE NOT FOUND", ApplicationConstant.NOT_FOUND_CODE);
         }
 
+        [HttpGet]
+        public async Task<DataResponse> FilterAccount(string? keyword,
+            [IsEnum(EnumType = typeof(AccountKeywordType), ErrorMessage = "KEY WORD TYPE IS INVALID")] string? keywordType = "NAME", 
+            string? role = "", string? page = "1")
+        {
+            if (keyword == null)
+                keyword = string.Empty;
+            AccountKeywordType enumKeyWordType;
+            Console.WriteLine(keywordType);
+            if (Enum.TryParse<AccountKeywordType>(keywordType, true, out enumKeyWordType) == false)
+                enumKeyWordType = AccountKeywordType.NAME;
+            Console.WriteLine(enumKeyWordType.ToString()); Console.WriteLine(keyword == "");
+            try
+            {
+                Enum.Parse<Role>(role, true);
+            }
+            catch (Exception e)
+            {
+                role = "";
+            }
+
+            int numberPage;
+            Int32.TryParse(page, out numberPage);
+            numberPage = numberPage == 0 ? 1 : numberPage;
+
+            return await _authService.FilterAccount(keyword.Trim(), enumKeyWordType, role, numberPage);
+        }
+
     }
 }

@@ -4,9 +4,11 @@ using System.ComponentModel.DataAnnotations.Schema;
 using tlcn_dotnet.Constant;
 using tlcn_dotnet.Dto.ProductImageDto;
 using tlcn_dotnet.Entity;
+using tlcn_dotnet.Utils;
 
 namespace tlcn_dotnet.Dto.ProductDto
 {
+    [UnitValidator]
     public class EditProductDto
     {
         [Required]

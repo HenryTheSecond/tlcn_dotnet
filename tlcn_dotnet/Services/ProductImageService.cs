@@ -147,7 +147,7 @@ namespace tlcn_dotnet.ServicesImpl
                     Product = product,
                     FileName = fileName
                 };
-                return (await _productImageRepository.Add(productImage));
+                return (await _dbContext.ProductImage.AddAsync(productImage)).Entity;
             }
         }
 

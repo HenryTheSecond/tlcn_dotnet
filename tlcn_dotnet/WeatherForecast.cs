@@ -1,5 +1,8 @@
+using tlcn_dotnet.Utils;
+
 namespace tlcn_dotnet
 {
+    [UnitValidator]
     public class WeatherForecast
     {
         public DateTime Date { get; set; }

@@ -13,6 +13,7 @@ using tlcn_dotnet.Entity;
 using tlcn_dotnet.Services;
 using tlcn_dotnet.Utils;
 using Microsoft.EntityFrameworkCore;
+using tlcn_dotnet.IRepositories;
 
 namespace tlcn_dotnet.ServicesImpl
 {
@@ -23,15 +24,17 @@ namespace tlcn_dotnet.ServicesImpl
         private readonly IMapper _mapper;
         private readonly IConfirmTokenService _confirmTokenService;
         private readonly IEmailService _emailService;
+        private readonly IAccountRepository _accountRepository;
 
         public AuthService(IConfiguration configuration, MyDbContext dbContext, IMapper mapper, 
-            IConfirmTokenService confirmTokenService, IEmailService emailService)
+            IConfirmTokenService confirmTokenService, IEmailService emailService, IAccountRepository accountRepository)
         {
             _configuration = configuration;
             _dbContext = dbContext;
             _mapper = mapper;
             _confirmTokenService = confirmTokenService;
             _emailService = emailService;
+            _accountRepository = accountRepository;
         }
 
         public async Task<DataResponse> ConfirmAccount(string token)
@@ -124,5 +127,16 @@ namespace tlcn_dotnet.ServicesImpl
             return new DataResponse(_mapper.Map<AccountResponse>(accountDb));
         }
 
+        public async Task<DataResponse> FilterAccount(string keyword, AccountKeywordType keywordType, string role, int page)
+        {
+            var result = await _accountRepository.FilterAccount(keyword, keywordType, role, page);
+
+            return new DataResponse(new
+            { 
+                accounts = _mapper.Map<IEnumerable<AccountResponse>>(result.Accounts),
+                maxPage = Util.CalculateMaxPage(result.Total, 2),
+                currentPage = page
+            });
+        }
     }
 }
