@@ -27,6 +27,7 @@
         public static readonly string ACCOUNT_INACTIVE = "ACCOUNT HAS NOT BEEN ACTIVATED";
         public static readonly string EMAIL_OR_PASSWORD_INCORRECT = "EMAIL OR PASSWORD IS INCORRECT";
         public static readonly string CONFIRM_TOKEN_EMAIL_SUBJECT = "Verify your email";
+        public static readonly string CONFIRM_CHANGE_PASSWORD_SUBJECT = "Verify Your Change Password";
         public static readonly string TOKEN_NOT_FOUND = "TOKEN NOT FOUND";
         public static readonly string EMAIL_HAS_BEEN_CONFIRMED = "EMAIL HAS BEEN CONFIRMED";
         public static readonly string TOKEN_EXPIRED = "TOKEN EXPIRED";

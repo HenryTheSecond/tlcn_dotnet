@@ -29,6 +29,7 @@ namespace tlcn_dotnet.Entity
         public string? WardId { get; set; }
 
         public string? DetailLocation { get; set; }
+        public string? VerifyToken { get; set; }
 
         public virtual ICollection<CartDetail> CartDetails { get; set; }
 

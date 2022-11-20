@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using tlcn_dotnet;
 
@@ -11,9 +12,10 @@ using tlcn_dotnet;
 namespace tlcn_dotnet.Migrations
 {
     [DbContext(typeof(MyDbContext))]
-    partial class MyDbContextModelSnapshot : ModelSnapshot
+    [Migration("20221119165814_verify_token_column_account_table")]
+    partial class verify_token_column_account_table
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -242,41 +244,6 @@ namespace tlcn_dotnet.Migrations
                         .IsUnique();
 
                     b.ToTable("Category");
-                });
-
-            modelBuilder.Entity("tlcn_dotnet.Entity.ChangePasswordToken", b =>
-                {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"), 1L, 1);
-
-                    b.Property<long>("AccountId")
-                        .HasColumnType("bigint");
-
-                    b.Property<DateTime?>("ConfirmAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateTime>("ExpireAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("Password")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Token")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("AccountId");
-
-                    b.ToTable("ChangePasswordToken");
                 });
 
             modelBuilder.Entity("tlcn_dotnet.Entity.ConfirmToken", b =>
@@ -537,17 +504,6 @@ namespace tlcn_dotnet.Migrations
                     b.Navigation("Cart");
 
                     b.Navigation("Product");
-                });
-
-            modelBuilder.Entity("tlcn_dotnet.Entity.ChangePasswordToken", b =>
-                {
-                    b.HasOne("tlcn_dotnet.Entity.Account", "Account")
-                        .WithMany()
-                        .HasForeignKey("AccountId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Account");
                 });
 
             modelBuilder.Entity("tlcn_dotnet.Entity.ConfirmToken", b =>

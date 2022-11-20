@@ -61,6 +61,7 @@ builder.Services.AddScoped<ISupplierRepository, SupplierRepository>();
 builder.Services.AddScoped<IProductRepository, ProductRepository>();
 builder.Services.AddScoped<IProductImageRepository, ProductImageRepository>();
 builder.Services.AddScoped<IAccountRepository, AccountRepository>();
+builder.Services.AddScoped<IChangePasswordTokenRepository, ChangePasswordTokenRepository>();
 
 /*builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options => {
@@ -87,8 +88,10 @@ app.ConfigureExceptionHandler(); //Exception Handler
 
 app.UseHttpsRedirection();
 app.UseCors("FrontEnd");
+
 app.UseAuthentication();
 app.UseAuthorization();
+//app.UseMiddleware<JwtValidateMiddleware>();
 
 app.MapControllers();
 

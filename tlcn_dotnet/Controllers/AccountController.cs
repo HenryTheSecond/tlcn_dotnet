@@ -1,10 +1,13 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using tlcn_dotnet.AuthorizationAttributes;
 using tlcn_dotnet.Constant;
 using tlcn_dotnet.CustomException;
 using tlcn_dotnet.Dto.AccountDto;
+using tlcn_dotnet.Entity;
 using tlcn_dotnet.Services;
+using tlcn_dotnet.Utils;
 
 namespace tlcn_dotnet.Controllers
 {
@@ -18,7 +21,6 @@ namespace tlcn_dotnet.Controllers
         {
                _authService = authService;
         }
-
 
         [HttpPost("user/register")]
         public async Task<DataResponse> UserRegister([FromBody] RegisterAccountDto registerAccountDto)
@@ -50,7 +52,7 @@ namespace tlcn_dotnet.Controllers
             throw new GeneralException("ROLE NOT FOUND", ApplicationConstant.NOT_FOUND_CODE);
         }
 
-        [HttpGet]
+        [HttpGet("admin/account")]
         public async Task<DataResponse> FilterAccount(string? keyword,
             [IsEnum(EnumType = typeof(AccountKeywordType), ErrorMessage = "KEY WORD TYPE IS INVALID")] string? keywordType = "NAME", 
             string? role = "", string? page = "1")
@@ -78,5 +80,24 @@ namespace tlcn_dotnet.Controllers
             return await _authService.FilterAccount(keyword.Trim(), enumKeyWordType, role, numberPage);
         }
 
+        [HttpPost("changePassword")]
+        public async Task<DataResponse> ChangePassword(ChangePasswordRequest changePasswordRequest)
+        { 
+            return await _authService.ChangePassword(changePasswordRequest);
+        }
+
+        [HttpGet("changePassword")]
+        public async Task<DataResponse> ConfirmChangePassword(string token)
+        { 
+            return await _authService.ConfirmChangePassword(token);
+        }
+
+        [HttpGet("admin/account/{strId}")]
+        [CustomAuthorize(Roles = "ROLE_ADMIN")]
+        public async Task<DataResponse> AdminGetAccountById(string strId)
+        {
+            long? id = Util.ParseId(strId) ?? throw new GeneralException(ApplicationConstant.INVALID_ID, ApplicationConstant.BAD_REQUEST_CODE);
+            return await _authService.GetAccountById(id.Value);
+        }
     }
 }

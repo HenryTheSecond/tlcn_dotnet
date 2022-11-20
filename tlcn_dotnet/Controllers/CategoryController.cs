@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using tlcn_dotnet.AuthorizationAttributes;
 using tlcn_dotnet.Constant;
 using tlcn_dotnet.CustomException;
 using tlcn_dotnet.Dto.CategoryDto;
@@ -20,7 +21,8 @@ namespace tlcn_dotnet.Controllers
         }
 
         [HttpGet]
-        [Authorize(Roles = "ROLE_ADMIN")]
+        [CustomAuthorize(Roles = "ROLE_ADMIN")]
+        //[Authorize(Roles = "ROLE_ADMIN")]
         public async Task<DataResponse> GetAllCategory()
         {
             return await _categoryService.GetAllCategory();

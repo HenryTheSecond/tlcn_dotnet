@@ -25,9 +25,11 @@ namespace tlcn_dotnet.ServicesImpl
         private readonly IConfirmTokenService _confirmTokenService;
         private readonly IEmailService _emailService;
         private readonly IAccountRepository _accountRepository;
+        private readonly IChangePasswordTokenRepository _changePasswordTokenRepository;
 
         public AuthService(IConfiguration configuration, MyDbContext dbContext, IMapper mapper, 
-            IConfirmTokenService confirmTokenService, IEmailService emailService, IAccountRepository accountRepository)
+            IConfirmTokenService confirmTokenService, IEmailService emailService, IAccountRepository accountRepository,
+            IChangePasswordTokenRepository changePasswordTokenRepository)
         {
             _configuration = configuration;
             _dbContext = dbContext;
@@ -35,6 +37,7 @@ namespace tlcn_dotnet.ServicesImpl
             _confirmTokenService = confirmTokenService;
             _emailService = emailService;
             _accountRepository = accountRepository;
+            _changePasswordTokenRepository = changePasswordTokenRepository;
         }
 
         public async Task<DataResponse> ConfirmAccount(string token)
@@ -57,8 +60,16 @@ namespace tlcn_dotnet.ServicesImpl
         {
             List<Claim> claims = new List<Claim>()
             {
+                new Claim("userId", account.Id.ToString()),
                 new Claim(ClaimTypes.Email, account.Email),
                 new Claim(ClaimTypes.Role, account.Role.ToString()),
+                new Claim(ClaimTypes.MobilePhone, account.Phone),
+                new Claim("status", account.Status.ToString()),
+                new Claim("cityId", account.CityId),
+                new Claim("districtId", account.DistrictId),
+                new Claim("wardId", account.WardId),
+                new Claim("detailLocation", account.DetailLocation),
+                new Claim("verifyToken", account.VerifyToken)
             };
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration.GetSection("Jwt:Key").Value));
             var cred = new SigningCredentials(key, SecurityAlgorithms.HmacSha512Signature);
@@ -73,7 +84,9 @@ namespace tlcn_dotnet.ServicesImpl
 
         public async Task<DataResponse> Login(LoginRequest loginRequest)
         {
-            Account accountDb = await _dbContext.Account.Where(account => account.Email == loginRequest.Email).FirstOrDefaultAsync();
+            Account accountDb = await _dbContext.Account
+                .Where(account => account.Email == loginRequest.Email)
+                .FirstOrDefaultAsync();
             if (accountDb == null || !BCrypt.Net.BCrypt.Verify(loginRequest.Password, accountDb.Password))
             {
                 throw new GeneralException(ApplicationConstant.EMAIL_OR_PASSWORD_INCORRECT, ApplicationConstant.FAILED_CODE);
@@ -112,6 +125,7 @@ namespace tlcn_dotnet.ServicesImpl
             Account account = _mapper.Map<Account>(registerAccountDto);
             account.Role = role;
             account.Status = UserStatus.INACTIVE;
+            account.VerifyToken = Guid.NewGuid().ToString();
 
             string checkLocation = await Util.CheckVietnameseAddress(account.CityId, account.DistrictId, account.WardId);
             if (checkLocation != null)
@@ -137,6 +151,47 @@ namespace tlcn_dotnet.ServicesImpl
                 maxPage = Util.CalculateMaxPage(result.Total, 2),
                 currentPage = page
             });
+        }
+
+        public async Task<DataResponse> ChangePassword(ChangePasswordRequest changePasswordRequest)
+        {
+            Account accountDb = (await _accountRepository.FindByEmail(changePasswordRequest.Email)) ?? throw new GeneralException("EMAIL NOT FOUND", ApplicationConstant.NOT_FOUND_CODE);
+
+            ChangePasswordToken changePasswordToken = new ChangePasswordToken()
+            {
+                Account = accountDb,
+                Password = BCrypt.Net.BCrypt.HashPassword(changePasswordRequest.Password),
+                Token = Guid.NewGuid().ToString(),
+                CreatedAt = DateTime.Now,
+                ExpireAt = DateTime.Now.AddMinutes(Double.Parse(_configuration.GetSection("ChangePassword:Duration").Value)),
+                ConfirmAt = null
+            };
+            ChangePasswordToken changePasswordTokenDb = await _changePasswordTokenRepository.Add(changePasswordToken);
+            _emailService.SendChangePasswordConfirmationToken(changePasswordTokenDb);
+            return new DataResponse(true);
+        }
+
+        public async Task<DataResponse> ConfirmChangePassword(string token)
+        {
+            ChangePasswordToken changePasswordTokenDb = (await _changePasswordTokenRepository.FindByToken(token)) 
+                ?? throw new GeneralException("TOKEN NOT FOUND", ApplicationConstant.NOT_FOUND_CODE);
+            DateTime now = DateTime.Now;
+            if (changePasswordTokenDb.ConfirmAt != null)
+                throw new GeneralException("TOKEN CONFIRMED", ApplicationConstant.FAILED_CODE);
+            if (now > changePasswordTokenDb.ExpireAt)
+                throw new GeneralException(ApplicationConstant.TOKEN_EXPIRED, ApplicationConstant.FAILED_CODE);
+            changePasswordTokenDb.ConfirmAt = now;
+            changePasswordTokenDb.Account.Password = changePasswordTokenDb.Password;
+            changePasswordTokenDb.Account.VerifyToken = Guid.NewGuid().ToString(); 
+            ChangePasswordToken changePasswordTokenSaved = await _changePasswordTokenRepository.Update(changePasswordTokenDb);
+            return new DataResponse(_mapper.Map<AccountResponse>(changePasswordTokenSaved.Account));
+        }
+
+        public async Task<DataResponse> GetAccountById(long id)
+        {
+            Account account = (await _accountRepository.GetById(id)) 
+                ?? throw new GeneralException("ACCOUNT NOT FOUND", ApplicationConstant.NOT_FOUND_CODE);
+            return new DataResponse(_mapper.Map<AccountResponse>(account));
         }
     }
 }

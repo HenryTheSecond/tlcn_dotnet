@@ -23,5 +23,7 @@ namespace tlcn_dotnet.Dto.AccountDto
         public string DistrictId { get; set; }
         public string WardId { get; set; }
         public string DetailLocation { get; set; }
+
+        public string VerifyToken { get; set; }
     }
 }

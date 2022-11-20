@@ -43,5 +43,15 @@ namespace tlcn_dotnet.Repositories
                 Total = total
             };
         }
+
+        public async Task<Account> FindByEmail(string email)
+        {
+            return await _dbContext.Account.Where(account => account.Email == email).SingleOrDefaultAsync();
+        }
+
+        public string GetVerifyTokenById(long id)
+        {
+            return  _dbContext.Account.Find(id).VerifyToken;
+        }
     }
 }

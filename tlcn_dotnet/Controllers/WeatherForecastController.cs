@@ -12,6 +12,7 @@ using CloudinaryDotNet;
 using CloudinaryDotNet.Actions;
 using System.Drawing;
 using tlcn_dotnet.Dto.ProductDto;
+using tlcn_dotnet.AuthorizationAttributes;
 
 namespace tlcn_dotnet.Controllers
 {
@@ -113,6 +114,13 @@ namespace tlcn_dotnet.Controllers
             this.TryValidateModel(addProductDto, "product validate");
 
             return Ok(ModelState["product validate"].Errors[0].ErrorMessage);
+        }
+
+        [HttpGet("testAuthorize/{strId}")]
+        [CustomAuthorize]
+        public IActionResult TestAuthorize(string strId)
+        {
+            return Ok(true);
         }
     }
 }

@@ -13,6 +13,30 @@ namespace tlcn_dotnet.ServicesImpl
         {
             _configuration = configuration;
         }
+
+        public async Task SendChangePasswordConfirmationToken(ChangePasswordToken changePasswordToken)
+        {
+            var emailConfiguration = _configuration.GetSection("Email");
+            var email = new MimeMessage();
+            email.From.Add(MailboxAddress.Parse(emailConfiguration.GetSection("From").Value));
+            email.To.Add(MailboxAddress.Parse(changePasswordToken.Account.Email));
+            email.Subject = ApplicationConstant.CONFIRM_CHANGE_PASSWORD_SUBJECT;
+            email.Body = new TextPart(MimeKit.Text.TextFormat.Html)
+            {
+                Text = EmailVerificationTemplate.ChangePasswordConfirmTemplate(changePasswordToken.Account.Email, changePasswordToken.Token)
+            };
+
+            using var smtp = new SmtpClient();
+            await smtp.ConnectAsync(
+                emailConfiguration.GetSection("Smtp").Value,
+                Int32.Parse(emailConfiguration.GetSection("Port").Value),
+                MailKit.Security.SecureSocketOptions.StartTls
+                ); //Must use ConnectAsync not Connect, otherwise take long time to response in controller
+            smtp.Authenticate(emailConfiguration.GetSection("From").Value, emailConfiguration.GetSection("Password").Value);
+            smtp.Send(email);
+            smtp.Disconnect(true);
+        }
+
         public async Task SendRegisterConfirmationToken(ConfirmToken confirmToken)
         {
             var emailConfiguration = _configuration.GetSection("Email");
