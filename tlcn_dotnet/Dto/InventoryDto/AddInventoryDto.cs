@@ -14,6 +14,6 @@ namespace tlcn_dotnet.Dto.InventoryDto
         public string Description { get; set; }
         public long? SupplierId { get; set; }
         [IsEnum(EnumType = typeof(ProductUnit), ErrorMessage = "UNIT IS INVALID")]
-        public string Unit { get; set; }
+        public ProductUnit Unit { get; set; }
     }
 }

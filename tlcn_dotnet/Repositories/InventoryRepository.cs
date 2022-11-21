@@ -1,5 +1,6 @@
 ﻿using Dapper;
 using DapperQueryBuilder;
+using Microsoft.OpenApi.Extensions;
 using System.Collections;
 using System.Data.SqlClient;
 using System.Linq;
@@ -43,8 +44,9 @@ namespace tlcn_dotnet.RepositoriesImpl
                                 values (@ProductId, @Quantity, @ImportPrice, 
                                         @DeliveryDate, @ExpireDate, @Description, 
                                         @SupplierId, @Unit)";
-
-                long id = await connection.ExecuteScalarAsync<long>(query, addInventoryDto);
+                DynamicParameters parameters = new DynamicParameters(addInventoryDto);
+                parameters.Add("Unit", addInventoryDto.Unit.GetDisplayName());
+                long id = await connection.ExecuteScalarAsync<long>(query, parameters);
                 return await GetInventoryById(id);
             }
         }
@@ -207,6 +209,7 @@ namespace tlcn_dotnet.RepositoriesImpl
                                 WHERE Id = @Id";
                 DynamicParameters parameters = new DynamicParameters(editInventoryDto);
                 parameters.Add("Id", id);
+                parameters.Add("Unit", editInventoryDto.Unit.GetDisplayName());
                 int affectedRow = await connection.ExecuteAsync(query, parameters);
                 if (affectedRow == 0)
                     throw new GeneralException("INVENTORY NOT FOUND", ApplicationConstant.NOT_FOUND_CODE);

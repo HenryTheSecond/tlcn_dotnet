@@ -83,8 +83,7 @@ namespace tlcn_dotnet.Controllers
         [HttpPut("{strId}")]
         public async Task<DataResponse> EditInventory(string strId, EditInventoryDto editInventoryDto)
         {
-            long? id = Util.ParseId(strId);
-            if (id == null)
+            long? id = Util.ParseId(strId) ??
                 throw new GeneralException(ApplicationConstant.INVALID_ID, ApplicationConstant.BAD_REQUEST_CODE);
             return await _inventoryService.EditInventory(id.Value, editInventoryDto);
         }

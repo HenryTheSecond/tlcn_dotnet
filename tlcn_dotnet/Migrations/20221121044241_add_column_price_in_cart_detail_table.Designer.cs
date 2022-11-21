@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using tlcn_dotnet;
 
@@ -11,9 +12,10 @@ using tlcn_dotnet;
 namespace tlcn_dotnet.Migrations
 {
     [DbContext(typeof(MyDbContext))]
-    partial class MyDbContextModelSnapshot : ModelSnapshot
+    [Migration("20221121044241_add_column_price_in_cart_detail_table")]
+    partial class add_column_price_in_cart_detail_table
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -199,7 +201,7 @@ namespace tlcn_dotnet.Migrations
                     b.Property<long?>("CartId")
                         .HasColumnType("bigint");
 
-                    b.Property<decimal?>("Price")
+                    b.Property<decimal>("Price")
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<long?>("ProductId")
@@ -208,13 +210,11 @@ namespace tlcn_dotnet.Migrations
                     b.Property<double>("Quantity")
                         .HasColumnType("float");
 
-                    b.Property<string>("Status")
-                        .IsRequired()
-                        .HasColumnType("varchar(50)");
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
 
-                    b.Property<string>("Unit")
-                        .IsRequired()
-                        .HasColumnType("varchar(50)");
+                    b.Property<int>("Unit")
+                        .HasColumnType("int");
 
                     b.HasKey("Id");
 

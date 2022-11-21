@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using tlcn_dotnet.Dto.AccountDto;
+using tlcn_dotnet.Dto.CartDetailDto;
 using tlcn_dotnet.Dto.CategoryDto;
 using tlcn_dotnet.Dto.InventoryDto;
 using tlcn_dotnet.Dto.ProductDto;
@@ -44,6 +45,8 @@ namespace tlcn_dotnet.Mapper
             CreateMap<ProductImage, SimpleProductImageDto>();
 
             CreateMap<Inventory, SimpleInventoryDto>();
+
+            CreateMap<CartDetail, CartDetailResponse>();
         }
     }
 }

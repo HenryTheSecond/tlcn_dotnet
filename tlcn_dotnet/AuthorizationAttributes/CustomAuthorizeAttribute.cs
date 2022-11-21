@@ -31,8 +31,6 @@ namespace tlcn_dotnet.AuthorizationAttributes
             tokenValidator.ReadJwtToken(jwtToken).Payload.TryGetValue("verifyToken", out verifyTokenClaim);
             tokenValidator.ReadJwtToken(jwtToken).Payload.TryGetValue("userId", out id);
 
-            Console.WriteLine($"{verifyTokenClaim} {Convert.ToInt64(id)}");
-
             if (verifyTokenClaim.ToString() != accountRepository.GetVerifyTokenById(Convert.ToInt64(id)))
             {
                 filterContext.Result = new UnauthorizedObjectResult(null);

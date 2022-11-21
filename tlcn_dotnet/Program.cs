@@ -8,6 +8,7 @@ using System.Text;
 using tlcn_dotnet;
 using tlcn_dotnet.DatabaseContext;
 using tlcn_dotnet.IRepositories;
+using tlcn_dotnet.IServices;
 using tlcn_dotnet.Repositories;
 using tlcn_dotnet.RepositoriesImpl;
 using tlcn_dotnet.Services;
@@ -53,6 +54,7 @@ builder.Services.AddScoped<ISupplierService, SupplierService>();
 builder.Services.AddScoped<IProductService, ProductService>();
 builder.Services.AddScoped<IProductImageService, ProductImageService>();
 builder.Services.AddScoped<IInventoryService, InventoryService>();
+builder.Services.AddScoped<ICartDetailService, CartDetailService>();
 
 //Add repositories
 builder.Services.AddScoped<IInventoryRepository, InventoryRepository>();
@@ -62,6 +64,7 @@ builder.Services.AddScoped<IProductRepository, ProductRepository>();
 builder.Services.AddScoped<IProductImageRepository, ProductImageRepository>();
 builder.Services.AddScoped<IAccountRepository, AccountRepository>();
 builder.Services.AddScoped<IChangePasswordTokenRepository, ChangePasswordTokenRepository>();
+builder.Services.AddScoped<ICartDetailRepository, CartDetailRepository>();
 
 /*builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options => {

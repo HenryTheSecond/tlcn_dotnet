@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using tlcn_dotnet;
 
@@ -11,9 +12,10 @@ using tlcn_dotnet;
 namespace tlcn_dotnet.Migrations
 {
     [DbContext(typeof(MyDbContext))]
-    partial class MyDbContextModelSnapshot : ModelSnapshot
+    [Migration("20221121062155_change_enum_to_varchar")]
+    partial class change_enum_to_varchar
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -199,7 +201,7 @@ namespace tlcn_dotnet.Migrations
                     b.Property<long?>("CartId")
                         .HasColumnType("bigint");
 
-                    b.Property<decimal?>("Price")
+                    b.Property<decimal>("Price")
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<long?>("ProductId")

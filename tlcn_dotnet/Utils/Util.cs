@@ -1,4 +1,5 @@
-﻿using System.Text.Json.Nodes;
+﻿using System.IdentityModel.Tokens.Jwt;
+using System.Text.Json.Nodes;
 using tlcn_dotnet.Services;
 using tlcn_dotnet.ServicesImpl;
 
@@ -89,5 +90,15 @@ namespace tlcn_dotnet.Utils
             return (T?)Convert.ChangeType(source, typeof(T));
 
         }
+
+        public static JwtSecurityToken ReadJwtToken(string authorization)
+        {
+            var jwtToken = authorization.Substring(0, 7).ToLower() == "bearer " ?
+                authorization.ToString().Substring("bearer ".Length) : authorization;
+            var tokenValidator = new JwtSecurityTokenHandler();
+            return tokenValidator.ReadJwtToken(jwtToken);
+        }
+
+        
     }
 }
