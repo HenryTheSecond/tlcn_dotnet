@@ -156,6 +156,9 @@ namespace tlcn_dotnet.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2");
+
                     b.Property<string>("DetailLocation")
                         .IsRequired()
                         .HasColumnType("text");
@@ -199,17 +202,22 @@ namespace tlcn_dotnet.Migrations
                     b.Property<long?>("CartId")
                         .HasColumnType("bigint");
 
+                    b.Property<decimal?>("Price")
+                        .HasColumnType("decimal(18,2)");
+
                     b.Property<long?>("ProductId")
                         .HasColumnType("bigint");
 
                     b.Property<double>("Quantity")
                         .HasColumnType("float");
 
-                    b.Property<int>("Status")
-                        .HasColumnType("int");
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("varchar(50)");
 
-                    b.Property<int>("Unit")
-                        .HasColumnType("int");
+                    b.Property<string>("Unit")
+                        .IsRequired()
+                        .HasColumnType("varchar(50)");
 
                     b.HasKey("Id");
 
@@ -246,11 +254,11 @@ namespace tlcn_dotnet.Migrations
 
             modelBuilder.Entity("tlcn_dotnet.Entity.ChangePasswordToken", b =>
                 {
-                    b.Property<long>("Id")
+                    b.Property<long?>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("bigint");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"), 1L, 1);
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long?>("Id"), 1L, 1);
 
                     b.Property<long>("AccountId")
                         .HasColumnType("bigint");

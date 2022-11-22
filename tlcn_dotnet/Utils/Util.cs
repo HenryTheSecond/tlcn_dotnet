@@ -1,4 +1,8 @@
-﻿using System.Text.Json.Nodes;
+﻿using System.IdentityModel.Tokens.Jwt;
+using System.Security.Cryptography;
+using System.Text;
+using System.Text.Json.Nodes;
+using tlcn_dotnet.Constant;
 using tlcn_dotnet.Services;
 using tlcn_dotnet.ServicesImpl;
 
@@ -88,6 +92,31 @@ namespace tlcn_dotnet.Utils
                 return Enum.Parse<T>(source, true);
             return (T?)Convert.ChangeType(source, typeof(T));
 
+        }
+
+        public static JwtSecurityToken ReadJwtToken(string authorization)
+        {
+            var jwtToken = authorization.Substring(0, 7).ToLower() == "bearer " ?
+                authorization.ToString().Substring("bearer ".Length) : authorization;
+            var tokenValidator = new JwtSecurityTokenHandler();
+            return tokenValidator.ReadJwtToken(jwtToken);
+        }
+
+        public static string ComputeHMACSHA256(string secret, string message, HashFormat format = HashFormat.HEX, bool isLowerCase = true)
+        {
+            var hmac = new HMACSHA256(Encoding.ASCII.GetBytes(secret));
+            var hash = hmac.ComputeHash(Encoding.ASCII.GetBytes(message));
+
+            string result = string.Empty;
+            if (format == HashFormat.HEX)
+                result = Convert.ToHexString(hash);
+            else if (format == HashFormat.BASE64)
+                result = Convert.ToBase64String(hash);
+            if (isLowerCase)
+                result = result.ToLower();
+            else
+                result = result.ToUpper();
+            return result;
         }
     }
 }

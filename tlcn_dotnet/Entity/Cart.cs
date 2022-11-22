@@ -23,7 +23,7 @@ namespace tlcn_dotnet.Entity
 
         [Column(TypeName = "varchar(20)")]
         public CartStatus Status { get; set; }
-
-        public virtual ICollection<CartDetail> CartDetails { get; set; }
+        public DateTime CreatedDate { get; set; }
+        public virtual IEnumerable<CartDetail> CartDetails { get; set; }
     }
 }

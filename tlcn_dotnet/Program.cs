@@ -8,6 +8,7 @@ using System.Text;
 using tlcn_dotnet;
 using tlcn_dotnet.DatabaseContext;
 using tlcn_dotnet.IRepositories;
+using tlcn_dotnet.IServices;
 using tlcn_dotnet.Repositories;
 using tlcn_dotnet.RepositoriesImpl;
 using tlcn_dotnet.Services;
@@ -41,7 +42,8 @@ builder.Services.AddSwaggerGen(options => {
 });
 
 
-builder.Services.AddAutoMapper(typeof(Program).Assembly); 
+builder.Services.AddAutoMapper(typeof(Program).Assembly);
+builder.Services.AddSingleton<HttpClient>();
 
 //Add services
 builder.Services.AddScoped<ILocationService, LocationService>(); //Should AddSingleton instead maybe
@@ -53,6 +55,10 @@ builder.Services.AddScoped<ISupplierService, SupplierService>();
 builder.Services.AddScoped<IProductService, ProductService>();
 builder.Services.AddScoped<IProductImageService, ProductImageService>();
 builder.Services.AddScoped<IInventoryService, InventoryService>();
+builder.Services.AddScoped<ICartDetailService, CartDetailService>();
+builder.Services.AddScoped<IBillService, BillService>();
+builder.Services.AddScoped<ICartService, CartService>();
+builder.Services.AddScoped<IPaymentService, MomoPaymentService>();
 
 //Add repositories
 builder.Services.AddScoped<IInventoryRepository, InventoryRepository>();
@@ -62,6 +68,10 @@ builder.Services.AddScoped<IProductRepository, ProductRepository>();
 builder.Services.AddScoped<IProductImageRepository, ProductImageRepository>();
 builder.Services.AddScoped<IAccountRepository, AccountRepository>();
 builder.Services.AddScoped<IChangePasswordTokenRepository, ChangePasswordTokenRepository>();
+builder.Services.AddScoped<ICartDetailRepository, CartDetailRepository>();
+builder.Services.AddScoped<ICartRepository, CartRepository>();
+builder.Services.AddScoped<IBillRepository, BillRepository>();
+builder.Services.AddScoped<IBillDetailRepository, BillDetailRepository>();
 
 /*builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options => {

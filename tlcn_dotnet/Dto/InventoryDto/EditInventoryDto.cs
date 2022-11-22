@@ -12,7 +12,7 @@ namespace tlcn_dotnet.Dto.InventoryDto
         public double? Quantity { get; set; }
         public decimal? ImportPrice { get; set; }
         [IsEnum(EnumType = typeof(ProductUnit), ErrorMessage = "UNIT IS INVALID")]
-        public string Unit { get; set; }
+        public ProductUnit Unit { get; set; }
         public DateTime? DeliveryDate { get; set; }
         public DateTime? ExpireDate { get; set; }
         public string Description { get; set; }

@@ -1,20 +1,20 @@
 {
   "format": 1,
   "restore": {
-    "E:\\dotnet\\tlcn_dotnet\\tlcn_dotnet\\tlcn_dotnet.csproj": {}
+    "D:\\testing\\tlcn_dotnet\\tlcn_dotnet\\tlcn_dotnet.csproj": {}
   },
   "projects": {
-    "E:\\dotnet\\tlcn_dotnet\\tlcn_dotnet\\tlcn_dotnet.csproj": {
+    "D:\\testing\\tlcn_dotnet\\tlcn_dotnet\\tlcn_dotnet.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "E:\\dotnet\\tlcn_dotnet\\tlcn_dotnet\\tlcn_dotnet.csproj",
+        "projectUniqueName": "D:\\testing\\tlcn_dotnet\\tlcn_dotnet\\tlcn_dotnet.csproj",
         "projectName": "tlcn_dotnet",
-        "projectPath": "E:\\dotnet\\tlcn_dotnet\\tlcn_dotnet\\tlcn_dotnet.csproj",
-        "packagesPath": "C:\\Users\\tuyen\\.nuget\\packages\\",
-        "outputPath": "E:\\dotnet\\tlcn_dotnet\\tlcn_dotnet\\obj\\",
+        "projectPath": "D:\\testing\\tlcn_dotnet\\tlcn_dotnet\\tlcn_dotnet.csproj",
+        "packagesPath": "C:\\Users\\intern.vctuyen\\.nuget\\packages\\",
+        "outputPath": "D:\\testing\\tlcn_dotnet\\tlcn_dotnet\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
-          "C:\\Users\\tuyen\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Users\\intern.vctuyen\\AppData\\Roaming\\NuGet\\NuGet.Config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
         "originalTargetFrameworks": [
@@ -63,6 +63,10 @@
             "MailKit": {
               "target": "Package",
               "version": "[3.4.2, )"
+            },
+            "Microsoft.AspNet.WebApi.Client": {
+              "target": "Package",
+              "version": "[5.2.9, )"
             },
             "Microsoft.AspNet.WebApi.Core": {
               "target": "Package",
