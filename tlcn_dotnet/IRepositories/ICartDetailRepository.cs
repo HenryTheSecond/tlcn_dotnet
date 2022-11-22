@@ -12,5 +12,7 @@ namespace tlcn_dotnet.IRepositories
         public Task<int> DeleteCartDetailByIdAndAccountId(long id, long accountId);
         public Task<CartDetail> UpdateCartDetailQuantity(long productId, double quantity, long accountId);
         public Task<IEnumerable<CartDetail>> GetCurrentCart(long accountId);
+        public Task<IEnumerable<CartDetail>> GetListCart(long accountId, IList<long> listCartDetailId);
+        public Task<int> InsertPriceAndCartId(long id, decimal price, long cartId);
     }
 }

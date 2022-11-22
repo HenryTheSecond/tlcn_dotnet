@@ -1,5 +1,8 @@
 ﻿using System.IdentityModel.Tokens.Jwt;
+using System.Security.Cryptography;
+using System.Text;
 using System.Text.Json.Nodes;
+using tlcn_dotnet.Constant;
 using tlcn_dotnet.Services;
 using tlcn_dotnet.ServicesImpl;
 
@@ -99,6 +102,21 @@ namespace tlcn_dotnet.Utils
             return tokenValidator.ReadJwtToken(jwtToken);
         }
 
-        
+        public static string ComputeHMACSHA256(string secret, string message, HashFormat format = HashFormat.HEX, bool isLowerCase = true)
+        {
+            var hmac = new HMACSHA256(Encoding.ASCII.GetBytes(secret));
+            var hash = hmac.ComputeHash(Encoding.ASCII.GetBytes(message));
+
+            string result = string.Empty;
+            if (format == HashFormat.HEX)
+                result = Convert.ToHexString(hash);
+            else if (format == HashFormat.BASE64)
+                result = Convert.ToBase64String(hash);
+            if (isLowerCase)
+                result = result.ToLower();
+            else
+                result = result.ToUpper();
+            return result;
+        }
     }
 }

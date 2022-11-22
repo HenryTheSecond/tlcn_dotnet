@@ -42,7 +42,8 @@ builder.Services.AddSwaggerGen(options => {
 });
 
 
-builder.Services.AddAutoMapper(typeof(Program).Assembly); 
+builder.Services.AddAutoMapper(typeof(Program).Assembly);
+builder.Services.AddSingleton<HttpClient>();
 
 //Add services
 builder.Services.AddScoped<ILocationService, LocationService>(); //Should AddSingleton instead maybe
@@ -55,6 +56,9 @@ builder.Services.AddScoped<IProductService, ProductService>();
 builder.Services.AddScoped<IProductImageService, ProductImageService>();
 builder.Services.AddScoped<IInventoryService, InventoryService>();
 builder.Services.AddScoped<ICartDetailService, CartDetailService>();
+builder.Services.AddScoped<IBillService, BillService>();
+builder.Services.AddScoped<ICartService, CartService>();
+builder.Services.AddScoped<IPaymentService, MomoPaymentService>();
 
 //Add repositories
 builder.Services.AddScoped<IInventoryRepository, InventoryRepository>();
@@ -65,6 +69,9 @@ builder.Services.AddScoped<IProductImageRepository, ProductImageRepository>();
 builder.Services.AddScoped<IAccountRepository, AccountRepository>();
 builder.Services.AddScoped<IChangePasswordTokenRepository, ChangePasswordTokenRepository>();
 builder.Services.AddScoped<ICartDetailRepository, CartDetailRepository>();
+builder.Services.AddScoped<ICartRepository, CartRepository>();
+builder.Services.AddScoped<IBillRepository, BillRepository>();
+builder.Services.AddScoped<IBillDetailRepository, BillDetailRepository>();
 
 /*builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options => {

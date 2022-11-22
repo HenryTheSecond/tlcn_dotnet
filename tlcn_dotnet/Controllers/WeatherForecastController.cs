@@ -13,6 +13,7 @@ using CloudinaryDotNet.Actions;
 using System.Drawing;
 using tlcn_dotnet.Dto.ProductDto;
 using tlcn_dotnet.AuthorizationAttributes;
+using tlcn_dotnet.IServices;
 
 namespace tlcn_dotnet.Controllers
 {
@@ -26,10 +27,12 @@ namespace tlcn_dotnet.Controllers
     };
 
         private readonly ILogger<WeatherForecastController> _logger;
+        private readonly IPaymentService _paymentService;
 
-        public WeatherForecastController(ILogger<WeatherForecastController> logger)
+        public WeatherForecastController(ILogger<WeatherForecastController> logger, IPaymentService paymentService)
         {
             _logger = logger;
+            _paymentService = paymentService;
         }
 
         [HttpGet(Name = "GetWeatherForecast")]
@@ -121,6 +124,19 @@ namespace tlcn_dotnet.Controllers
         public IActionResult TestAuthorize(string strId)
         {
             return Ok(true);
+        }
+
+        [HttpGet("testMomo")]
+        public async Task<IActionResult> TestMomo()
+        { 
+            Dictionary<string, object> dict = new Dictionary<string, object>();
+            dict.Add("orderId", "1");
+            dict.Add("amount", 150000);
+            dict.Add("orderInfo", "helloworld");
+            dict.Add("requestId", "1");
+
+            var res = await _paymentService.SendPaymentRequest(dict);
+            return Ok(await res.Content.ReadFromJsonAsync<Dictionary<string, object>>());
         }
     }
 }

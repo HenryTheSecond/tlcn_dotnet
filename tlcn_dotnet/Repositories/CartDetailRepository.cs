@@ -110,6 +110,47 @@ namespace tlcn_dotnet.Repositories
             }
         }
 
+        public async Task<IEnumerable<CartDetail>> GetListCart(long accountId, IList<long> listCartDetailId)
+        {
+            using (var connection = _dapperContext.CreateConnection())
+            {
+                string query = CART_DETAIL_SELECT +
+                    " WHERE CartDetail.Id in @ListId AND CartDetail.AccountId = @AccountId AND CartDetail.CartId IS NULL";
+                var cartDetails = await connection.QueryAsync<CartDetail, Product, Category, ProductImage, CartDetail>(query,
+                    (cartDetail, product, category, productImage) =>
+                    {
+                        if (productImage != null)
+                            product.ProductImages.Add(productImage);
+                        product.Category = category;
+                        cartDetail.Product = product;
+                        cartDetail.ProductId = product.Id;
+                        return cartDetail;
+                    }, splitOn: "Id",
+                    param: new 
+                    {
+                        ListId = listCartDetailId,
+                        AccountId = accountId
+                    });
+                return cartDetails;
+            }
+        }
+
+        public async Task<int> InsertPriceAndCartId(long id, decimal price, long cartId)
+        {
+            using (var connection = _dapperContext.CreateConnection())
+            { 
+                string query = @"UPDATE CartDetail 
+                                SET Price = @Price, CartId = @CartId
+                                WHERE Id = @Id";
+                return await connection.ExecuteAsync(query, new
+                {
+                    Price = price,
+                    CartId = cartId,
+                    Id = id
+                });
+            }
+        }
+
         public async Task<CartDetail> UpdateCartDetailQuantity(long id, double quantity)
         {
             using (var connection = _dapperContext.CreateConnection())

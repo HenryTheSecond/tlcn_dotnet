@@ -14,9 +14,11 @@ namespace tlcn_dotnet.Controllers
     public class CartController : ControllerBase
     {
         private readonly ICartDetailService _cartDetailService;
-        public CartController(ICartDetailService cartDetailService)
+        private readonly ICartService _cartService;
+        public CartController(ICartDetailService cartDetailService, ICartService cartService)
         {
             _cartDetailService = cartDetailService;
+            _cartService = cartService;
         }
 
         [CustomAuthorize]
@@ -48,6 +50,13 @@ namespace tlcn_dotnet.Controllers
         public async Task<DataResponse> GetCurrentCart([FromHeader(Name = "Authorization")] string authorization)
         { 
             return await _cartDetailService.GetCurrentCart(authorization);
+        }
+
+        [CustomAuthorize]
+        [HttpPost("payment")]
+        public async Task<DataResponse> PayCurrentCart([FromHeader(Name = "Authorization")] string authorization, [FromBody] CartPaymentDto cartPaymentDto)
+        {
+            return await _cartService.PayCurrentCart(authorization, cartPaymentDto);
         }
     }
 }
