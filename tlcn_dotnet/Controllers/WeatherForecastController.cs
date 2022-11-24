@@ -136,7 +136,14 @@ namespace tlcn_dotnet.Controllers
             dict.Add("requestId", "1");
 
             var res = await _paymentService.SendPaymentRequest(dict);
-            return Ok(await res.Content.ReadFromJsonAsync<Dictionary<string, object>>());
+            return Ok((await res.Content.ReadFromJsonAsync<Dictionary<string, object>>())["payUrl"]);
+        }
+
+        [HttpPost("testIpn")]
+        public async Task<IActionResult> TestIpn([FromBody] object body)
+        {
+            Console.WriteLine("IPN test successful with data: " + body);
+            return Ok();
         }
     }
 }

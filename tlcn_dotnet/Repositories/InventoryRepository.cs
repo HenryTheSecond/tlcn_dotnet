@@ -19,7 +19,7 @@ namespace tlcn_dotnet.RepositoriesImpl
         private readonly DapperContext _dapperContext;
 
         private readonly string SELECT = @" select i.Id, i.Quantity, i.ImportPrice, i.DeliveryDate, i.ExpireDate, i.Description, i.Unit,
-	                                            p.Id, p.Description, p.MinPurchase, p.Name, p.Price, p.Quantity, p.Unit,
+	                                            p.Id, p.Description, p.MinPurchase, p.Name, p.Price, p.Unit,
 	                                            s.Id, s.Name, s.CountryCode, s.CityCode, s.DetailLocation,
 	                                            c.Id, c.Name,
 	                                            img.Id, img.FileName, img.Url ";
@@ -37,13 +37,10 @@ namespace tlcn_dotnet.RepositoriesImpl
         {
             using (var connection = _dapperContext.CreateConnection())
             {
-                string query = @"Insert into Inventory (ProductId, Quantity, 
-                                                    ImportPrice, DeliveryDate, ExpireDate, 
-                                                    Description, SupplierId, Unit)
-                                OUTPUT inserted.Id
-                                values (@ProductId, @Quantity, @ImportPrice, 
-                                        @DeliveryDate, @ExpireDate, @Description, 
-                                        @SupplierId, @Unit)";
+                string query = @"EXEC sp_InsertInventory
+                                @ProductId, @Quantity, @ImportPrice, 
+                                @DeliveryDate, @ExpireDate, @Description, 
+                                @SupplierId, @Unit";
                 DynamicParameters parameters = new DynamicParameters(addInventoryDto);
                 parameters.Add("Unit", addInventoryDto.Unit.GetDisplayName());
                 long id = await connection.ExecuteScalarAsync<long>(query, parameters);
@@ -201,12 +198,10 @@ namespace tlcn_dotnet.RepositoriesImpl
         {
             using (var connection = _dapperContext.CreateConnection())
             {
-                string query = @"UPDATE Inventory 
-                                SET ProductId = @ProductId, Quantity = @Quantity, 
-                                    ImportPrice = @ImportPrice, Unit = @Unit,
-                                    DeliveryDate = @DeliveryDate, ExpireDate = @ExpireDate,
-                                    Description = @Description, SupplierId = @SupplierId
-                                WHERE Id = @Id";
+                string query = @"EXEC sp_UpdateInventory 
+                                    @Id, @ProductId, @Quantity, @ImportPrice, @Unit,
+                                    @DeliveryDate, @ExpireDate,
+                                    @Description, @SupplierId ";
                 DynamicParameters parameters = new DynamicParameters(editInventoryDto);
                 parameters.Add("Id", id);
                 parameters.Add("Unit", editInventoryDto.Unit.GetDisplayName());

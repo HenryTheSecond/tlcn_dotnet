@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using tlcn_dotnet.Constant;
+using tlcn_dotnet.CustomException;
 using tlcn_dotnet.Dto.BillDto;
 using tlcn_dotnet.Entity;
 using tlcn_dotnet.IRepositories;
@@ -12,11 +13,20 @@ namespace tlcn_dotnet.Services
         private readonly IBillRepository _billRepository;
         private readonly IBillDetailRepository _billDetailRepository;
         private readonly IMapper _mapper;
-        public BillService(IBillRepository billRepository, IBillDetailRepository billDetailRepository, IMapper mapper)
+        private readonly IPaymentService _momoPaymentService;
+        public BillService(IBillRepository billRepository, IBillDetailRepository billDetailRepository, IMapper mapper, IPaymentService momoPaymentService)
         {
             _billRepository = billRepository;
             _billDetailRepository = billDetailRepository;
             _mapper = mapper;
+            _momoPaymentService = momoPaymentService;
+        }
+
+        public async Task<DataResponse> BillPaying(long id)
+        {
+            Bill bill = await _billRepository.UpdatePurchaseDate(id, DateTime.Now)
+                ?? throw new GeneralException("BILL NOT FOUND", ApplicationConstant.NOT_FOUND_CODE);
+            return new DataResponse(_mapper.Map<SimpleBillDto>(bill));
         }
 
         public async Task<DataResponse> CreateBill(IEnumerable<CartDetail> cartDetails, PaymentMethod paymentMethod)
@@ -24,23 +34,47 @@ namespace tlcn_dotnet.Services
             decimal total = CalculateCart(cartDetails);
             long billId = await _billRepository.InsertBill(total, paymentMethod);
             List<BillDetail> billDetails = new List<BillDetail>();
+            List<Task<long>> insertBillDetailTasks = new List<Task<long>>();
             foreach (CartDetail cartDetail in cartDetails)
             {
-                _billDetailRepository.InsertBillDetail(new BillDetail()
-                {
-                    BillId = billId,
-                    ProductId = cartDetail.ProductId,
-                    Unit = cartDetail.Unit,
-                    Quantity = cartDetail.Quantity,
-                    Price = cartDetail.Price.Value
-                });
+                insertBillDetailTasks.Add
+                    (
+                        _billDetailRepository.InsertBillDetail(new BillDetail()
+                        {
+                            BillId = billId,
+                            ProductId = cartDetail.ProductId,
+                            Unit = cartDetail.Unit,
+                            Quantity = cartDetail.Quantity,
+                            Price = cartDetail.Price.Value
+                        })
+                    );
             }
+            await Task.WhenAll(insertBillDetailTasks);
             Bill bill = new Bill()
             {
                 Total = total,
                 Id = billId,
                 PaymentMethod = paymentMethod
             };
+
+            if (paymentMethod == PaymentMethod.MOMO)
+            {
+                DateTime now = DateTime.Now;
+                Bill billDb = await _billRepository.UpdatePurchaseDate(billId, now);
+                Dictionary<string, object> momoRequestParameters = new Dictionary<string, object>();
+                momoRequestParameters.Add("orderId", billDb.Id.ToString() + "_" + now.Ticks.ToString());
+                momoRequestParameters.Add("amount", billDb.Total.Value);
+                momoRequestParameters.Add("orderInfo", "Thanks for buying at One Winged Angel Fruit Shop");
+                momoRequestParameters.Add("requestId", billDb.Id.ToString() + "_" + now.Ticks.ToString());
+                HttpResponseMessage response = await _momoPaymentService.SendPaymentRequest(momoRequestParameters);
+                SimpleBillDto payingMomoBill = _mapper.Map<SimpleBillDto>(billDb);
+                return new DataResponse(new PayingMomoBill()
+                { 
+                    Bill = payingMomoBill,
+                    MomoPaymentLink = (await response.Content.ReadFromJsonAsync<Dictionary<string, object>>())["payUrl"].ToString()
+                });
+            }
+
             return new DataResponse(_mapper.Map<SimpleBillDto>(bill));
         }
 

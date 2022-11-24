@@ -52,7 +52,6 @@ namespace tlcn_dotnet.ServicesImpl
 
             product.Name = editProductDto.Name;
             product.Price = editProductDto.Price != null ? editProductDto.Price : product.Price;
-            product.Quantity = editProductDto.Quantity != null ? editProductDto.Quantity : product.Quantity;
             product.Unit = editProductDto.Unit;
             product.MinPurchase = editProductDto.MinPurchase != null ? editProductDto.MinPurchase : product.MinPurchase;
             product.Status = editProductDto.Status;

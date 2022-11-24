@@ -1,4 +1,7 @@
-﻿using tlcn_dotnet.IServices;
+﻿using Newtonsoft.Json;
+using System.Net.Http.Headers;
+using System.Text;
+using tlcn_dotnet.IServices;
 using tlcn_dotnet.Utils;
 
 namespace tlcn_dotnet.Services
@@ -35,15 +38,22 @@ namespace tlcn_dotnet.Services
             parameters.Add("extraData", "");
             parameters.Add("signature", GenerateSignature(parameters));
 
-            _httpClient.BaseAddress = new Uri(_apiEndPoint);
-            HttpResponseMessage response = await _httpClient.PostAsJsonAsync("", parameters);
+            /*_httpClient.BaseAddress = new Uri(_apiEndPoint);
+            HttpResponseMessage response = await _httpClient.PostAsJsonAsync("", parameters);*/
+
+            var request = new HttpRequestMessage(HttpMethod.Post, _apiEndPoint);
+            request.Headers.Accept.Clear();
+            request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+            request.Content = new StringContent(JsonConvert.SerializeObject(parameters), Encoding.UTF8, "application/json");
+            var response = await _httpClient.SendAsync(request, CancellationToken.None);
+
             return response;
         }
 
         private string GenerateSignature(Dictionary<string, object> parameters)
         {
             string message = $"accessKey={_accessKey}" +
-                $"&amount={parameters["amount"]}" +
+                $"&amount={decimal.Truncate((decimal)parameters["amount"])}" +
                 $"&extraData=" +
                 $"&ipnUrl={parameters["ipnUrl"]}" +
                 $"&orderId={parameters["orderId"]}" +
