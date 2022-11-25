@@ -20,5 +20,6 @@ namespace tlcn_dotnet.Dto
         public DateTime CreatedDate { get; set; }
         public IEnumerable<CartDetailResponse> CartDetails { get; set; }
         public SimpleBillDto Bill { get; set; }
+        public string PaymentUrl { get; set; }
     }
 }

@@ -22,8 +22,6 @@ namespace tlcn_dotnet.Entity
 
         public Decimal? Price { get; set; }
 
-        public double? Quantity { get; set; }
-
         [Column(TypeName = "varchar(255)")]
         public ProductUnit Unit { get; set; }
 

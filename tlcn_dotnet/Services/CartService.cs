@@ -41,7 +41,16 @@ namespace tlcn_dotnet.Services
 
             IEnumerable<CartDetail> cartDetails = await _cartDetailRepository.GetListCart((long)accountId, cartPaymentDto.ListCartDetailId);
 
-            SimpleBillDto simpleBillDto = (SimpleBillDto)(await _billService.CreateBill(cartDetails, cartPaymentDto.PaymentMethod)).Data;
+            SimpleBillDto simpleBillDto = null;
+            string paymentUrl = null;
+            var createBillResponseData = (await _billService.CreateBill(cartDetails, cartPaymentDto.PaymentMethod)).Data;
+            if (createBillResponseData.GetType() == typeof(SimpleBillDto))
+                simpleBillDto = (SimpleBillDto)createBillResponseData;
+            else 
+            {
+                simpleBillDto = ((PayingMomoBill)createBillResponseData).Bill;
+                paymentUrl = ((PayingMomoBill)createBillResponseData).MomoPaymentLink;
+            }
             Cart cart = new Cart()
             {
                 BillId = simpleBillDto.Id,
@@ -68,6 +77,7 @@ namespace tlcn_dotnet.Services
 
             CartResponse cartResponse = _mapper.Map<CartResponse>(cart);
             cartResponse.Bill = simpleBillDto;
+            cartResponse.PaymentUrl = paymentUrl;
 
             return new DataResponse(cartResponse);
         }

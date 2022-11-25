@@ -1,5 +1,6 @@
 ﻿using CloudinaryDotNet;
 using Dapper;
+using System.Data;
 using System.Reflection.Metadata.Ecma335;
 using tlcn_dotnet.Constant;
 using tlcn_dotnet.CustomException;
@@ -13,7 +14,7 @@ namespace tlcn_dotnet.Repositories
     public class CartDetailRepository : ICartDetailRepository
     {
         private readonly string CART_DETAIL_SELECT = @"SELECT CartDetail.Id, CartDetail.Price, CartDetail.Status, CartDetail.Unit, CartDetail.Quantity,
-		                                                        Product.Id, Product.Name, Product.Price, Product.Quantity, Product.Unit, Product.MinPurchase, Product.Status, Product.Description,
+		                                                        Product.Id, Product.Name, Product.Price, Product.Unit, Product.MinPurchase, Product.Status, Product.Description,
 		                                                        Category.Id, Category.Name,
 		                                                        Image.Id, Image.Url, Image.FileName
                                                         FROM ((CartDetail left outer join Product on CartDetail.ProductId = Product.Id)
@@ -29,10 +30,13 @@ namespace tlcn_dotnet.Repositories
         {
             using (var connection = _dapperContext.CreateConnection())
             {
-                string query = @"INSERT INTO CartDetail(Status, Unit, Quantity, ProductId, AccountId)
+                /*string query = @"INSERT INTO CartDetail(Status, Unit, Quantity, ProductId, AccountId)
                                     OUTPUT INSERTED.Id
                                     VALUES (@Status, @Unit, @Quantity, @ProductId, @AccountId)";
-                long id = await connection.ExecuteScalarAsync<long>(query, new DynamicParameters(parameters));
+                long id = await connection.ExecuteScalarAsync<long>(query, new DynamicParameters(parameters));*/
+
+                string procedure = "sp_InsertCartDetail";
+                long id = await connection.ExecuteScalarAsync<long>(procedure, new DynamicParameters(parameters), commandType: CommandType.StoredProcedure);
                 return await GetById(id);
             }
         }
@@ -41,15 +45,14 @@ namespace tlcn_dotnet.Repositories
         {
             using (var connection = _dapperContext.CreateConnection())
             {
-                string query = @"SELECT CartDetail.Id 
-                                FROM CartDetail 
-                                WHERE AccountId = @AccountId AND ProductId = @ProductId AND CartId IS NULL";
+                string procedure = @"sp_CheckCurrentCartHavingProduct";
 
-                long id = await connection.ExecuteScalarAsync<long>(query, new
+                long id = await connection.ExecuteScalarAsync<long>(procedure, new
                 {
                     AccountId = accountId,
                     ProductId = productId
-                });
+                },
+                commandType: CommandType.StoredProcedure);
                 return id;
             }
         }
@@ -58,13 +61,13 @@ namespace tlcn_dotnet.Repositories
         {
             using (var connection = _dapperContext.CreateConnection())
             {
-                string query = @"DELETE FROM CartDetail
-                                WHERE Id = @Id AND AccountId = AccountId AND CartId IS NULL";
-                return await connection.ExecuteAsync(query, new
+                string procedure = "sp_DeleteCartDetailByIdAndAccountId";
+                return await connection.ExecuteAsync(procedure, new
                 {
                     Id = id,
                     AccountId = accountId
-                });
+                },
+                commandType: CommandType.StoredProcedure);
             }
         }
 

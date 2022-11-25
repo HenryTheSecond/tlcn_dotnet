@@ -14,14 +14,12 @@ namespace tlcn_dotnet.Dto.ProductDto
         [Required]
         public string Name { get; set; }
 
-        [Range(1, Double.MaxValue)]
+        [Range(1, Double.PositiveInfinity, ErrorMessage = "PRICE IS INVALID")]
         public Decimal? Price { get; set; }
 
-        [Range(0, Double.MaxValue)]
-        public double? Quantity { get; set; }
         public ProductUnit Unit { get; set; }
 
-        [Range(0, Double.MaxValue)]
+        [Range(0, Double.PositiveInfinity, ErrorMessage = "MIN PURCHASE IS INVALID")]
         public double? MinPurchase { get; set; } = 0;
         public ProductStatus Status { get; set; }
         public string? Description { get; set; }
