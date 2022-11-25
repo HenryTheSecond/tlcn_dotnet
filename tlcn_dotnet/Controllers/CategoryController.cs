@@ -21,8 +21,6 @@ namespace tlcn_dotnet.Controllers
         }
 
         [HttpGet]
-        [CustomAuthorize(Roles = "ROLE_ADMIN")]
-        //[Authorize(Roles = "ROLE_ADMIN")]
         public async Task<DataResponse> GetAllCategory()
         {
             return await _categoryService.GetAllCategory();
