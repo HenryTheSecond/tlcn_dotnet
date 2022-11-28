@@ -21,9 +21,11 @@ namespace tlcn_dotnet.Mapper
 
             CreateMap<RegisterAccountDto, Account>();
             CreateMap<Account, AccountResponse>();
+            CreateMap<Account, AccountReviewDto>();
 
             CreateMap<Supplier, SimpleSupplierDto>();
             CreateMap<AddSupplierDto, Supplier>();
+            CreateMap<Supplier, SupplierIdAndName>();
 
             CreateMap<AddProductDto, Product>();
             CreateMap<Product, SimpleProductDto>();
@@ -43,8 +45,8 @@ namespace tlcn_dotnet.Mapper
                         Url = image.Url
                     };
                 });
-
             CreateMap<ProductImage, SimpleProductImageDto>();
+            CreateMap<Product, ProductIdAndNameDto>();
 
             CreateMap<Inventory, SimpleInventoryDto>();
 

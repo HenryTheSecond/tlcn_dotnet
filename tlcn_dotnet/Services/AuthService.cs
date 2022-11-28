@@ -69,7 +69,9 @@ namespace tlcn_dotnet.ServicesImpl
                 new Claim("districtId", account.DistrictId),
                 new Claim("wardId", account.WardId),
                 new Claim("detailLocation", account.DetailLocation),
-                new Claim("verifyToken", account.VerifyToken)
+                new Claim("verifyToken", account.VerifyToken),
+                new Claim("firstName", account.FirstName),
+                new Claim("lastName", account.LastName)
             };
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration.GetSection("Jwt:Key").Value));
             var cred = new SigningCredentials(key, SecurityAlgorithms.HmacSha512Signature);

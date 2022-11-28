@@ -1,7 +1,9 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using Microsoft.EntityFrameworkCore;
+using System.ComponentModel.DataAnnotations;
 
 namespace tlcn_dotnet.Entity
 {
+    [Index(nameof(ProductId), nameof(AccountId), IsUnique = true)]
     public class Review
     {
         [Key]
@@ -9,11 +11,13 @@ namespace tlcn_dotnet.Entity
         public string Content { get; set; }
 
         public virtual Account Account { get; set; }
+        public long AccountId { get; set; }
 
         public double? Rating { get; set; }
 
         public DateTime PostDate { get; set; }
 
         public Product Product { get; set; }
+        public long ProductId { get; set; }
     }
 }

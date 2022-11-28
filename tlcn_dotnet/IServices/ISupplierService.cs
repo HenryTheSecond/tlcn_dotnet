@@ -8,5 +8,6 @@ namespace tlcn_dotnet.Services
         public Task<DataResponse> AddSupplier(AddSupplierDto addSupplierDto);
         public Task<DataResponse> DeleteSupplier(long? id);
         public Task<DataResponse> EditSupplier(long? id, SimpleSupplierDto simpleSupplierDto);
+        public Task<DataResponse> GetAllSupplierIdAndName();
     }
 }

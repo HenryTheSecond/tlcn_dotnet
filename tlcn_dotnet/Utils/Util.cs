@@ -1,8 +1,10 @@
 ﻿using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json.Nodes;
 using tlcn_dotnet.Constant;
+using tlcn_dotnet.Entity;
 using tlcn_dotnet.Services;
 using tlcn_dotnet.ServicesImpl;
 
@@ -100,6 +102,35 @@ namespace tlcn_dotnet.Utils
                 authorization.ToString().Substring("bearer ".Length) : authorization;
             var tokenValidator = new JwtSecurityTokenHandler();
             return tokenValidator.ReadJwtToken(jwtToken);
+        }
+
+        public static long ReadJwtTokenAndGetAccountId(string authorization)
+        { 
+            JwtSecurityToken jwtToken = ReadJwtToken(authorization);
+            object accountId;
+            jwtToken.Payload.TryGetValue("userId", out accountId);
+            return Convert.ToInt64(accountId);
+        }
+
+        public static Account ReadJwtTokenAndParseToAccount(string authorization)
+        {
+            Account account = new Account();
+            JwtSecurityToken jwtToken = ReadJwtToken(authorization);
+
+            account.Id = Convert.ToInt64(jwtToken.Payload["userId"]);
+            account.Email = (string)jwtToken.Payload[ClaimTypes.Email];
+            account.Role = Enum.Parse<Role>(jwtToken.Payload[ClaimTypes.Role].ToString());
+            account.Phone = (string?)jwtToken.Payload[ClaimTypes.MobilePhone];
+            account.Status = Enum.Parse<UserStatus>(jwtToken.Payload["status"].ToString());
+            account.CityId = (string?)jwtToken.Payload["cityId"];
+            account.DistrictId = (string?)jwtToken.Payload["districtId"];
+            account.WardId = (string?)jwtToken.Payload["wardId"];
+            account.DetailLocation = (string?)jwtToken.Payload["detailLocation"];
+            account.VerifyToken = (string?)jwtToken.Payload["verifyToken"];
+            account.FirstName = (string)jwtToken.Payload["firstName"];
+            account.LastName = (string)jwtToken.Payload["lastName"];
+
+            return account;
         }
 
         public static string ComputeHMACSHA256(string secret, string message, HashFormat format = HashFormat.HEX, bool isLowerCase = true)

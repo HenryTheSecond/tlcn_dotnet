@@ -98,5 +98,11 @@ namespace tlcn_dotnet.Controllers
 
             return await _productService.DeleteProduct(id);
         }
+
+        [HttpGet("GetAllProductIdAndNam")]
+        public async Task<DataResponse> GetAllProductIdAndName()
+        {
+            return await _productService.GetAllProductIdAndName();
+        }
     }
 }

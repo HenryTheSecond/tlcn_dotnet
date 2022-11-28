@@ -48,5 +48,11 @@ namespace tlcn_dotnet.Controllers
                 throw new GeneralException(ApplicationConstant.INVALID_ID, ApplicationConstant.BAD_REQUEST_CODE);
             return await _supplierService.EditSupplier(id, simpleSupplierDto);
         }
+
+        [HttpGet("GetAllSupplierIdAndName")]
+        public async Task<DataResponse> GettAllSupplierIdAndName()
+        {
+            return await _supplierService.GetAllSupplierIdAndName();
+        }
     }
 }

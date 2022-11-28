@@ -59,5 +59,11 @@ namespace tlcn_dotnet.ServicesImpl
             supplierDb = await _supplierRepository.Update(supplierDb);
             return new DataResponse(_mapper.Map<SimpleSupplierDto>(supplierDb));
         }
+
+        public async Task<DataResponse> GetAllSupplierIdAndName()
+        {
+            IEnumerable<Supplier> suppliers = await _supplierRepository.GetAll();
+            return new DataResponse(_mapper.Map<IEnumerable<SupplierIdAndName>>(suppliers));
+        }
     }
 }

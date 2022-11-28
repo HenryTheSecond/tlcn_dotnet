@@ -80,6 +80,13 @@ namespace tlcn_dotnet.ServicesImpl
             });
         }
 
+        public async Task<DataResponse> GetAllProductIdAndName()
+        {
+            var products = await _productRepository.GetAll();
+            return new DataResponse
+                (_mapper.Map<IEnumerable<ProductIdAndNameDto>>(products));
+        }
+
         public async Task<DataResponse> GetProductById(long? id)
         {
             Product product = await _productRepository.GetProductWithImageById(id);

@@ -59,6 +59,7 @@ builder.Services.AddScoped<ICartDetailService, CartDetailService>();
 builder.Services.AddScoped<IBillService, BillService>();
 builder.Services.AddScoped<ICartService, CartService>();
 builder.Services.AddScoped<IPaymentService, MomoPaymentService>();
+builder.Services.AddScoped<IReviewService, ReviewService>();
 
 //Add repositories
 builder.Services.AddScoped<IInventoryRepository, InventoryRepository>();
@@ -72,6 +73,7 @@ builder.Services.AddScoped<ICartDetailRepository, CartDetailRepository>();
 builder.Services.AddScoped<ICartRepository, CartRepository>();
 builder.Services.AddScoped<IBillRepository, BillRepository>();
 builder.Services.AddScoped<IBillDetailRepository, BillDetailRepository>();
+builder.Services.AddScoped<IReviewRepository, ReviewRepository>();
 
 /*builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options => {

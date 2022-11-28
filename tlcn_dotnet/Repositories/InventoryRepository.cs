@@ -53,7 +53,7 @@ namespace tlcn_dotnet.RepositoriesImpl
             using (var connection = _dapperContext.CreateConnection())
             {
                 string query = @"select i.Id, i.Quantity, i.ImportPrice, i.DeliveryDate, i.ExpireDate, i.Description, i.Unit,
-	                                    p.Id, p.Description, p.MinPurchase, p.Name, p.Price, p.Quantity, p.Unit,
+	                                    p.Id, p.Description, p.MinPurchase, p.Name, p.Price, p.Unit,
 	                                    s.Id, s.Name, s.CountryCode, s.CityCode, s.DetailLocation,
 	                                    c.Id, c.Name,
 	                                    img.Id, img.FileName, img.Url
