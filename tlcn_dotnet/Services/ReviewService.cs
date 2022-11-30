@@ -23,10 +23,18 @@ namespace tlcn_dotnet.Services
             _productRepository = productRepository;
         }
 
-        /*public Task<DataResponse> GetAllProductReview(long id)
+        public async Task<DataResponse> GetAllProductReview(long productId, int page = 1, int pageSize = 5)
         {
-            throw new NotImplementedException();
-        }*/
+            var reviews = await _reviewRepository.GetAllProductReview(productId, page, pageSize);
+            var count = await _reviewRepository.CountProductReview(productId);
+            var reviewResponses = _mapper.Map<IEnumerable<ReviewResponse>>(reviews);
+            return new DataResponse(new 
+            {
+                reviews = reviewResponses,
+                maxPage = Util.CalculateMaxPage(count, pageSize),
+                currentPage = page
+            });
+        }
         public async Task<DataResponse> ReviewProduct(string authorization, long productId, ReviewRequest reviewRequest)
         {
             /*Product product = await _productRepository.GetById(productId)

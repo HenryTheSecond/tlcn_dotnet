@@ -4,7 +4,7 @@ namespace tlcn_dotnet.IServices
 {
     public interface IReviewService
     {
-        //public Task<DataResponse> GetAllProductReview(long id);
+        public Task<DataResponse> GetAllProductReview(long productId, int page = 1, int pageSize = 5);
         public Task<DataResponse> ReviewProduct(string authorization, long productId, ReviewRequest reviewRequest);
     }
 }

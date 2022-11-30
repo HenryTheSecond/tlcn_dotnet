@@ -18,14 +18,25 @@ namespace tlcn_dotnet.Controllers
         {
             _reviewService = reviewService;
         }
-        /*[HttpGet("product/{strId}")]
-        public Task<DataResponse> GetAllProductReview(string strId)
+
+        [HttpGet("product/{strId}")]
+        public async Task<DataResponse> GetAllProductReview(string strId, string? page = "1", string? pageSize = "5")
         {
-            long? id = Util.ParseId(strId) ??
+            long? productId = Util.ParseId(strId) ??
                 throw new GeneralException(ApplicationConstant.INVALID_ID, ApplicationConstant.BAD_REQUEST_CODE);
-
-
-        }*/
+            int numberPage = 1;
+            int numberPageSize = 5;
+            if (int.TryParse(page, out numberPage) && int.TryParse(pageSize, out numberPageSize))
+            {
+                numberPage = numberPage < 1 ? 1 : numberPage;
+                numberPageSize = numberPageSize < 1 ? 5 : numberPageSize;
+            }
+            else
+            {
+                throw new GeneralException(ApplicationConstant.BAD_REQUEST, ApplicationConstant.BAD_REQUEST_CODE);
+            }
+            return await _reviewService.GetAllProductReview(productId.Value, numberPage, numberPageSize);
+        }
 
         [HttpPost("product/{strId}")]
         [CustomAuthorize]

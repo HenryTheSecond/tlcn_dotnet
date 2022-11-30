@@ -5,8 +5,8 @@ namespace tlcn_dotnet.IRepositories
 {
     public interface IReviewRepository
     {
-        //public IEnumerable<Review> GetAllProductReview(long id);
-
+        public Task<IEnumerable<Review>> GetAllProductReview(long productId, int page = 1, int pageSize = 5);
+        public Task<long> CountProductReview(long productId);
         public Task<long> InsertReview(long accountId, long productId, ReviewRequest reviewRequest);
     }
 }
