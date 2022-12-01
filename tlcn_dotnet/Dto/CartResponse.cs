@@ -12,6 +12,7 @@ namespace tlcn_dotnet.Dto
     {
         public long? Id { get; set; }
         public string Phone { get; set; }
+        public string Name { get; set; }
         public string CityId { get; set; }
         public string DistrictId { get; set; }
         public string WardId { get; set; }

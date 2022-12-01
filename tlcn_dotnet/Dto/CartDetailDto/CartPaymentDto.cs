@@ -8,6 +8,8 @@ namespace tlcn_dotnet.Dto.CartDetailDto
         [Phone]
         public string Phone { get; set; }
         [Required]
+        public string Name { get; set; }
+        [Required]
         public string CityId { get; set; }
         [Required]
         public string DistrictId { get; set; }

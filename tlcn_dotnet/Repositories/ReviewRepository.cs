@@ -27,6 +27,30 @@ namespace tlcn_dotnet.Repositories
             }
         }
 
+        public async Task<int> DeleteReview(long id, long accountId)
+        {
+            using (var connection = _dapperContext.CreateConnection())
+            {
+                string procedure = "sp_DeleteReview";
+                int affectedRow = await connection.ExecuteAsync(procedure,
+                    new { Id = id, AccountId = accountId }, commandType: CommandType.StoredProcedure);
+                return affectedRow;
+            }
+        }
+
+        public async Task<Review> EditReview(long accountId, long id, ReviewRequest reviewRequest)
+        {
+            using (var connection = _dapperContext.CreateConnection())
+            {
+                string procedure = "sp_EditReview";
+                DynamicParameters parameters = new DynamicParameters(reviewRequest);
+                parameters.Add("Id", id);
+                parameters.Add("AccountId", accountId);
+                var review = await connection.QuerySingleOrDefaultAsync<Review>(procedure, parameters, commandType: CommandType.StoredProcedure);
+                return review;
+            }
+        }
+
         public async Task<IEnumerable<Review>> GetAllProductReview(long productId, int page = 1, int pageSize = 5)
         {
             using (var connection = _dapperContext.CreateConnection())

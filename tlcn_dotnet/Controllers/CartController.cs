@@ -4,6 +4,7 @@ using tlcn_dotnet.AuthorizationAttributes;
 using tlcn_dotnet.Constant;
 using tlcn_dotnet.CustomException;
 using tlcn_dotnet.Dto.CartDetailDto;
+using tlcn_dotnet.Dto.CartDto;
 using tlcn_dotnet.IServices;
 using tlcn_dotnet.Utils;
 
@@ -57,6 +58,16 @@ namespace tlcn_dotnet.Controllers
         public async Task<DataResponse> PayCurrentCart([FromHeader(Name = "Authorization")] string authorization, [FromBody] CartPaymentDto cartPaymentDto)
         {
             return await _cartService.PayCurrentCart(authorization, cartPaymentDto);
+        }
+
+        [CustomAuthorize(Roles = "ROLE_ADMIN, ROLE_EMPLOYEE")]
+        [HttpPut("processCart/{strId}")]
+        public async Task<DataResponse> ProcessCart([FromHeader(Name = "Authorization")] string authorization,
+            string strId, [FromBody] ProcessCartDto processCartDto)
+        {
+            long? id = Util.ParseId(strId) ??
+                throw new GeneralException(ApplicationConstant.INVALID_ID, ApplicationConstant.BAD_REQUEST_CODE);
+            return await _cartService.ProcessCart(authorization, id.Value, processCartDto);
         }
     }
 }

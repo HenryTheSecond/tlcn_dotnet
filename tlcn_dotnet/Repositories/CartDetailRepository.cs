@@ -92,7 +92,7 @@ namespace tlcn_dotnet.Repositories
             }
         }
 
-        public async Task<IEnumerable<CartDetail>> GetCurrentCart(long accountId)
+        public async Task<IList<CartDetail>> GetCurrentCart(long accountId)
         {
             using (var connection = _dapperContext.CreateConnection())
             {
@@ -108,12 +108,12 @@ namespace tlcn_dotnet.Repositories
                         return cartDetail;
                     }, splitOn: "Id",
                     param: new { AccountId = accountId});
-                return cartDetails;
+                return cartDetails.ToList();
 
             }
         }
 
-        public async Task<IEnumerable<CartDetail>> GetListCart(long accountId, IList<long> listCartDetailId)
+        public async Task<IList<CartDetail>> GetListCart(long accountId, IList<long> listCartDetailId)
         {
             using (var connection = _dapperContext.CreateConnection())
             {
@@ -134,7 +134,7 @@ namespace tlcn_dotnet.Repositories
                         ListId = listCartDetailId,
                         AccountId = accountId
                     });
-                return cartDetails;
+                return cartDetails.ToList();
             }
         }
 

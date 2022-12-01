@@ -23,6 +23,25 @@ namespace tlcn_dotnet.Services
             _productRepository = productRepository;
         }
 
+        public async Task<DataResponse> DeleteReview(string authorization, long id)
+        {
+            long accountId = Util.ReadJwtTokenAndGetAccountId(authorization);
+            int affectedRow = await _reviewRepository.DeleteReview(id, accountId);
+            if (affectedRow == 0)
+                throw new GeneralException("REVIEW NOT FOUND", ApplicationConstant.NOT_FOUND_CODE);
+            return new DataResponse(true);
+        }
+
+        public async Task<DataResponse> EditReview(string authorization, long id, ReviewRequest reviewRequest)
+        {
+            long accountId = Util.ReadJwtTokenAndGetAccountId(authorization);
+            Review review = await _reviewRepository.EditReview(accountId, id, reviewRequest)
+                ?? throw new GeneralException("REVIEW NOT FOUND", ApplicationConstant.NOT_FOUND_CODE);
+
+            review.Account = Util.ReadJwtTokenAndParseToAccount(authorization);
+            return new DataResponse(_mapper.Map<ReviewResponse>(review));
+        }
+
         public async Task<DataResponse> GetAllProductReview(long productId, int page = 1, int pageSize = 5)
         {
             var reviews = await _reviewRepository.GetAllProductReview(productId, page, pageSize);

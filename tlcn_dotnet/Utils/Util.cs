@@ -4,6 +4,7 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json.Nodes;
 using tlcn_dotnet.Constant;
+using tlcn_dotnet.Dto.LocationDto;
 using tlcn_dotnet.Entity;
 using tlcn_dotnet.Services;
 using tlcn_dotnet.ServicesImpl;
@@ -75,6 +76,36 @@ namespace tlcn_dotnet.Utils
                 }
             }
             return "Country Code is invalid";
+        }
+
+        public static async Task<VietnamLocationDto> FindVietnamLocation(string cityId, string districtId, string wardId)
+        {
+            VietnamLocationDto location = new VietnamLocationDto();
+            JsonNode vietnameseLocation = (JsonNode)(await _locationService.GetVietnamLocation()).Data;
+            foreach (JsonNode city in vietnameseLocation.AsArray())
+            {
+                if (cityId == city["level1_id"].ToString())
+                {
+                    location.City = city["name"].ToString();
+                    foreach (JsonNode district in city["level2s"].AsArray())
+                    {
+                        if (districtId == district["level2_id"].ToString())
+                        {
+                            location.District = district["name"].ToString();
+                            foreach (JsonNode ward in district["level3s"].AsArray())
+                            {
+                                if (wardId == ward["level3_id"].ToString())
+                                {
+                                    location.Ward = ward["name"].ToString();
+                                    return location;
+                                }
+                            }
+                        }
+                    }
+                }
+
+            }
+            return null;
         }
 
         public static long CalculateMaxPage(long quantity, int pageSize)

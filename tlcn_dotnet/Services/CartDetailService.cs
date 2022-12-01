@@ -80,9 +80,9 @@ namespace tlcn_dotnet.Services
             jwtToken.Payload.TryGetValue("userId", out accountId);
             accountId = Convert.ToInt64(accountId);
 
-            IEnumerable<CartDetail> cartDetails = await _cartDetailRepository.GetCurrentCart((long)accountId);
+            IList<CartDetail> cartDetails = await _cartDetailRepository.GetCurrentCart((long)accountId);
 
-            return new DataResponse(_mapper.Map<IEnumerable<CartDetailResponse>>(cartDetails));
+            return new DataResponse(_mapper.Map<IList<CartDetailResponse>>(cartDetails));
         }
 
         public async Task<DataResponse> UpdateCartDetailQuantity(string authorization, UpdateCartDetailQuantityDto updateCartDetailQuantityDto)

@@ -60,6 +60,7 @@ builder.Services.AddScoped<IBillService, BillService>();
 builder.Services.AddScoped<ICartService, CartService>();
 builder.Services.AddScoped<IPaymentService, MomoPaymentService>();
 builder.Services.AddScoped<IReviewService, ReviewService>();
+builder.Services.AddScoped<IDeliveryService, GhnDeliveryService>();
 
 //Add repositories
 builder.Services.AddScoped<IInventoryRepository, InventoryRepository>();

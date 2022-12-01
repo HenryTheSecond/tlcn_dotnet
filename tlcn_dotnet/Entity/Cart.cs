@@ -13,6 +13,7 @@ namespace tlcn_dotnet.Entity
         public long? BillId { get; set; }
 
         public string Phone { get; set; }
+        public string Name { get; set; }
 
         public string CityId { get; set; }
         public string DistrictId { get; set; }
@@ -24,6 +25,9 @@ namespace tlcn_dotnet.Entity
         [Column(TypeName = "varchar(20)")]
         public CartStatus Status { get; set; }
         public DateTime CreatedDate { get; set; }
-        public virtual IEnumerable<CartDetail> CartDetails { get; set; }
+        public virtual IList<CartDetail> CartDetails { get; set; }
+
+        public string? ProcessDescription { get; set; }
+        public Account? ProcessAccount { get; set; }
     }
 }
