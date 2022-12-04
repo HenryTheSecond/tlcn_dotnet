@@ -78,6 +78,11 @@ namespace tlcn_dotnet.Services
             return new DataResponse(_mapper.Map<SimpleBillDto>(bill));
         }
 
+        public async Task<DataResponse> PayCod(long id)
+        {
+            return new DataResponse(await _billRepository.UpdateBillPurchaseDate(id, DateTime.Now));
+        }
+
         private decimal CalculateCart(IEnumerable<CartDetail> cartDetails)
         {
             decimal total = 0;

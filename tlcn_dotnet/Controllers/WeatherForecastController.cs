@@ -14,6 +14,8 @@ using System.Drawing;
 using tlcn_dotnet.Dto.ProductDto;
 using tlcn_dotnet.AuthorizationAttributes;
 using tlcn_dotnet.IServices;
+using tlcn_dotnet.Repositories;
+using tlcn_dotnet.IRepositories;
 
 namespace tlcn_dotnet.Controllers
 {
@@ -28,11 +30,13 @@ namespace tlcn_dotnet.Controllers
 
         private readonly ILogger<WeatherForecastController> _logger;
         private readonly IPaymentService _paymentService;
+        private readonly ICartRepository _cartRepository;
 
-        public WeatherForecastController(ILogger<WeatherForecastController> logger, IPaymentService paymentService)
+        public WeatherForecastController(ILogger<WeatherForecastController> logger, IPaymentService paymentService, ICartRepository cartRepository)
         {
             _logger = logger;
             _paymentService = paymentService;
+            _cartRepository = cartRepository;
         }
 
         [HttpGet(Name = "GetWeatherForecast")]
@@ -73,7 +77,7 @@ namespace tlcn_dotnet.Controllers
             }
             return Ok(list);*/
 
-            using (StreamReader r = new StreamReader("Properties\\vietnam_city_district_ward.json"))
+            /*using (StreamReader r = new StreamReader("Properties\\vietnam_city_district_ward.json"))
             {
                 var result = JsonSerializer.Deserialize<JsonNode>(r.ReadToEnd());
                 watch.Stop();
@@ -84,7 +88,12 @@ namespace tlcn_dotnet.Controllers
                 }
                 return Ok(result["data"].AsArray());
 
-            }  
+            }  */
+
+            return Ok
+                (
+
+                );
         }
 
         [HttpGet("test-upload-image")]

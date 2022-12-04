@@ -127,6 +127,30 @@ namespace tlcn_dotnet.Utils
 
         }
 
+        public static bool TryConvertStringToDataType<T>(string source, out T? dest, T? defaultValue = null) where T : struct
+        {
+            try
+            {
+                if (source == null || source.Trim() == "")
+                {
+                    dest = defaultValue;
+                    return true;
+                }
+                if (typeof(T).IsEnum)
+                {
+                    dest = Enum.Parse<T>(source, true);
+                    return true;
+                }
+                dest = (T?)Convert.ChangeType(source, typeof(T));
+                return true;
+            }
+            catch(Exception e) when(e is InvalidCastException || e is FormatException || e is ArgumentNullException)
+            {
+                dest = null;
+                return false;
+            }
+        }
+
         public static JwtSecurityToken ReadJwtToken(string authorization)
         {
             var jwtToken = authorization.Substring(0, 7).ToLower() == "bearer " ?

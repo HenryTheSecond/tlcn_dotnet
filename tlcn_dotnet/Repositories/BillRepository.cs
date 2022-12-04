@@ -36,6 +36,29 @@ namespace tlcn_dotnet.Repositories
             }
         }
 
+        public async Task<int> UpdateBillOrderCode(long id, string orderCode)
+        {
+            using (var connection = _dapperContext.CreateConnection())
+            {
+                string query = "UPDATE Bill SET Bill.OrderCode = @OrderCode WHERE Bill.Id = @Id";
+                int affectedRow = await connection.ExecuteAsync(query, new { Id = id, OrderCode = orderCode });
+                return affectedRow;
+            }
+        }
+
+        public async Task<Bill> UpdateBillPurchaseDate(long id, DateTime? date)
+        {
+            using (var connection = _dapperContext.CreateConnection())
+            {
+                string query = @"UPDATE Bill 
+                                SET Bill.PurchaseDate = @PurchaseDate 
+                                OUTPUT inserted.*
+                                WHERE Id = @Id";
+                var bill = await connection.QuerySingleOrDefaultAsync<Bill>(query, new { PurchaseDate = date, Id = id });
+                return bill;
+            }
+        }
+
         public async Task<Bill> UpdatePurchaseDate(long id, DateTime date)
         {
             using (var connection = _dapperContext.CreateConnection())

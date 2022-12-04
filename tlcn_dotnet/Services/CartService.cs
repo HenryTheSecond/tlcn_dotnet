@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using CloudinaryDotNet.Actions;
 using System.IdentityModel.Tokens.Jwt;
+using System.Text.Json.Nodes;
 using tlcn_dotnet.Constant;
 using tlcn_dotnet.CustomException;
 using tlcn_dotnet.Dto;
@@ -12,6 +13,7 @@ using tlcn_dotnet.Dto.LocationDto;
 using tlcn_dotnet.Entity;
 using tlcn_dotnet.IRepositories;
 using tlcn_dotnet.IServices;
+using tlcn_dotnet.Migrations;
 using tlcn_dotnet.Utils;
 
 namespace tlcn_dotnet.Services
@@ -23,13 +25,16 @@ namespace tlcn_dotnet.Services
         private readonly ICartRepository _cartRepository;
         private readonly IMapper _mapper;
         private readonly IDeliveryService _deliveryService;
-        public CartService(ICartDetailRepository cartDetailRepository, IBillService billService, ICartRepository cartRepository, IMapper mapper, IDeliveryService deliveryService)
+        private readonly IBillRepository _billRepository;
+        public CartService(ICartDetailRepository cartDetailRepository, IBillService billService,
+            ICartRepository cartRepository, IMapper mapper, IDeliveryService deliveryService, IBillRepository billRepository)
         {
             _cartDetailRepository = cartDetailRepository;
             _billService = billService;
             _cartRepository = cartRepository;
             _mapper = mapper;
             _deliveryService = deliveryService;
+            _billRepository = billRepository;
         }
 
         public async Task<DataResponse> PayCurrentCart(string authorization, CartPaymentDto cartPaymentDto)
@@ -95,14 +100,28 @@ namespace tlcn_dotnet.Services
                 ?? throw new GeneralException("CART NOT FOUND", ApplicationConstant.NOT_FOUND_CODE);
             if (cart.Status == CartStatus.DELIVERIED)
             {
-                HttpResponseMessage response = await _deliveryService.SendDeliveryRequest(await GhnParameters(cart));
-                var a = (await response.Content.ReadFromJsonAsync<Dictionary<string, object>>())["code_message_value"];
-                Console.WriteLine(a);
+                HttpResponseMessage response = await _deliveryService.SendDeliveryRequest(await GhnParameters(cart, processCartDto));
+                JsonNode data = (await response.Content.ReadFromJsonAsync<JsonNode>());
+                string orderCode = data["data"]["order_code"].ToString();
+                await _billRepository.UpdateBillOrderCode(cart.Bill.Id.Value, orderCode);
+
+                DateTime now = DateTime.Now;
+                if (cart.Bill.PaymentMethod == PaymentMethod.CASH)
+                {
+                    await _billRepository.UpdateBillPurchaseDate(cart.Bill.Id.Value, now);
+                    cart.Bill.PurchaseDate = now;
+                }
+                cart.Bill.OrderCode = orderCode;
+            }
+            else if (cart.Status == CartStatus.CANCELLED)
+            {
+                await _billRepository.UpdateBillPurchaseDate(cart.Bill.Id.Value, null);
+                cart.Bill.PurchaseDate = null;
             }
             return new DataResponse(_mapper.Map<CartResponse>(cart));
         }
 
-        private async Task<Dictionary<string, object>> GhnParameters(Cart cart)
+        private async Task<Dictionary<string, object>> GhnParameters(Cart cart, ProcessCartDto processCartDto)
         {
             Dictionary<string, object> parameters = new Dictionary<string, object>();
 
@@ -116,11 +135,11 @@ namespace tlcn_dotnet.Services
             parameters.Add("to_ward_name", location.Ward);
             parameters.Add("to_district_name", location.District);
             parameters.Add("to_province_name", location.City);
-            parameters.Add("cod_amount", cart.Bill.PaymentMethod == PaymentMethod.CASH ? cart.Bill.Total : 0);
-            parameters.Add("weight", 500);
-            parameters.Add("length", 50);
-            parameters.Add("width", 50);
-            parameters.Add("height", 20);
+            parameters.Add("cod_amount", cart.Bill.PaymentMethod == PaymentMethod.CASH ? Convert.ToInt32(cart.Bill.Total) : (int)0);
+            parameters.Add("weight", processCartDto.Weight);
+            parameters.Add("length", processCartDto.Length);
+            parameters.Add("width", processCartDto.Width);
+            parameters.Add("height", processCartDto.Height);
             parameters.Add("service_id", 0);
             parameters.Add("service_type_id", 2);
             parameters.Add("items", CreateGhnItemList(cart.CartDetails));
@@ -143,6 +162,46 @@ namespace tlcn_dotnet.Services
                 items.Add(item);
             }
             return items;
+        }
+
+        public async Task<DataResponse> GetCartHistory(string authorization, string? strStatus, string? strPaymentMethod,
+            string? strFromDate, string? strToDate, string? strFromTotal, 
+            string? strToTotal, string? sortBy, string? order, string? strPage, string? strPageSize)
+        {
+            long accountId = Util.ReadJwtTokenAndGetAccountId(authorization);
+            DateTime? fromDate = null, toDate = null;
+            decimal? fromTotal = null, toTotal = null;
+            int? page = 1;
+            int? pageSize = 5;
+            if (sortBy.ToUpper() != "PURCHASEDATE" && sortBy.ToUpper() != "TOTAL")
+                sortBy = "PURCHASEDATE";
+            if (order.ToUpper() != "DESC" && order.ToUpper() != "ASC")
+                order = "DESC";
+            try
+            {
+                fromDate = Util.ConvertStringToDataType<DateTime>(strFromDate);
+                toDate = Util.ConvertStringToDataType<DateTime>(strToDate);
+                toDate = toDate != null ? toDate.Value.AddDays(1).AddTicks(-1) : null;
+                fromTotal = Util.ConvertStringToDataType<decimal>(strFromTotal);
+                toTotal = Util.ConvertStringToDataType<decimal>(strToTotal);
+                page = Util.TryConvertStringToDataType<int>(strPage, out page) ? (page > 0 ? page : 1) : 1;
+                pageSize = Util.TryConvertStringToDataType<int>(strPageSize, out pageSize) ? (pageSize > 0 ? pageSize : 5) : 5;
+            }
+            catch (Exception e)
+            {
+                throw new GeneralException(ApplicationConstant.BAD_REQUEST, ApplicationConstant.BAD_REQUEST_CODE);
+            }
+            dynamic result = await _cartRepository.GetUserCartHistory(accountId, strStatus, strPaymentMethod, fromDate, toDate,
+                fromTotal, toTotal, sortBy, order, page.Value, pageSize.Value);
+            return new DataResponse
+                (
+            new
+            {
+                        carts = _mapper.Map<IList<CartResponse>>(result.carts),
+                        maxPage = Util.CalculateMaxPage(result.count, pageSize.Value),
+                        currentPage = page
+                    }
+                );
         }
     }
 }

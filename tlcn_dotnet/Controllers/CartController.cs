@@ -69,5 +69,15 @@ namespace tlcn_dotnet.Controllers
                 throw new GeneralException(ApplicationConstant.INVALID_ID, ApplicationConstant.BAD_REQUEST_CODE);
             return await _cartService.ProcessCart(authorization, id.Value, processCartDto);
         }
+
+        [CustomAuthorize]
+        [HttpGet("cartHistory")]
+        public async Task<DataResponse> GetCartHistory([FromHeader(Name = "Authorization")] string authorization,
+            string? status, string? paymentMethod, string? fromDate, string? toDate,
+            string? fromTotal, string? toTotal, string sortBy = "PURCHASEDATE", string order = "DESC", string? page = "1", string? pageSize = "5")
+        {
+            return await _cartService.GetCartHistory(authorization, status, paymentMethod,
+                fromDate, toDate, fromTotal, toTotal, sortBy, order, page, pageSize);
+        }
     }
 }

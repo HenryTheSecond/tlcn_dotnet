@@ -1,5 +1,6 @@
 ﻿using CloudinaryDotNet;
 using Dapper;
+using Microsoft.OpenApi.Extensions;
 using System.Data;
 using System.Reflection.Metadata.Ecma335;
 using tlcn_dotnet.Constant;
@@ -143,13 +144,14 @@ namespace tlcn_dotnet.Repositories
             using (var connection = _dapperContext.CreateConnection())
             { 
                 string query = @"UPDATE CartDetail 
-                                SET Price = @Price, CartId = @CartId
+                                SET Price = @Price, CartId = @CartId, Status = @Status
                                 WHERE Id = @Id";
                 return await connection.ExecuteAsync(query, new
                 {
                     Price = price,
                     CartId = cartId,
-                    Id = id
+                    Id = id,
+                    Status = CartDetailStatus.PAID.GetDisplayName()
                 });
             }
         }
