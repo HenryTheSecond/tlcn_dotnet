@@ -18,6 +18,184 @@ namespace tlcn_dotnet.Repositories
             _dapperContext = dapperContext;
         }
 
+        public async Task<Dictionary<string, long>> CountCartByStatus(DateTime? fromDate, DateTime? toDate)
+        {
+            using (var connection = _dapperContext.CreateConnection())
+            {
+                string where = string.Empty;
+                DynamicParameters parameters = new DynamicParameters();
+                bool ignoreFirstAndFlag = false;
+                if (fromDate != null)
+                {
+                    where += " Cart.CreatedDate >= @FromDate ";
+                    parameters.Add("FromDate", fromDate);
+                    ignoreFirstAndFlag = true;
+                }
+                if (toDate != null)
+                {
+                    if (ignoreFirstAndFlag)
+                        where += " AND ";
+                    else
+                        ignoreFirstAndFlag = false;
+                    where += " Cart.CreatedDate <= @ToDate";
+                    parameters.Add("ToDate", toDate);
+                }
+                if (where != string.Empty)
+                    where = " WHERE " + where;
+                string query = $"select Cart.Status, count(*) as count from Cart {where} group by Cart.Status";
+                var counts = await connection.QueryAsync(query, parameters);
+                Dictionary<string, long> result = new Dictionary<string, long>();
+                foreach (string status in Enum.GetNames(typeof(CartStatus)))
+                {
+                    result.Add(status, 0);
+                }
+                foreach (var row in counts)
+                {
+                    result[row.Status] = row.count;
+                }
+                return result;
+            }
+        }
+
+        public async Task<Cart> GetById(long id, long accountId)
+        {
+            using (var connection = _dapperContext.CreateConnection())
+            {
+                string query = @"SELECT * FROM Cart JOIN Bill ON Cart.BillId = Bill.Id
+                                WHERE Cart.Id = @Id AND 
+	                                Cart.Id IN 
+		                                (SELECT TOP 1 CartDetail.CartId FROM CartDetail WHERE CartDetail.CartId = @Id AND CartDetail.AccountId = @AccountId)";
+                Cart cart = (await connection.QueryAsync<Cart, Bill, Cart>(query,
+                    (cart, bill) =>
+                    {
+                        cart.Bill = bill;
+                        return cart;
+                    },
+                    new { Id = id, AccountId = accountId })).SingleOrDefault();
+                Console.WriteLine($"CHECK {cart.Bill}");
+                return cart;
+            }
+        }
+
+        public async Task<dynamic> GetCarts(string? keywordType, string? keyword, string? cityId, string? districtId, string? wardId, DateTime? fromCreatedDate, DateTime? toCreatedDate, decimal? fromTotal, decimal? toTotal, PaymentMethod? paymentMethod, int page, int pageSize, CartStatus? status = CartStatus.PENDING, string? sortBy = "CREATEDDATE", string? order = "ASC")
+        {
+            string from = @" FROM Cart JOIN CartDetail ON Cart.Id = CartDetail.CartId
+                                    JOIN Bill ON Bill.Id = Cart.BillId
+                                    JOIN Product ON CartDetail.ProductId = Product.Id
+                                    JOIN Account ON Account.Id = CartDetail.AccountId
+                                    OUTER APPLY(SELECT TOP 1 * FROM ProductImage WHERE ProductImage.ProductId = Product.Id) as img ";
+            string where = @"  ";
+            List<string> conditions = new List<string>();
+            string orderBy = " ";
+            if (sortBy == "CREATEDDATE")
+                orderBy += " ORDER BY Cart.CreatedDate ";
+            else
+                orderBy += " ORDER BY Bill.Total ";
+            orderBy += order;
+            DynamicParameters parameters = new DynamicParameters();
+            if (keywordType != null)
+            {
+                if (keywordType == "NAME")
+                {
+                    conditions.Add(" Cart.Name LIKE @Keyword ");
+                }
+                else
+                {
+                    conditions.Add(" Cart.Phone LIKE @Keyword ");
+                }
+                parameters.Add("Keyword", "%"+ keyword +"%");
+            }
+            if (cityId != null)
+            {
+                conditions.Add(" Cart.CityId = @CityId ");
+                parameters.Add("CityId", cityId);
+            }
+            if (districtId != null)
+            {
+                conditions.Add(" Cart.DistrictId = @DistrictId ");
+                parameters.Add("DistrictId", districtId);
+            }
+            if (wardId != null)
+            {
+                conditions.Add(" Cart.WardId = @WardId ");
+                parameters.Add("WardId", wardId);
+            }
+            if (fromCreatedDate != null)
+            {
+                conditions.Add(" Cart.CreatedDate >= @FromCreatedDate ");
+                parameters.Add("FromCreatedDate", fromCreatedDate);
+            }
+            if (toCreatedDate != null)
+            {
+                conditions.Add(" Cart.CreatedDate <= @ToCreatedDate ");
+                parameters.Add("ToCreatedDate", toCreatedDate);
+            }
+            if (fromTotal != null)
+            {
+                conditions.Add(" Bill.Total >= @FromTotal ");
+                parameters.Add("FromTotal", fromTotal);
+            }
+            if (toTotal != null)
+            {
+                conditions.Add(" Bill.Total <= @ToTotal ");
+                parameters.Add("ToTotal", toTotal);
+            }
+            if (paymentMethod != null)
+            {
+                conditions.Add(" Bill.PaymentMethod = @PaymentMethod ");
+                parameters.Add("PaymentMethod", paymentMethod.GetDisplayName());
+            }
+            if (status != null)
+            {
+                conditions.Add(" Cart.Status = @Status ");
+                parameters.Add("Status", status.GetDisplayName());
+            }
+            if (conditions.Count > 0)
+            {
+                where += " WHERE " + string.Join(" AND ", conditions); 
+            }
+            string query = $@" SELECT * 
+                                {from} 
+                                WHERE Cart.Id IN 
+                                            (SELECT DISTINCT(Cart.Id) 
+                                            {from} {where} 
+                                            ORDER BY Cart.Id OFFSET @Skip ROWS FETCH NEXT @Take ROWS ONLY)
+                                {orderBy}";
+            parameters.Add("Skip", (page - 1) * pageSize);
+            parameters.Add("Take", pageSize);
+            Console.WriteLine(query);
+            using (var connection = _dapperContext.CreateConnection())
+            {
+                var cartDictionary = new Dictionary<long, Cart>();
+                IList<Cart> carts = (await connection.QueryAsync<Cart, CartDetail, Bill, Product, Account, ProductImage, Cart>
+                    (
+                        query,
+                        (cart, cartDetail, bill, product, account, productImage) =>
+                        {
+                            product.ProductImages.Add(productImage);
+                            cartDetail.Account = account;
+                            cartDetail.Product = product;
+                            cartDetail.ProductId = product.Id;
+
+                            Cart cartEntry;
+                            if (cartDictionary.TryGetValue(cart.Id.Value, out cartEntry) == false)
+                            {
+                                cartEntry = cart;
+                                cartEntry.CartDetails = new List<CartDetail>();
+                                cartDictionary.Add(cartEntry.Id.Value, cartEntry);
+                                cartEntry.Bill = bill;
+                                cartEntry.BillId = bill.Id;
+                            }
+                            cartEntry.CartDetails.Add(cartDetail);
+                            return cartEntry;
+                        },
+                        param: parameters
+                    )).Distinct().ToList();
+                long count = await connection.ExecuteScalarAsync<long>("SELECT COUNT(DISTINCT(Cart.Id)) " + from + where, parameters);
+                return new { carts, count};
+            }
+        }
+
         public async Task<dynamic> GetUserCartHistory(long accountId, string? status, string? paymentMethod, 
             DateTime? fromDate, DateTime? toDate, decimal? fromTotal, decimal? toTotal, 
             string? sortBy, string? order, int page, int pageSize)
@@ -186,6 +364,19 @@ ORDER BY Cart.CreatedDate DESC*/
                     }, parameters,
                     commandType: CommandType.StoredProcedure))
                     .Distinct().SingleOrDefault();
+                return cart;
+            }
+        }
+
+        public async Task<Cart> UpdateCartStatus(long id, CartStatus status)
+        {
+            using (var connection = _dapperContext.CreateConnection())
+            {
+                string query = @"UPDATE Cart
+                                SET Cart.Status = @Status
+                                OUTPUT inserted.*
+                                WHERE Cart.Id = @Id";
+                Cart cart = await connection.QuerySingleOrDefaultAsync<Cart>(query, new { Status = status.GetDisplayName(), Id = id });
                 return cart;
             }
         }

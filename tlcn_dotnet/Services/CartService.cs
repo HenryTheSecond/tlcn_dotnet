@@ -117,6 +117,8 @@ namespace tlcn_dotnet.Services
             {
                 await _billRepository.UpdateBillPurchaseDate(cart.Bill.Id.Value, null);
                 cart.Bill.PurchaseDate = null;
+
+                //TODO Refund payment
             }
             return new DataResponse(_mapper.Map<CartResponse>(cart));
         }
@@ -202,6 +204,63 @@ namespace tlcn_dotnet.Services
                         currentPage = page
                     }
                 );
+        }
+
+        public async Task<DataResponse> CancelCart(string authorization, long id)
+        {
+            long accountId = Util.ReadJwtTokenAndGetAccountId(authorization);
+            Cart cart = await _cartRepository.GetById(id, accountId)
+                ?? throw new GeneralException("CART NOT FOUND", ApplicationConstant.NOT_FOUND_CODE);
+            if (cart.Status == CartStatus.DELIVERIED)
+                throw new GeneralException("CART ALREADY DELIVERIED, CANNOT CANCELLED", ApplicationConstant.FAILED_CODE);
+            else if (cart.Status == CartStatus.CANCELLED)
+                throw new GeneralException("CART HAS BEEN CANCELLED", ApplicationConstant.FAILED_CODE);
+            await _cartRepository.UpdateCartStatus(id, CartStatus.CANCELLED);
+            await _billRepository.UpdateBillPurchaseDate(cart.Bill.Id.Value, null);
+            return new DataResponse()
+            {
+                Message = ApplicationConstant.SUCCESSFUL,
+                Status = ApplicationConstant.SUCCESSFUL_CODE,
+                Data = true,
+                DetailMessage = "CANCEL CART SUCCESSFULLY"
+            };
+        }
+
+        public async Task<DataResponse> ManageCart(RequestFilterProcessCartDto requestFilterProcessCartDto)
+        {
+            DateTime? fromCreatedDate = null, toCreatedDate = null;
+            decimal? fromTotal = null, toTotal = null;
+            PaymentMethod? paymentMethod = null;
+            int? page = 1, pageSize = 5;
+            string? sortBy = requestFilterProcessCartDto.SortBy != null ? requestFilterProcessCartDto.SortBy.ToUpper() : "CREATEDDATE";
+            sortBy = (sortBy != "CREATEDDATE" && sortBy != "TOTAL") ? "CREATEDDATE" : sortBy;
+            string? order = requestFilterProcessCartDto.Order != null ? requestFilterProcessCartDto.Order.ToUpper() : "ASC";
+            order = (order != "ASC" && order != "DESC") ? "ASC" : order;
+            string ? keywordType = requestFilterProcessCartDto.KeyWordType != null ? requestFilterProcessCartDto.KeyWordType.ToUpper() : null;
+            keywordType = (keywordType != "NAME" && keywordType != "PHONE") ? null : keywordType;
+
+            Util.TryConvertStringToDataType<DateTime>(requestFilterProcessCartDto.FromCreatedDate, out fromCreatedDate);
+            Util.TryConvertStringToDataType<DateTime>(requestFilterProcessCartDto.ToCreatedDate, out toCreatedDate);
+            toCreatedDate = toCreatedDate == null ? null : toCreatedDate.Value.AddDays(1).AddTicks(-1);
+            Util.TryConvertStringToDataType<decimal>(requestFilterProcessCartDto.FromTotal, out fromTotal);
+            Util.TryConvertStringToDataType<decimal>(requestFilterProcessCartDto.ToTotal, out toTotal);
+            Util.TryConvertStringToDataType<PaymentMethod>(requestFilterProcessCartDto.PaymentMethod, out paymentMethod);
+            Util.TryConvertStringToDataType<int>(requestFilterProcessCartDto.Page, out page);
+            page = page == null ? 1 : (page < 0 ? 1 : page);
+            Util.TryConvertStringToDataType<int>(requestFilterProcessCartDto.PageSize, out pageSize);
+            pageSize = pageSize == null ? 5 : (pageSize < 0 ? 5 : pageSize);
+
+            var result = await _cartRepository.GetCarts(keywordType, requestFilterProcessCartDto.KeyWord,
+                requestFilterProcessCartDto.CityId, requestFilterProcessCartDto.DistrictId,
+                requestFilterProcessCartDto.WardId, fromCreatedDate, toCreatedDate,
+                fromTotal, toTotal, paymentMethod, page.Value, pageSize.Value, status: CartStatus.PENDING,
+                sortBy: sortBy, order: order);
+            return new DataResponse(new
+            { 
+                carts = _mapper.Map<IList<CartResponse>>(result.carts),
+                maxPage = Util.CalculateMaxPage(result.count, pageSize.Value),
+                currentPage = page.Value
+            });
         }
     }
 }
