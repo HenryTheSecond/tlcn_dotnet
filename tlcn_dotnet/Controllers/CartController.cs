@@ -57,6 +57,8 @@ namespace tlcn_dotnet.Controllers
         [HttpPost("payment")]
         public async Task<DataResponse> PayCurrentCart([FromHeader(Name = "Authorization")] string authorization, [FromBody] CartPaymentDto cartPaymentDto)
         {
+            if (cartPaymentDto.ListCartDetailId == null || cartPaymentDto.ListCartDetailId.Count < 1)
+                throw new GeneralException("NO ITEM IN CART", ApplicationConstant.BAD_REQUEST_CODE);
             return await _cartService.PayCurrentCart(authorization, cartPaymentDto);
         }
 

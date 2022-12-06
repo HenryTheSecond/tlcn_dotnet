@@ -20,5 +20,19 @@ namespace tlcn_dotnet.Controllers
         {
             return _statisticsService.CountCartByStatus(fromDate, toDate);
         }
+
+        [CustomAuthorize(Roles = "ROLE_ADMIN")]
+        [HttpGet("profit")]
+        public async Task<DataResponse> CalculateProfit(string? fromDate, string? toDate)
+        {
+            return await _statisticsService.CalculateProfit(fromDate, toDate);
+        }
+
+        [CustomAuthorize(Roles = "ROLE_ADMIN")]
+        [HttpGet("product")]
+        public async Task<DataResponse> StatisicProduct(string? keyword, string? fromDate, string? toDate, string? sortBy = "PRODUCTNAME", string? order = "DESC")
+        {
+            return await _statisticsService.StatisticProduct(keyword, fromDate, toDate, sortBy, order);
+        }
     }
 }

@@ -13,7 +13,6 @@ namespace tlcn_dotnet.Utils
             if (unitProperty == null)
                 return true;
             ProductUnit? unit = null;
-            Console.WriteLine(unitProperty.PropertyType);
             if (unitProperty.PropertyType == typeof(ProductUnit))
                 unit = (ProductUnit)unitProperty.GetValue(value);
             else if (unitProperty.PropertyType == typeof(string))
