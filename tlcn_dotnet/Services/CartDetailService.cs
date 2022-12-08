@@ -25,6 +25,13 @@ namespace tlcn_dotnet.Services
             _mapper = mapper;
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="authorization"></param>
+        /// <param name="addCartDetailDto"></param>
+        /// <returns></returns>
+        /// <exception cref="GeneralException"></exception>
         public async Task<DataResponse> AddCartDetail(string authorization, AddCartDetailRequest addCartDetailDto)
         {
             JwtSecurityToken jwtToken = Util.ReadJwtToken(authorization);

@@ -77,7 +77,12 @@ namespace tlcn_dotnet.Repositories
             }
         }
 
-        public async Task<dynamic> GetCarts(string? keywordType, string? keyword, string? cityId, string? districtId, string? wardId, DateTime? fromCreatedDate, DateTime? toCreatedDate, decimal? fromTotal, decimal? toTotal, PaymentMethod? paymentMethod, int page, int pageSize, CartStatus? status = CartStatus.PENDING, string? sortBy = "CREATEDDATE", string? order = "ASC")
+        /*public async Task<dynamic> GetCarts(string? keywordType, string? keyword,
+            string? cityId, string? districtId, string? wardId,
+            DateTime? fromCreatedDate, DateTime? toCreatedDate, decimal? fromTotal, decimal? toTotal,
+            PaymentMethod? paymentMethod, int page, int pageSize,
+            CartStatus? status = CartStatus.PENDING,
+            string? sortBy = "CREATEDDATE", string? order = "ASC")
         {
             string from = @" FROM Cart JOIN CartDetail ON Cart.Id = CartDetail.CartId
                                     JOIN Bill ON Bill.Id = Cart.BillId
@@ -103,7 +108,7 @@ namespace tlcn_dotnet.Repositories
                 {
                     conditions.Add(" Cart.Phone LIKE @Keyword ");
                 }
-                parameters.Add("Keyword", "%"+ keyword +"%");
+                parameters.Add("Keyword", "%" + keyword + "%");
             }
             if (cityId != null)
             {
@@ -152,7 +157,7 @@ namespace tlcn_dotnet.Repositories
             }
             if (conditions.Count > 0)
             {
-                where += " WHERE " + string.Join(" AND ", conditions); 
+                where += " WHERE " + string.Join(" AND ", conditions);
             }
             string query = $@" SELECT * 
                                 {from} 
@@ -192,9 +197,152 @@ namespace tlcn_dotnet.Repositories
                         param: parameters
                     )).Distinct().ToList();
                 long count = await connection.ExecuteScalarAsync<long>("SELECT COUNT(DISTINCT(Cart.Id)) " + from + where, parameters);
-                return new { carts, count};
+                return new { carts, count };
             }
+        }*/
+
+
+        public async Task<dynamic> GetCarts(string? keywordType, string? keyword,
+            string? cityId, string? districtId, string? wardId,
+            DateTime? fromCreatedDate, DateTime? toCreatedDate, decimal? fromTotal, decimal? toTotal,
+            PaymentMethod? paymentMethod, int page, int pageSize,
+            CartStatus? status = CartStatus.PENDING,
+            string? sortBy = "CREATEDDATE", string? order = "ASC")
+        {
+            string where = @"  ";
+            List<string> conditions = new List<string>();
+            string orderBy = " ";
+            if (sortBy == "CREATEDDATE")
+                orderBy += " ORDER BY Cart.CreatedDate ";
+            else
+                orderBy += " ORDER BY Bill.Total ";
+            orderBy += order;
+            DynamicParameters parameters = new DynamicParameters();
+            if (keywordType != null)
+            {
+                if (keywordType == "NAME")
+                {
+                    conditions.Add(" Cart.Name LIKE @Keyword ");
+                }
+                else
+                {
+                    conditions.Add(" Cart.Phone LIKE @Keyword ");
+                }
+                parameters.Add("Keyword", "%" + keyword + "%");
+            }
+            if (cityId != null)
+            {
+                conditions.Add(" Cart.CityId = @CityId ");
+                parameters.Add("CityId", cityId);
+            }
+            if (districtId != null)
+            {
+                conditions.Add(" Cart.DistrictId = @DistrictId ");
+                parameters.Add("DistrictId", districtId);
+            }
+            if (wardId != null)
+            {
+                conditions.Add(" Cart.WardId = @WardId ");
+                parameters.Add("WardId", wardId);
+            }
+            if (fromCreatedDate != null)
+            {
+                conditions.Add(" Cart.CreatedDate >= @FromCreatedDate ");
+                parameters.Add("FromCreatedDate", fromCreatedDate);
+            }
+            if (toCreatedDate != null)
+            {
+                conditions.Add(" Cart.CreatedDate <= @ToCreatedDate ");
+                parameters.Add("ToCreatedDate", toCreatedDate);
+            }
+            if (fromTotal != null)
+            {
+                conditions.Add(" Bill.Total >= @FromTotal ");
+                parameters.Add("FromTotal", fromTotal);
+            }
+            if (toTotal != null)
+            {
+                conditions.Add(" Bill.Total <= @ToTotal ");
+                parameters.Add("ToTotal", toTotal);
+            }
+            if (paymentMethod != null)
+            {
+                conditions.Add(" Bill.PaymentMethod = @PaymentMethod ");
+                parameters.Add("PaymentMethod", paymentMethod.GetDisplayName());
+            }
+            if (status != null)
+            {
+                conditions.Add(" Cart.Status = @Status ");
+                parameters.Add("Status", status.GetDisplayName());
+            }
+            if (conditions.Count > 0)
+            {
+                where += " WHERE " + string.Join(" AND ", conditions);
+            }
+            string from = $@" FROM (SELECT Cart.Id, Cart.Phone, Cart.Name, Cart.CityId, Cart.DistrictId, Cart.WardId,
+                                                    Cart.DetailLocation, Cart.Status, Cart.CreatedDate, Cart.ProcessDescription, ProcessAccountId,
+                                                    Bill.Id as BillId, Bill.PurchaseDate, Bill.Total, Bill.PaymentMethod, Bill.OrderCode
+                                                FROM Cart JOIN Bill ON Cart.BillId = Bill.Id 
+                                                {where}
+                                                {orderBy} OFFSET @Skip ROWS FETCH NEXT @Take ROWS ONLY) as CartBill
+                                        JOIN CartDetail ON CartBill.Id = CartDetail.CartId
+                                        JOIN Product ON CartDetail.ProductId = Product.Id
+                                        JOIN Account ON Account.Id = CartDetail.AccountId
+                                        OUTER APPLY(SELECT TOP 1 * FROM ProductImage WHERE ProductImage.ProductId = Product.Id) as img ";
+            string query = $@" SELECT  CartBill.Id, CartBill.Phone, CartBill.Name, CartBill.CityId, CartBill.DistrictId, CartBill.WardId,
+                                       CartBill.DetailLocation, CartBill.Status, CartBill.CreatedDate, CartBill.ProcessDescription, ProcessAccountId,
+                                       CartBill.BillId as Id, CartBill.PurchaseDate, CartBill.Total, CartBill.PaymentMethod, CartBill.OrderCode,
+	                                   CartDetail.Id, CartDetail.Price, CartDetail.Status, CartDetail.Unit, CartDetail.Quantity,
+	                                   Product.Id, Product.Name, Product.Price, Product.Unit, Product.MinPurchase, Product.Status, Product.Description,
+	                                   Account.Id, Account.Phone, Account.Email, Account.FirstName, Account.LastName, Account.CityId, Account.DistrictId, Account.WardId,
+	                                   img.Id, img.Url, img.FileName
+                                {from} ";
+            parameters.Add("Skip", (page - 1) * pageSize);
+            parameters.Add("Take", pageSize);
+            Console.WriteLine(query);
+            using (var connection = _dapperContext.CreateConnection())
+            {
+                var cartDictionary = new Dictionary<long, Cart>();
+                IList<Cart> carts = (await connection.QueryAsync<Cart, Bill, CartDetail, Product, Account, ProductImage, Cart>
+                    (
+                        query,
+                        (cart, bill, cartDetail, product, account, productImage) =>
+                        {
+                            product.ProductImages.Add(productImage);
+                            cartDetail.Account = account;
+                            cartDetail.Product = product;
+                            cartDetail.ProductId = product.Id;
+
+                            Cart cartEntry;
+                            if (cartDictionary.TryGetValue(cart.Id.Value, out cartEntry) == false)
+                            {
+                                cartEntry = cart;
+                                cartEntry.CartDetails = new List<CartDetail>();
+                                cartDictionary.Add(cartEntry.Id.Value, cartEntry);
+                                cartEntry.Bill = bill;
+                                cartEntry.BillId = bill.Id;
+                            }
+                            cartEntry.CartDetails.Add(cartDetail);
+                            Console.WriteLine($"CHECK {cart.BillId}");
+                            return cartEntry;
+                        },
+                        param: parameters,
+                        splitOn: "Id, Id, Id, Id, Id, Id "
+                    )).Distinct().ToList();
+                long count = await connection.ExecuteScalarAsync<long>($@"SELECT COUNT(DISTINCT(Cart.Id)) 
+                                                                            FROM Cart JOIN CartDetail ON Cart.Id = CartDetail.CartId
+                                                                                    JOIN Bill ON Bill.Id = Cart.BillId
+                                                                                    JOIN Product ON CartDetail.ProductId = Product.Id
+                                                                                    JOIN Account ON Account.Id = CartDetail.AccountId
+                                                                                    OUTER APPLY(SELECT TOP 1 * FROM ProductImage WHERE ProductImage.ProductId = Product.Id) as img 
+                                                                            {where}"  ,
+                                                                        parameters);
+                return new { carts, count };
+            }
+
         }
+
+
 
         public async Task<dynamic> GetUserCartHistory(long accountId, string? status, string? paymentMethod, 
             DateTime? fromDate, DateTime? toDate, decimal? fromTotal, decimal? toTotal, 

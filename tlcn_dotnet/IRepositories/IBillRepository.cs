@@ -11,5 +11,7 @@ namespace tlcn_dotnet.IRepositories
         public Task<Bill> UpdateBillPurchaseDate(long id, DateTime? date);
         public Task<decimal> CalculateProfit(DateTime? fromDate, DateTime? toDate);
         public Task<IList<dynamic>> ProductStatistic(string keyword, DateTime? fromDate, DateTime? toDate, string sortBy, string order);
+        Task<IList<Bill>> BillStatistic(DateTime? fromDate, DateTime? toDate,
+            decimal? fromTotal, decimal? toTotal, PaymentMethod? paymentMethod, string sortBy, string order);
     }
 }

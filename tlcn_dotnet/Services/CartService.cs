@@ -18,7 +18,7 @@ using tlcn_dotnet.Utils;
 
 namespace tlcn_dotnet.Services
 {
-    public class CartService: ICartService
+    public class CartService : ICartService
     {
         private readonly ICartDetailRepository _cartDetailRepository;
         private readonly IBillService _billService;
@@ -56,7 +56,7 @@ namespace tlcn_dotnet.Services
             var createBillResponseData = (await _billService.CreateBill(cartDetails, cartPaymentDto.PaymentMethod)).Data;
             if (createBillResponseData.GetType() == typeof(SimpleBillDto))
                 simpleBillDto = (SimpleBillDto)createBillResponseData;
-            else 
+            else
             {
                 simpleBillDto = ((PayingMomoBill)createBillResponseData).Bill;
                 paymentUrl = ((PayingMomoBill)createBillResponseData).MomoPaymentLink;
@@ -79,7 +79,7 @@ namespace tlcn_dotnet.Services
             foreach (CartDetail cartDetail in cartDetails)
             {
                 insertPriceAndCartIdTasks.Add(
-                    _cartDetailRepository.InsertPriceAndCartId(cartDetail.Id.Value, 
+                    _cartDetailRepository.UpdatePriceAndCartId(cartDetail.Id.Value,
                                                     cartDetail.Product.Price.Value, id));
             }
             await Task.WhenAll(insertPriceAndCartIdTasks);
@@ -149,9 +149,9 @@ namespace tlcn_dotnet.Services
         }
 
         private IList<GhnItemDto> CreateGhnItemList(IList<CartDetail> cartDetails)
-        { 
+        {
             IList<GhnItemDto> items = new List<GhnItemDto>();
-            foreach(var cartDetail in cartDetails)
+            foreach (var cartDetail in cartDetails)
             {
                 GhnItemDto item = new GhnItemDto()
                 {
@@ -167,7 +167,7 @@ namespace tlcn_dotnet.Services
         }
 
         public async Task<DataResponse> GetCartHistory(string authorization, string? strStatus, string? strPaymentMethod,
-            string? strFromDate, string? strToDate, string? strFromTotal, 
+            string? strFromDate, string? strToDate, string? strFromTotal,
             string? strToTotal, string? sortBy, string? order, string? strPage, string? strPageSize)
         {
             long accountId = Util.ReadJwtTokenAndGetAccountId(authorization);
@@ -199,10 +199,10 @@ namespace tlcn_dotnet.Services
                 (
             new
             {
-                        carts = _mapper.Map<IList<CartResponse>>(result.carts),
-                        maxPage = Util.CalculateMaxPage(result.count, pageSize.Value),
-                        currentPage = page
-                    }
+                carts = _mapper.Map<IList<CartResponse>>(result.carts),
+                maxPage = Util.CalculateMaxPage(result.count, pageSize.Value),
+                currentPage = page
+            }
                 );
         }
 
@@ -236,7 +236,7 @@ namespace tlcn_dotnet.Services
             sortBy = (sortBy != "CREATEDDATE" && sortBy != "TOTAL") ? "CREATEDDATE" : sortBy;
             string? order = requestFilterProcessCartDto.Order != null ? requestFilterProcessCartDto.Order.ToUpper() : "ASC";
             order = (order != "ASC" && order != "DESC") ? "ASC" : order;
-            string ? keywordType = requestFilterProcessCartDto.KeyWordType != null ? requestFilterProcessCartDto.KeyWordType.ToUpper() : null;
+            string? keywordType = requestFilterProcessCartDto.KeyWordType != null ? requestFilterProcessCartDto.KeyWordType.ToUpper() : null;
             keywordType = (keywordType != "NAME" && keywordType != "PHONE") ? null : keywordType;
 
             Util.TryConvertStringToDataType<DateTime>(requestFilterProcessCartDto.FromCreatedDate, out fromCreatedDate);
@@ -256,7 +256,7 @@ namespace tlcn_dotnet.Services
                 fromTotal, toTotal, paymentMethod, page.Value, pageSize.Value, status: CartStatus.PENDING,
                 sortBy: sortBy, order: order);
             return new DataResponse(new
-            { 
+            {
                 carts = _mapper.Map<IList<CartResponse>>(result.carts),
                 maxPage = Util.CalculateMaxPage(result.count, pageSize.Value),
                 currentPage = page.Value
