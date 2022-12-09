@@ -140,12 +140,14 @@ namespace tlcn_dotnet.ServicesImpl
             confirmToken = await _confirmTokenService.CreateConfirmToken(accountDb);
             _emailService.SendRegisterConfirmationToken(confirmToken);
 
+
+
             return new DataResponse(_mapper.Map<AccountResponse>(accountDb));
         }
 
-        public async Task<DataResponse> FilterAccount(string keyword, AccountKeywordType keywordType, string role, int page)
+        public async Task<DataResponse> GetAccount(string keyword, AccountKeywordType keywordType, string role, int page)
         {
-            var result = await _accountRepository.FilterAccount(keyword, keywordType, role, page);
+            var result = await _accountRepository.GetAccount(keyword, keywordType, role, page);
 
             return new DataResponse(new
             { 

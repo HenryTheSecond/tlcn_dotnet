@@ -13,6 +13,6 @@ namespace tlcn_dotnet.IRepositories
         public Task<CartDetail> UpdateCartDetailQuantity(long productId, double quantity, long accountId);
         public Task<IList<CartDetail>> GetCurrentCart(long accountId);
         public Task<IList<CartDetail>> GetListCart(long accountId, IList<long> listCartDetailId);
-        public Task<int> InsertPriceAndCartId(long id, decimal price, long cartId);
+        public Task<int> UpdatePriceAndCartId(long id, decimal price, long cartId);
     }
 }

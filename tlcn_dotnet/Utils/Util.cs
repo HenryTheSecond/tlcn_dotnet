@@ -144,7 +144,7 @@ namespace tlcn_dotnet.Utils
                 dest = (T?)Convert.ChangeType(source, typeof(T));
                 return true;
             }
-            catch(Exception e) when(e is InvalidCastException || e is FormatException || e is ArgumentNullException)
+            catch(Exception e) when(e is InvalidCastException || e is FormatException || e is ArgumentNullException || e is ArgumentException)
             {
                 dest = null;
                 return false;

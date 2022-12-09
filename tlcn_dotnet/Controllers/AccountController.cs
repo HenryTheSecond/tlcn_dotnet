@@ -77,7 +77,7 @@ namespace tlcn_dotnet.Controllers
             Int32.TryParse(page, out numberPage);
             numberPage = numberPage == 0 ? 1 : numberPage;
 
-            return await _authService.FilterAccount(keyword.Trim(), enumKeyWordType, role, numberPage);
+            return await _authService.GetAccount(keyword.Trim(), enumKeyWordType, role, numberPage);
         }
 
         [HttpPost("changePassword")]

@@ -25,6 +25,13 @@ namespace tlcn_dotnet.Services
             _mapper = mapper;
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="authorization"></param>
+        /// <param name="addCartDetailDto"></param>
+        /// <returns></returns>
+        /// <exception cref="GeneralException"></exception>
         public async Task<DataResponse> AddCartDetail(string authorization, AddCartDetailRequest addCartDetailDto)
         {
             JwtSecurityToken jwtToken = Util.ReadJwtToken(authorization);
@@ -110,7 +117,23 @@ namespace tlcn_dotnet.Services
                     return false;
                 }
             }
-            if (quantity % product.MinPurchase != 0)
+            if (product.MinPurchase == null || product.MinPurchase.Value == 0)
+                return true;
+            decimal decimalQuantity = Convert.ToDecimal(quantity);
+            decimal decimalMinPurchase = Convert.ToDecimal(product.MinPurchase.Value);
+            try
+            {
+                while (decimalMinPurchase != decimal.Ceiling(decimalMinPurchase))
+                {
+                    decimalMinPurchase *= 10;
+                    decimalQuantity *= 10;
+                }
+            }
+            catch (OverflowException e) //exception happens if min purchase is 0 or too small, almost equals to 0
+            {
+                return true;
+            }
+            if (decimalQuantity % decimalMinPurchase != 0)
                 return false;
             return true;
         }

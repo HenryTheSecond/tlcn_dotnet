@@ -139,7 +139,7 @@ namespace tlcn_dotnet.Repositories
             }
         }
 
-        public async Task<int> InsertPriceAndCartId(long id, decimal price, long cartId)
+        public async Task<int> UpdatePriceAndCartId(long id, decimal price, long cartId)
         {
             using (var connection = _dapperContext.CreateConnection())
             { 

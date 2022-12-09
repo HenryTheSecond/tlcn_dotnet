@@ -9,7 +9,7 @@ namespace tlcn_dotnet.Repositories
     {
         public AccountRepository(MyDbContext dbContext) : base(dbContext) { }
 
-        public async Task<dynamic> FilterAccount(string keyword, AccountKeywordType keywordType, string role, int page)
+        public async Task<dynamic> GetAccount(string keyword, AccountKeywordType keywordType, string role, int page)
         {
             IQueryable<Account> queryAccount = _dbContext.Account;
             if (keywordType == AccountKeywordType.NAME)

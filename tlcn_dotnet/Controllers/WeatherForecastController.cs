@@ -4,17 +4,10 @@ using MailKit.Net.Smtp;
 using Microsoft.AspNetCore.Mvc;
 using MimeKit;
 using Newtonsoft.Json;
-using System.Text.Json;
-using System.Text.Json.Nodes;
-using System.Text.Json.Serialization;
 using JsonSerializer = System.Text.Json.JsonSerializer;
-using CloudinaryDotNet;
-using CloudinaryDotNet.Actions;
-using System.Drawing;
 using tlcn_dotnet.Dto.ProductDto;
 using tlcn_dotnet.AuthorizationAttributes;
 using tlcn_dotnet.IServices;
-using tlcn_dotnet.Repositories;
 using tlcn_dotnet.IRepositories;
 
 namespace tlcn_dotnet.Controllers

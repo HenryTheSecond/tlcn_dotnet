@@ -57,6 +57,8 @@ namespace tlcn_dotnet.Controllers
         [HttpPost("payment")]
         public async Task<DataResponse> PayCurrentCart([FromHeader(Name = "Authorization")] string authorization, [FromBody] CartPaymentDto cartPaymentDto)
         {
+            if (cartPaymentDto.ListCartDetailId == null || cartPaymentDto.ListCartDetailId.Count < 1)
+                throw new GeneralException("NO ITEM IN CART", ApplicationConstant.BAD_REQUEST_CODE);
             return await _cartService.PayCurrentCart(authorization, cartPaymentDto);
         }
 
@@ -78,6 +80,22 @@ namespace tlcn_dotnet.Controllers
         {
             return await _cartService.GetCartHistory(authorization, status, paymentMethod,
                 fromDate, toDate, fromTotal, toTotal, sortBy, order, page, pageSize);
+        }
+
+        [CustomAuthorize]
+        [HttpGet("cartCancel/{strId}")]
+        public async Task<DataResponse> CancelCart([FromHeader(Name = "Authorization")] string authorization, string strId)
+        {
+            long? id = Util.ParseId(strId) ??
+                throw new GeneralException(ApplicationConstant.INVALID_ID, ApplicationConstant.BAD_REQUEST_CODE);
+            return await _cartService.CancelCart(authorization, id.Value);
+        }
+
+        [CustomAuthorize(Roles = "ROLE_ADMIN, ROLE_EMPLOYEE")]
+        [HttpGet("processCart")]
+        public async Task<DataResponse> ManageCart([FromQuery] RequestFilterProcessCartDto requestFilterProcessCart)
+        {
+            return await _cartService.ManageCart(requestFilterProcessCart);
         }
     }
 }
