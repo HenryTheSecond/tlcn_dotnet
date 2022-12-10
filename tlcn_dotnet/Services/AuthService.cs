@@ -197,5 +197,12 @@ namespace tlcn_dotnet.ServicesImpl
                 ?? throw new GeneralException("ACCOUNT NOT FOUND", ApplicationConstant.NOT_FOUND_CODE);
             return new DataResponse(_mapper.Map<AccountResponse>(account));
         }
+
+        public async Task<DataResponse> GetProfile(string authorization)
+        {
+            long accountId = Util.ReadJwtTokenAndGetAccountId(authorization);
+            Account account = await _accountRepository.GetById(accountId);
+            return new DataResponse(_mapper.Map<AccountResponse>(account));
+        }
     }
 }
