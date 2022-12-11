@@ -1,6 +1,8 @@
 ﻿using AutoMapper;
 using CloudinaryDotNet.Actions;
+using Newtonsoft.Json;
 using System.IdentityModel.Tokens.Jwt;
+using System.Text.Json;
 using System.Text.Json.Nodes;
 using tlcn_dotnet.Constant;
 using tlcn_dotnet.CustomException;
@@ -101,7 +103,8 @@ namespace tlcn_dotnet.Services
             if (cart.Status == CartStatus.DELIVERIED)
             {
                 HttpResponseMessage response = await _deliveryService.SendDeliveryRequest(await GhnParameters(cart, processCartDto));
-                JsonNode data = (await response.Content.ReadFromJsonAsync<JsonNode>());
+                var data = (await response.Content.ReadFromJsonAsync<JsonNode>());
+                Console.WriteLine(System.Text.Json.JsonSerializer.Serialize(data));
                 string orderCode = data["data"]["order_code"].ToString();
                 await _billRepository.UpdateBillOrderCode(cart.Bill.Id.Value, orderCode);
 
@@ -137,14 +140,15 @@ namespace tlcn_dotnet.Services
             parameters.Add("to_ward_name", location.Ward);
             parameters.Add("to_district_name", location.District);
             parameters.Add("to_province_name", location.City);
-            parameters.Add("cod_amount", cart.Bill.PaymentMethod == PaymentMethod.CASH ? Convert.ToInt32(cart.Bill.Total) : (int)0);
+            parameters.Add("cod_amount", cart.Bill.PaymentMethod == PaymentMethod.CASH ? Convert.ToInt32(cart.Bill.Total) : Convert.ToInt32(0));
             parameters.Add("weight", processCartDto.Weight);
             parameters.Add("length", processCartDto.Length);
             parameters.Add("width", processCartDto.Width);
             parameters.Add("height", processCartDto.Height);
-            parameters.Add("service_id", 0);
+            parameters.Add("service_id", 53320);
             parameters.Add("service_type_id", 2);
             parameters.Add("items", CreateGhnItemList(cart.CartDetails));
+            Console.WriteLine(JsonConvert.SerializeObject(parameters));
             return parameters;
         }
 
