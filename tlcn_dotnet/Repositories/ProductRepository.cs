@@ -56,7 +56,7 @@ namespace tlcn_dotnet.Repositories
                             FROM Product LEFT OUTER JOIN BillDetail ON Product.Id = BillDetail.ProductId
                             LEFT OUTER JOIN Bill ON Bill.Id = BillDetail.BillId AND Bill.PurchaseDate IS NOT NULL
                             OUTER APPLY (SELECT TOP 1 ProductImage.Id, ProductImage.FileName, ProductImage.Url FROM ProductImage where ProductImage.ProductId = Product.Id) as Image
-                            GROUP BY Product.Id, Product.Name, Product.Price, Product.MinPurchase, Product.Status, Product.Unit,
+                            GROUP BY Product.Id, Product.Name, Product.Price, Product.MinPurchase, Product.Status, Product.Unit, Product.Quantity,
 			                            Image.Id, Image.Url, Image.FileName
                             ORDER BY sum(BillDetail.Quantity / Product.MinPurchase) desc";
             using (var connection = _dapperContext.CreateConnection())
@@ -85,7 +85,7 @@ namespace tlcn_dotnet.Repositories
                             FROM Product LEFT OUTER JOIN BillDetail ON Product.Id = BillDetail.ProductId
                             LEFT OUTER JOIN Bill ON Bill.Id = BillDetail.BillId AND Bill.PurchaseDate IS NOT NULL
                             OUTER APPLY (SELECT TOP 1 ProductImage.Id, ProductImage.FileName, ProductImage.Url FROM ProductImage where ProductImage.ProductId = Product.Id) as Image
-                            GROUP BY Product.Id, Product.Name, Product.Price, Product.MinPurchase, Product.Status, Product.Unit,
+                            GROUP BY Product.Id, Product.Name, Product.Price, Product.MinPurchase, Product.Status, Product.Unit, Product.Quantity,
 			                            Image.Id, Image.Url, Image.FileName
                             ORDER BY sum(BillDetail.Quantity / Product.MinPurchase) desc";
             using (var connection = _dapperContext.CreateConnection())
