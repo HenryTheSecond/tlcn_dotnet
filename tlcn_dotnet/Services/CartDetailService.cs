@@ -45,6 +45,9 @@ namespace tlcn_dotnet.Services
             if (ValidateQuantityCartDetail(productDb, addCartDetailDto.Quantity) == false)
                 throw new GeneralException("QUANTITY IS NOT VALID", ApplicationConstant.BAD_REQUEST_CODE);
 
+            if (addCartDetailDto.Quantity > productDb.Quantity)
+                throw new GeneralException("QUANTITY IS NOT ENOUGH", ApplicationConstant.BAD_REQUEST_CODE);
+
             long cartDetailExistId = await _cartDetailRepository.CheckCurrentCartHavingProduct((long)accountId, addCartDetailDto.ProductId);
             CartDetail cartDetail;
 
@@ -102,6 +105,9 @@ namespace tlcn_dotnet.Services
             Product product = await _productRepository.GetById(updateCartDetailQuantityDto.ProductId);
             if(ValidateQuantityCartDetail(product, updateCartDetailQuantityDto.Quantity) == false)
                 throw new GeneralException("QUANTITY IS NOT VALID", ApplicationConstant.BAD_REQUEST_CODE);
+
+            if (updateCartDetailQuantityDto.Quantity > product.Quantity)
+                throw new GeneralException("QUANTITY IS NOT ENOUGH", ApplicationConstant.BAD_REQUEST_CODE);
 
             CartDetail cartDetail = await _cartDetailRepository.UpdateCartDetailQuantity(updateCartDetailQuantityDto.ProductId, updateCartDetailQuantityDto.Quantity, (long)accountId)
                 ?? throw new GeneralException("CART DETAIL NOT FOUND", ApplicationConstant.NOT_FOUND_CODE);

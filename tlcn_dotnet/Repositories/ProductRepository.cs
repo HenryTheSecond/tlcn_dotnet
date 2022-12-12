@@ -1,5 +1,7 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Dapper;
+using Microsoft.EntityFrameworkCore;
 using tlcn_dotnet.Constant;
+using tlcn_dotnet.DatabaseContext;
 using tlcn_dotnet.Entity;
 using tlcn_dotnet.IRepositories;
 
@@ -7,9 +9,10 @@ namespace tlcn_dotnet.Repositories
 {
     public class ProductRepository: GenericRepository<Product>, IProductRepository
     {
-        public ProductRepository(MyDbContext dbContext): base(dbContext)
+        private readonly DapperContext _dapperContext;
+        public ProductRepository(MyDbContext dbContext, DapperContext dapperContext): base(dbContext)
         {
-
+            _dapperContext = dapperContext;
         }
 
         public async Task<dynamic> FilterProduct(string? keyword, decimal? minPrice, decimal? maxPrice,
@@ -46,11 +49,55 @@ namespace tlcn_dotnet.Repositories
             };
         }
 
+        public async Task<Product> GetBestProduct()
+        {
+            string query = @"SELECT TOP 1 Product.Id, Product.Name, Product.Price, Product.MinPurchase, Product.Status, Product.Unit, Product.Quantity,
+			                            Image.Id, Image.Url, Image.FileName
+                            FROM Product LEFT OUTER JOIN BillDetail ON Product.Id = BillDetail.ProductId
+                            LEFT OUTER JOIN Bill ON Bill.Id = BillDetail.BillId AND Bill.PurchaseDate IS NOT NULL
+                            OUTER APPLY (SELECT TOP 1 ProductImage.Id, ProductImage.FileName, ProductImage.Url FROM ProductImage where ProductImage.ProductId = Product.Id) as Image
+                            GROUP BY Product.Id, Product.Name, Product.Price, Product.MinPurchase, Product.Status, Product.Unit,
+			                            Image.Id, Image.Url, Image.FileName
+                            ORDER BY sum(BillDetail.Quantity / Product.MinPurchase) desc";
+            using (var connection = _dapperContext.CreateConnection())
+            {
+                var product = await connection.QueryAsync<Product, ProductImage, Product>(query, (product, image) =>
+                {
+                    product.ProductImages = new List<ProductImage>();
+                    product.ProductImages.Add(image);
+                    return product;
+                });
+                return product.SingleOrDefault();
+            }
+        }
+
         public async Task<Product> GetProductWithImageById(long? id)
         {
             return await _dbContext.Product.Include(product => product.ProductImages)
                 .Include(product => product.Category)
                 .FirstOrDefaultAsync(product => product.Id == id);
+        }
+
+        public async Task<IList<Product>> GetTop8Product()
+        {
+            string query = @"SELECT TOP 8 Product.Id, Product.Name, Product.Price, Product.MinPurchase, Product.Status, Product.Unit, Product.Quantity,
+			                            Image.Id, Image.Url, Image.FileName
+                            FROM Product LEFT OUTER JOIN BillDetail ON Product.Id = BillDetail.ProductId
+                            LEFT OUTER JOIN Bill ON Bill.Id = BillDetail.BillId AND Bill.PurchaseDate IS NOT NULL
+                            OUTER APPLY (SELECT TOP 1 ProductImage.Id, ProductImage.FileName, ProductImage.Url FROM ProductImage where ProductImage.ProductId = Product.Id) as Image
+                            GROUP BY Product.Id, Product.Name, Product.Price, Product.MinPurchase, Product.Status, Product.Unit,
+			                            Image.Id, Image.Url, Image.FileName
+                            ORDER BY sum(BillDetail.Quantity / Product.MinPurchase) desc";
+            using (var connection = _dapperContext.CreateConnection())
+            {
+                var products = await connection.QueryAsync<Product, ProductImage, Product>(query, (product, image) =>
+                {
+                    product.ProductImages = new List<ProductImage>();
+                    product.ProductImages.Add(image);
+                    return product;
+                });
+                return products.ToList();
+            }
         }
     }
 }

@@ -214,5 +214,32 @@ namespace tlcn_dotnet.Repositories
                 return bills;
             }
         }
+
+        public async Task DeleteBillById(long id)
+        {
+            string deleteBillByIdQuery = @"DELETE FROM Bill WHERE Bill.Id = @BillId";
+            DynamicParameters parameters = new DynamicParameters(new { BillId = id });
+            string deleteBillDetailQuery = @"DELETE FROM BillDetail Where BillDetail.BillId = @BillId";
+            string setNullCartQuery = @"UPDATE Cart SET Cart.BillId = NULL WHERE Cart.BillId = @BillId";
+            using (var connection = _dapperContext.CreateConnection())
+            {
+                await connection.ExecuteAsync(deleteBillDetailQuery, parameters);
+                await connection.ExecuteAsync(setNullCartQuery, parameters);
+                await connection.ExecuteAsync(deleteBillByIdQuery, parameters);
+            }
+        }
+
+        public async Task UpdateProductQuantityAfterProcess(long id)
+        {
+            string query = @"UPDATE Product SET Product.Quantity = Product.Quantity - BillDetail.Quantity
+                            FROM Bill JOIN BillDetail ON Bill.Id = BillDetail.BillId
+                            JOIN Product ON Product.Id = BillDetail.ProductId
+                            WHERE Bill.Id = @BillId";
+            DynamicParameters parameters = new DynamicParameters(new { BillId = id });
+            using (var connection = _dapperContext.CreateConnection())
+            { 
+                await connection.ExecuteAsync(query, parameters);
+            }
+        }
     }
 }
