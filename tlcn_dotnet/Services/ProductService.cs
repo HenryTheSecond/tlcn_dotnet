@@ -56,6 +56,7 @@ namespace tlcn_dotnet.ServicesImpl
             product.MinPurchase = editProductDto.MinPurchase != null ? editProductDto.MinPurchase : product.MinPurchase;
             product.Status = editProductDto.Status;
             product.Description = editProductDto.Description != null ? editProductDto.Description : product.Description;
+            product.Quantity = editProductDto.Quantity != null ? editProductDto.Quantity : product.Quantity;
             product.Category = category;
 
             IEnumerable<SimpleProductImageDto> productImages = await _productImageService.EditProductImage(product, editProductDto.EditImageStatus, files);
@@ -80,11 +81,17 @@ namespace tlcn_dotnet.ServicesImpl
             });
         }
 
-        public async Task<DataResponse> GetAllProductIdAndName()
+        public async Task<DataResponse> GetAllProductIdAndNameAndUnit()
         {
             var products = await _productRepository.GetAll();
             return new DataResponse
-                (_mapper.Map<IEnumerable<ProductIdAndNameDto>>(products));
+                (_mapper.Map<IEnumerable<ProductWithIdNameUnitDto>>(products));
+        }
+
+        public async Task<DataResponse> GetBestProduct()
+        {
+            var product = await _productRepository.GetBestProduct();
+            return new DataResponse(_mapper.Map<SingleImageProductDto>(product));
         }
 
         public async Task<DataResponse> GetProductById(long? id)
@@ -94,6 +101,12 @@ namespace tlcn_dotnet.ServicesImpl
                 throw new GeneralException("PRODUCT NOT FOUND", ApplicationConstant.NOT_FOUND_CODE);
             ProductWithImageDto productWithImageDto = _mapper.Map<ProductWithImageDto>(product);
             return new DataResponse(productWithImageDto);
+        }
+
+        public async Task<DataResponse> GetTop8Product()
+        {
+            var products = await _productRepository.GetTop8Product();
+            return new DataResponse(_mapper.Map<IList<SingleImageProductDto>>(products));
         }
     }
 }

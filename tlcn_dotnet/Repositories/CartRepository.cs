@@ -293,7 +293,7 @@ namespace tlcn_dotnet.Repositories
                                        CartBill.DetailLocation, CartBill.Status, CartBill.CreatedDate, CartBill.ProcessDescription, ProcessAccountId,
                                        CartBill.BillId as Id, CartBill.PurchaseDate, CartBill.Total, CartBill.PaymentMethod, CartBill.OrderCode,
 	                                   CartDetail.Id, CartDetail.Price, CartDetail.Status, CartDetail.Unit, CartDetail.Quantity,
-	                                   Product.Id, Product.Name, Product.Price, Product.Unit, Product.MinPurchase, Product.Status, Product.Description,
+	                                   Product.Id, Product.Name, Product.Price, Product.Unit, Product.MinPurchase, Product.Status, Product.Description, Product.Quantity,
 	                                   Account.Id, Account.Phone, Account.Email, Account.FirstName, Account.LastName, Account.CityId, Account.DistrictId, Account.WardId,
 	                                   img.Id, img.Url, img.FileName
                                 {from} ";

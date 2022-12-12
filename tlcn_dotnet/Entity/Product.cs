@@ -30,6 +30,7 @@ namespace tlcn_dotnet.Entity
         public ProductStatus Status { get; set; }
 
         public string? Description { get; set; }
+        public double? Quantity { get; set; } = 0;
 
         public virtual Category? Category { get; set; }
         

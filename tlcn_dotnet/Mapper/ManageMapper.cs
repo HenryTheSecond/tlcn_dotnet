@@ -49,6 +49,7 @@ namespace tlcn_dotnet.Mapper
                 });
             CreateMap<ProductImage, SimpleProductImageDto>();
             CreateMap<Product, ProductIdAndNameDto>();
+            CreateMap<Product, ProductWithIdNameUnitDto>();
 
             CreateMap<Inventory, SimpleInventoryDto>();
 

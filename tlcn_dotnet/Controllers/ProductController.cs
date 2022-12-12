@@ -99,10 +99,22 @@ namespace tlcn_dotnet.Controllers
             return await _productService.DeleteProduct(id);
         }
 
-        [HttpGet("GetAllProductIdAndNam")]
-        public async Task<DataResponse> GetAllProductIdAndName()
+        [HttpGet("GetAllProductIdAndNameAndUnit")]
+        public async Task<DataResponse> GetAllProductIdAndNameAndUnit()
         {
-            return await _productService.GetAllProductIdAndName();
+            return await _productService.GetAllProductIdAndNameAndUnit();
+        }
+
+        [HttpGet("GetTop8Product")]
+        public async Task<DataResponse> GetTop8Product()
+        {
+            return await _productService.GetTop8Product();
+        }
+
+        [HttpGet("GetBestProduct")]
+        public async Task<DataResponse> GetBestProduct()
+        {
+            return await _productService.GetBestProduct();
         }
     }
 }

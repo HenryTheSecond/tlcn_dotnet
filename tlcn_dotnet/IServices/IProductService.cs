@@ -12,6 +12,8 @@ namespace tlcn_dotnet.Services
         public Task<DataResponse> FilterProduct(string? keyword, decimal? minPrice, decimal? maxPrice, 
             long? categoryId, ProductOrderBy? productOrderBy, SortOrder? sortOrder, int page);
         public Task<DataResponse> DeleteProduct(long? id);
-        public Task<DataResponse> GetAllProductIdAndName();
+        public Task<DataResponse> GetAllProductIdAndNameAndUnit();
+        public Task<DataResponse> GetTop8Product();
+        public Task<DataResponse> GetBestProduct();
     }
 }

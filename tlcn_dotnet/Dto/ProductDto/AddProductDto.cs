@@ -16,5 +16,6 @@ namespace tlcn_dotnet.Dto.ProductDto
         public double? MinPurchase { get; set; } = 0;
         public ProductStatus Status { get; set; }
         public string? Description { get; set; }
+        public double? Quantity { get; set; } = 0;
     }
 }
