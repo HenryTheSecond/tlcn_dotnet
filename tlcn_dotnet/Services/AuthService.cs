@@ -98,7 +98,11 @@ namespace tlcn_dotnet.ServicesImpl
             {
                 throw new GeneralException(ApplicationConstant.USER_INACTIVE, ApplicationConstant.FAILED_CODE);
             }
-            return new DataResponse(CreateJwtToken(accountDb));
+            return new DataResponse(new
+            { 
+                accessToken = CreateJwtToken(accountDb),
+                user = _mapper.Map<AccountResponse>(accountDb)
+            });
         }
         
 
