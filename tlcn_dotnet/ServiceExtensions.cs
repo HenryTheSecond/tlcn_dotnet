@@ -42,7 +42,13 @@ namespace tlcn_dotnet
                         dataResponse.Message = Constant.ApplicationConstant.FAILED;
                     }
 
-                    await context.Response.WriteAsync(JsonConvert.SerializeObject(dataResponse));
+                    await context.Response.WriteAsync(JsonConvert.SerializeObject(new
+                    {
+                        message = dataResponse.Message,
+                        data = dataResponse.Data,
+                        status = dataResponse.Status,
+                        detailMessage = dataResponse.DetailMessage
+                    }));
                 });
             });
         }
