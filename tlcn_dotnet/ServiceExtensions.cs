@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.IdentityModel.Tokens;
 using Newtonsoft.Json;
+using NLog;
 using System.ComponentModel.DataAnnotations;
 using System.Data.SqlClient;
 using System.Text;
@@ -13,7 +14,7 @@ namespace tlcn_dotnet
 {
     public static class ServiceExtensions
     {
-        public static void ConfigureExceptionHandler(this IApplicationBuilder app)
+        public static void ConfigureExceptionHandler(this IApplicationBuilder app, Logger? logger)
         {
             app.UseExceptionHandler(error =>
             {
@@ -41,6 +42,7 @@ namespace tlcn_dotnet
                     {
                         dataResponse.Status = Constant.ApplicationConstant.FAILED_CODE;
                         dataResponse.Message = Constant.ApplicationConstant.FAILED;
+                        logger.Error(contextFeature.Error.StackTrace);
                     }
 
                     await context.Response.WriteAsync(JsonConvert.SerializeObject(new

@@ -43,5 +43,33 @@ namespace tlcn_dotnet.Controllers
         {
             return await _statisticsService.StatisticBill(fromDate, toDate, fromTotal, toTotal, paymentMethod, sortBy, order);
         }
+
+        [CustomAuthorize(Roles = "ROLE_ADMIN")]
+        [HttpGet("bill/export")]
+        public async Task<FileResult> ExportStatisticBillToExcel(string? fromDate, string? toDate, string? fromTotal,
+            string? toTotal, string? paymentMethod, string? sortBy = "PURCHASEDATE", string? order = "DESC")
+        {
+            MemoryStream stream = await _statisticsService.ExportStatisticBillToExcel(fromDate, toDate, fromTotal,
+                toTotal, paymentMethod, sortBy, order);
+            using (stream)
+            {
+                stream.Seek(0, SeekOrigin.Begin);
+                return File(stream.ToArray(),
+                    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", DateTime.Now.ToString() + ".xlsx");
+            }
+        }
+
+        [CustomAuthorize(Roles = "ROLE_ADMIN")]
+        [HttpGet("product/export")]
+        public async Task<FileResult> ExportStatisticProductToExcel(string? keyword, string? fromDate, string? toDate, string? sortBy = "PRODUCTNAME", string? order = "DESC")
+        {
+            MemoryStream stream = await _statisticsService.ExportStatisticProductToExcel(keyword, fromDate, toDate, sortBy, order);
+            using (stream)
+            {
+                stream.Seek(0, SeekOrigin.Begin);
+                return File(stream.ToArray(),
+                    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", DateTime.Now.ToString() + ".xlsx");
+            }
+        }
     }
 }

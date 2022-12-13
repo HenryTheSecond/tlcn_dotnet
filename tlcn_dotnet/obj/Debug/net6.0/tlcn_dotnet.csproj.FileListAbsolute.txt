@@ -174,3 +174,14 @@ D:\testing\tlcn_dotnet\tlcn_dotnet\bin\Debug\net6.0\runtimes\unix\lib\netcoreapp
 D:\testing\tlcn_dotnet\tlcn_dotnet\bin\Debug\net6.0\runtimes\win\lib\netcoreapp2.1\System.Data.SqlClient.dll
 D:\testing\tlcn_dotnet\tlcn_dotnet\bin\Debug\net6.0\DapperQueryBuilder.dll
 E:\dotnet\tlcn_dotnet\tlcn_dotnet\bin\Debug\net6.0\DapperQueryBuilder.dll
+D:\testing\tlcn_dotnet\tlcn_dotnet\bin\Debug\net6.0\nlog.config
+D:\testing\tlcn_dotnet\tlcn_dotnet\bin\Debug\net6.0\NLog.dll
+D:\testing\tlcn_dotnet\tlcn_dotnet\bin\Debug\net6.0\NLog.Extensions.Logging.dll
+D:\testing\tlcn_dotnet\tlcn_dotnet\bin\Debug\net6.0\NLog.Web.AspNetCore.dll
+D:\testing\tlcn_dotnet\tlcn_dotnet\bin\Debug\net6.0\ClosedXML.dll
+D:\testing\tlcn_dotnet\tlcn_dotnet\bin\Debug\net6.0\DocumentFormat.OpenXml.dll
+D:\testing\tlcn_dotnet\tlcn_dotnet\bin\Debug\net6.0\ExcelNumberFormat.dll
+D:\testing\tlcn_dotnet\tlcn_dotnet\bin\Debug\net6.0\Irony.dll
+D:\testing\tlcn_dotnet\tlcn_dotnet\bin\Debug\net6.0\SixLabors.Fonts.dll
+D:\testing\tlcn_dotnet\tlcn_dotnet\bin\Debug\net6.0\System.IO.Packaging.dll
+D:\testing\tlcn_dotnet\tlcn_dotnet\bin\Debug\net6.0\XLParser.dll
