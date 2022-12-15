@@ -6,8 +6,12 @@ using NLog;
 using System.ComponentModel.DataAnnotations;
 using System.Data.SqlClient;
 using System.Text;
+using tlcn_dotnet.Constant;
 using tlcn_dotnet.Controllers;
 using tlcn_dotnet.CustomException;
+using tlcn_dotnet.Entity;
+using tlcn_dotnet.IRepositories;
+using tlcn_dotnet.Repositories;
 using tlcn_dotnet.Utils;
 
 namespace tlcn_dotnet

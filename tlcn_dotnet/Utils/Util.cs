@@ -184,6 +184,7 @@ namespace tlcn_dotnet.Utils
             account.VerifyToken = (string?)jwtToken.Payload["verifyToken"];
             account.FirstName = (string)jwtToken.Payload["firstName"];
             account.LastName = (string)jwtToken.Payload["lastName"];
+            account.PhotoUrl = (string)jwtToken.Payload["photoUrl"];
 
             return account;
         }

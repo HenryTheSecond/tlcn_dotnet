@@ -25,5 +25,6 @@ namespace tlcn_dotnet.Dto.AccountDto
         public string DetailLocation { get; set; }
 
         public string VerifyToken { get; set; }
+        public string PhotoUrl { get; set; }
     }
 }

@@ -14,6 +14,11 @@ using tlcn_dotnet.Services;
 using tlcn_dotnet.Utils;
 using Microsoft.EntityFrameworkCore;
 using tlcn_dotnet.IRepositories;
+using CloudinaryDotNet;
+using Account = tlcn_dotnet.Entity.Account;
+using CloudinaryDotNet.Actions;
+using static System.Net.Mime.MediaTypeNames;
+using Role = tlcn_dotnet.Constant.Role;
 
 namespace tlcn_dotnet.ServicesImpl
 {
@@ -26,6 +31,7 @@ namespace tlcn_dotnet.ServicesImpl
         private readonly IEmailService _emailService;
         private readonly IAccountRepository _accountRepository;
         private readonly IChangePasswordTokenRepository _changePasswordTokenRepository;
+        private readonly Cloudinary _cloudinary;
 
         public AuthService(IConfiguration configuration, MyDbContext dbContext, IMapper mapper, 
             IConfirmTokenService confirmTokenService, IEmailService emailService, IAccountRepository accountRepository,
@@ -38,6 +44,14 @@ namespace tlcn_dotnet.ServicesImpl
             _emailService = emailService;
             _accountRepository = accountRepository;
             _changePasswordTokenRepository = changePasswordTokenRepository;
+
+            var cloudinarySection = configuration.GetSection("Cloudinary");
+            string cloudName = cloudinarySection.GetSection("CloudName").Value;
+            string apiKey = cloudinarySection.GetSection("ApiKey").Value;
+            string apiSecret = cloudinarySection.GetSection("ApiSecret").Value;
+            CloudinaryDotNet.Account cloudinaryAccount = new CloudinaryDotNet.Account(cloudName, apiKey, apiSecret);
+            _cloudinary = new Cloudinary(cloudinaryAccount);
+            _cloudinary.Api.Secure = true;
         }
 
         public async Task<DataResponse> ConfirmAccount(string token)
@@ -71,7 +85,8 @@ namespace tlcn_dotnet.ServicesImpl
                 new Claim("detailLocation", account.DetailLocation),
                 new Claim("verifyToken", account.VerifyToken),
                 new Claim("firstName", account.FirstName),
-                new Claim("lastName", account.LastName)
+                new Claim("lastName", account.LastName),
+                new Claim("photoUrl", account.PhotoUrl ?? String.Empty)
             };
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration.GetSection("Jwt:Key").Value));
             var cred = new SigningCredentials(key, SecurityAlgorithms.HmacSha512Signature);
@@ -207,6 +222,31 @@ namespace tlcn_dotnet.ServicesImpl
             long accountId = Util.ReadJwtTokenAndGetAccountId(authorization);
             Account account = await _accountRepository.GetById(accountId);
             return new DataResponse(_mapper.Map<AccountResponse>(account));
+        }
+
+        public async Task<DataResponse> UploadPhoto(string authorization, IFormFile photo)
+        {
+            long accountId = Util.ReadJwtTokenAndGetAccountId(authorization);
+
+            using (var stream = new MemoryStream())
+            {
+                await photo.CopyToAsync(stream);
+                stream.Seek(0, SeekOrigin.Begin);
+                string fileName = $"user_photo_{accountId}";
+                ImageUploadParams uploadParams = new ImageUploadParams()
+                {
+                    File = new FileDescription(fileName, stream),
+                    UseFilename = true,
+                    UniqueFilename = false,
+                    Overwrite = true
+                };
+                ImageUploadResult result = await _cloudinary.UploadAsync(uploadParams);
+                Account accountDb = await _accountRepository.GetById(accountId);
+                accountDb.PhotoUrl = result.Url.ToString();
+                await _accountRepository.Update(accountDb);
+                return new DataResponse(_mapper.Map<AccountResponse>(accountDb));
+            }
+
         }
     }
 }

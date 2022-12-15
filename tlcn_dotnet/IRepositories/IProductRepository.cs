@@ -10,5 +10,6 @@ namespace tlcn_dotnet.IRepositories
         public Task<Product> GetProductWithImageById(long? id);
         public Task<IList<Product>> GetTop8Product();
         public Task<Product> GetBestProduct();
+        public Task<IList<Product>> GetAllProudctWithImage();
     }
 }

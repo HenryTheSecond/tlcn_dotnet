@@ -106,5 +106,12 @@ namespace tlcn_dotnet.Controllers
         {
             return await _authService.GetProfile(authorization);
         }
+
+        [HttpPost("uploadPhoto")]
+        [CustomAuthorize]
+        public async Task<DataResponse> UploadPhoto([FromHeader(Name = "Authorization")] string authorization, [FromForm(Name = "photo")] IFormFile photo)
+        {
+            return await _authService.UploadPhoto(authorization, photo);
+        }
     }
 }

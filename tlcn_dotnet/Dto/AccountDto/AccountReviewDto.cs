@@ -9,5 +9,6 @@
         public string CityId { get; set; }
         public string DistrictId { get; set; }
         public string WardId { get; set; }
+        public string PhotoUrl { get; set; }
     }
 }

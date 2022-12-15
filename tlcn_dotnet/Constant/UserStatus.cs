@@ -2,6 +2,6 @@
 {
     public enum UserStatus
     {
-        ACTIVE, INACTIVE
+        ACTIVE, INACTIVE, BANNED
     }
 }

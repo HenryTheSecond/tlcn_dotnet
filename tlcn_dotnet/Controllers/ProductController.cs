@@ -46,7 +46,7 @@ namespace tlcn_dotnet.Controllers
         public async Task<DataResponse> EditProduct(string strId)
         {
             long? id = Util.ParseId(strId);
-            if(id == null) throw new GeneralException(ApplicationConstant.INVALID_ID, ApplicationConstant.BAD_REQUEST_CODE);
+            if (id == null) throw new GeneralException(ApplicationConstant.INVALID_ID, ApplicationConstant.BAD_REQUEST_CODE);
             var files = HttpContext.Request.Form.Files;
             var strEditProduct = HttpContext.Request.Form["editProduct"][0];
 
@@ -86,7 +86,7 @@ namespace tlcn_dotnet.Controllers
             }
             Console.WriteLine("MIN PRICE " + minPrice);
             Console.WriteLine("MIN PRICE PARSED" + numberMinPrice);
-            return await _productService.FilterProduct(keyword, numberMinPrice, numberMaxPrice, 
+            return await _productService.FilterProduct(keyword, numberMinPrice, numberMaxPrice,
                 numberCategoryId, productOrderBy, sortOrder, numberPage);
         }
 
@@ -115,6 +115,12 @@ namespace tlcn_dotnet.Controllers
         public async Task<DataResponse> GetBestProduct()
         {
             return await _productService.GetBestProduct();
+        }
+
+        [HttpGet("GetAllProductWithImage")]
+        public async Task<DataResponse> GetAllProductWithImage()
+        {
+            return await _productService.GetAllProductWithImage();
         }
     }
 }

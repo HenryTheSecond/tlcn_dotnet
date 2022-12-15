@@ -88,6 +88,12 @@ namespace tlcn_dotnet.ServicesImpl
                 (_mapper.Map<IEnumerable<ProductWithIdNameUnitDto>>(products));
         }
 
+        public async Task<DataResponse> GetAllProductWithImage()
+        {
+            IList<Product> products = await _productRepository.GetAllProudctWithImage();
+            return new DataResponse(_mapper.Map<IList<SingleImageProductDto>>(products));
+        }
+
         public async Task<DataResponse> GetBestProduct()
         {
             var product = await _productRepository.GetBestProduct();

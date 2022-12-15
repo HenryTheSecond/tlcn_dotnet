@@ -1,5 +1,6 @@
 ﻿using Dapper;
 using Microsoft.EntityFrameworkCore;
+using System.Dynamic;
 using tlcn_dotnet.Constant;
 using tlcn_dotnet.DatabaseContext;
 using tlcn_dotnet.Entity;
@@ -47,6 +48,11 @@ namespace tlcn_dotnet.Repositories
                 Products = products,
                 Total = total
             };
+        }
+
+        public async Task<IList<Product>> GetAllProudctWithImage()
+        {
+            return await _dbContext.Product.Include(product => product.ProductImages).ToListAsync();
         }
 
         public async Task<Product> GetBestProduct()

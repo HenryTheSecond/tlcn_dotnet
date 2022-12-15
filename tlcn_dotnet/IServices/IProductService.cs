@@ -15,5 +15,6 @@ namespace tlcn_dotnet.Services
         public Task<DataResponse> GetAllProductIdAndNameAndUnit();
         public Task<DataResponse> GetTop8Product();
         public Task<DataResponse> GetBestProduct();
+        public Task<DataResponse> GetAllProductWithImage();
     }
 }
