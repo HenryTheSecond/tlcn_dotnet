@@ -97,5 +97,12 @@ namespace tlcn_dotnet.Controllers
         {
             return await _cartService.ManageCart(requestFilterProcessCart);
         }
+
+        [CustomAuthorize]
+        [HttpDelete("deleteCurrentCart")]
+        public async Task<DataResponse> DeleteCurrentCart([FromHeader(Name = "Authorization")] string authorization)
+        {
+            return await _cartService.DeleteCurrentCart(authorization);
+        }
     }
 }

@@ -12,5 +12,6 @@ namespace tlcn_dotnet.IServices
             string? strToTotal, string? sortBy, string? order, string? strPage = "1", string? strPageSize = "5");
         public Task<DataResponse> CancelCart(string authorization, long id);
         public Task<DataResponse> ManageCart(RequestFilterProcessCartDto requestFilterProcessCartDto);
+        public Task<DataResponse> DeleteCurrentCart(string authorization);
     }
 }

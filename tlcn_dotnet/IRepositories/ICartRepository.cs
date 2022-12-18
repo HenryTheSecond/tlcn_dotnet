@@ -19,5 +19,7 @@ namespace tlcn_dotnet.IRepositories
             string? sortBy = "CREATEDDATE", string? order = "ASC");
 
         public Task<Dictionary<string, long>> CountCartByStatus(DateTime? fromDate, DateTime? toDate);
+
+        public Task<int> DeleteCurrentCart(long accountId);
     }
 }

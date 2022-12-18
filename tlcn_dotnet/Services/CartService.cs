@@ -276,5 +276,14 @@ namespace tlcn_dotnet.Services
                 currentPage = page.Value
             });
         }
+
+        public async Task<DataResponse> DeleteCurrentCart(string authorization)
+        {
+            long accountId = Util.ReadJwtTokenAndGetAccountId(authorization);
+            int affectedRow = await _cartRepository.DeleteCurrentCart(accountId);
+            if (affectedRow == 0)
+                throw new GeneralException("NO ITEM IN CART", ApplicationConstant.NOT_FOUND_CODE);
+            return new DataResponse(true);
+        }
     }
 }

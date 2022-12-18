@@ -57,6 +57,17 @@ namespace tlcn_dotnet.Repositories
             }
         }
 
+        public async Task<int> DeleteCurrentCart(long accountId)
+        {
+            string query = @"DELETE CartDetail WHERE CartDetail.AccountId = @AccountId AND CartDetail.CartId IS NULL";
+            DynamicParameters parameters = new DynamicParameters(new { AccountId = accountId });
+            using (var connection = _dapperContext.CreateConnection())
+            {
+                int affectedRows = await connection.ExecuteAsync(query, parameters);
+                return affectedRows;
+            }
+        }
+
         public async Task<Cart> GetById(long id, long accountId)
         {
             using (var connection = _dapperContext.CreateConnection())
