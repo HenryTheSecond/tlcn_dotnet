@@ -36,15 +36,15 @@ namespace tlcn_dotnet.ServicesImpl
             double? maxQuantity, decimal? minImportPrice, decimal? maxImportPrice,
             DateTime? fromDeliveryDate, DateTime? toDeliveryDate, DateTime? fromExpireDate,
             DateTime? toExpireDate, long? supplierId, string? unit, InventoryOrderBy inventoryOrderBy, SortOrder sortOrder,
-            int page = 1)
+            int page = 1, int pageSize = 8)
         {
             var result = await _inventoryRepository.SearchInventory(keyword, productId, minQuantity,
                     maxQuantity, minImportPrice, maxImportPrice, fromDeliveryDate, toDeliveryDate,
-                    fromExpireDate, toExpireDate, supplierId, unit, inventoryOrderBy, sortOrder, page);
+                    fromExpireDate, toExpireDate, supplierId, unit, inventoryOrderBy, sortOrder, page, pageSize);
             var inventories = _mapper.Map<IEnumerable<SimpleInventoryDto>>(result.inventories);
             return new DataResponse(new { 
                 inventories = inventories,
-                maxPage = Util.CalculateMaxPage(result.total, 2),
+                maxPage = Util.CalculateMaxPage(result.total, pageSize),
                 currentPage = page
             });
         }

@@ -10,7 +10,7 @@ namespace tlcn_dotnet.Services
         public Task<DataResponse> FilterInventory(string? keyword, long? productId, double? minQuantity,
             double? maxQuantity, decimal? minImportPrice, decimal? maxImportPrice, DateTime? fromDeliveryDate,
             DateTime? toDeliveryDate, DateTime? fromExpireDate, DateTime? toExpireDate,
-            long? supplierId, string? unit, InventoryOrderBy inventoryOrderBy, SortOrder sortOrder, int page = 1);
+            long? supplierId, string? unit, InventoryOrderBy inventoryOrderBy, SortOrder sortOrder, int page = 1, int pageSize = 8);
         public Task<DataResponse> EditInventory(long id, EditInventoryDto editInventoryDto);
     }
 }

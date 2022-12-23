@@ -60,9 +60,10 @@ namespace tlcn_dotnet.Controllers
 
         [HttpGet]
         public async Task<DataResponse> FilterProduct(string? keyword, string? minPrice, string? maxPrice,
-            string? categoryId, string? orderBy, string? order, string? page = "1")
+            string? categoryId, string? orderBy, string? order, string? page = "1", string? pageSize = "8")
         {
             int numberPage = 1;
+            int numberPageSize = 8;
             decimal? numberMinPrice = null;
             decimal? numberMaxPrice = null;
             long? numberCategoryId = null;
@@ -72,6 +73,8 @@ namespace tlcn_dotnet.Controllers
             {
                 numberPage = Int32.Parse(page);
                 numberPage = numberPage > 0 ? numberPage : 1;
+                numberPageSize = Int32.Parse(pageSize);
+                numberPageSize = numberPageSize > 0 ? numberPageSize : 8;
                 numberMinPrice = minPrice == null ? null : Convert.ToDecimal(minPrice);
                 numberMaxPrice = maxPrice == null ? null : Convert.ToDecimal(maxPrice);
                 numberCategoryId = categoryId == null ? null : Convert.ToInt64(categoryId);
@@ -87,7 +90,7 @@ namespace tlcn_dotnet.Controllers
             Console.WriteLine("MIN PRICE " + minPrice);
             Console.WriteLine("MIN PRICE PARSED" + numberMinPrice);
             return await _productService.FilterProduct(keyword, numberMinPrice, numberMaxPrice,
-                numberCategoryId, productOrderBy, sortOrder, numberPage);
+                numberCategoryId, productOrderBy, sortOrder, numberPage, numberPageSize);
         }
 
         [HttpDelete("{strId}")]

@@ -164,14 +164,14 @@ namespace tlcn_dotnet.ServicesImpl
             return new DataResponse(_mapper.Map<AccountResponse>(accountDb));
         }
 
-        public async Task<DataResponse> GetAccount(string keyword, AccountKeywordType keywordType, string role, int page)
+        public async Task<DataResponse> GetAccount(string keyword, AccountKeywordType keywordType, string role, int page, int pageSize)
         {
-            var result = await _accountRepository.GetAccount(keyword, keywordType, role, page);
+            var result = await _accountRepository.GetAccount(keyword, keywordType, role, page, pageSize);
 
             return new DataResponse(new
             { 
                 accounts = _mapper.Map<IEnumerable<AccountResponse>>(result.Accounts),
-                maxPage = Util.CalculateMaxPage(result.Total, 2),
+                maxPage = Util.CalculateMaxPage(result.Total, pageSize),
                 currentPage = page
             });
         }

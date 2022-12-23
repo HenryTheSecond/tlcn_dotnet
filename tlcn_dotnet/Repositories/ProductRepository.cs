@@ -17,7 +17,7 @@ namespace tlcn_dotnet.Repositories
         }
 
         public async Task<dynamic> FilterProduct(string? keyword, decimal? minPrice, decimal? maxPrice,
-            long? categoryId, ProductOrderBy? productOrderBy, SortOrder? sortOrder, int page)
+            long? categoryId, ProductOrderBy? productOrderBy, SortOrder? sortOrder, int page, int pageSize)
         {
             IQueryable<Product> queryProduct = _dbContext.Product
                 .Include(product => product.Category)
@@ -41,7 +41,7 @@ namespace tlcn_dotnet.Repositories
                     queryProduct.OrderBy(product => product.Price) :
                     queryProduct.OrderByDescending(product => product.Price);
 
-            IEnumerable<Product> products = await queryProduct.Skip((page - 1) * 2).Take(2).ToListAsync();
+            IEnumerable<Product> products = await queryProduct.Skip((page - 1) * pageSize).Take(pageSize).ToListAsync();
             long total = await queryProduct.LongCountAsync();
             return new
             {

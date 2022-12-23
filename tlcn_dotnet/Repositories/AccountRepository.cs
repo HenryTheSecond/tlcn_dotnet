@@ -9,7 +9,7 @@ namespace tlcn_dotnet.Repositories
     {
         public AccountRepository(MyDbContext dbContext) : base(dbContext) { }
 
-        public async Task<dynamic> GetAccount(string keyword, AccountKeywordType keywordType, string role, int page)
+        public async Task<dynamic> GetAccount(string keyword, AccountKeywordType keywordType, string role, int page, int pageSize)
         {
             IQueryable<Account> queryAccount = _dbContext.Account;
             if (keywordType == AccountKeywordType.NAME)
@@ -33,8 +33,8 @@ namespace tlcn_dotnet.Repositories
             }
             var accounts = await queryAccount.OrderBy(account => account.FirstName)
                 .OrderBy(account => account.LastName)
-                .Skip((page - 1) * 2)
-                .Take(2)
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
                 .ToListAsync();
             long total = await queryAccount.LongCountAsync();
             return new

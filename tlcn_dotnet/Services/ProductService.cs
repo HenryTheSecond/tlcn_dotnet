@@ -67,12 +67,12 @@ namespace tlcn_dotnet.ServicesImpl
         }
 
         public async Task<DataResponse> FilterProduct(string? keyword, decimal? minPrice, decimal? maxPrice,
-            long? categoryId, ProductOrderBy? productOrderBy, SortOrder? sortOrder, int page)
+            long? categoryId, ProductOrderBy? productOrderBy, SortOrder? sortOrder, int page, int pageSize)
         {
             var result = await _productRepository.FilterProduct(keyword, minPrice, maxPrice, categoryId, 
-                productOrderBy, sortOrder, page);
+                productOrderBy, sortOrder, page, pageSize);
             var products = _mapper.Map<List<SingleImageProductDto>>(result.Products);
-            var maxPage = Util.CalculateMaxPage(result.Total, 2);
+            var maxPage = Util.CalculateMaxPage(result.Total, pageSize);
 
             return new DataResponse(new { 
                 products = products,

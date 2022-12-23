@@ -37,7 +37,7 @@ namespace tlcn_dotnet.Controllers
             string? maxQuantity, string? minImportPrice, string? maxImportPrice, string? fromDeliveryDate,
             string? toDeliveryDate, string? fromExpireDate, string? toExpireDate,
             string? supplierId, string? unit,  string? orderBy, 
-            string? order, string? page = "1")
+            string? order, string? page = "1", string? pageSize = "8")
         {
             long? numberProductId = null, numberSupplierId = null;
             double? numberMinQuantity = null, numberMaxQuantity = null;
@@ -45,6 +45,7 @@ namespace tlcn_dotnet.Controllers
             DateTime? dateFromDeliveryDate = null, dateToDeliveryDate = null;
             DateTime? dateFromExpireDate = null, dateToExpireDate = null;
             int? numberPage = 1;
+            int? numberPageSize = 8;
             InventoryOrderBy inventoryOrderBy = InventoryOrderBy.DELIVERY_DATE;
             SortOrder sortOrder = SortOrder.DESC;
             try
@@ -68,6 +69,8 @@ namespace tlcn_dotnet.Controllers
 
                 numberPage = Util.ConvertStringToDataType<int>(page);
                 numberPage = (numberPage == null && numberPage < 1) ? 1 : numberPage;
+                numberPageSize = Util.ConvertStringToDataType<int>(pageSize);
+                numberPageSize = (numberPageSize == null && numberPageSize < 1) ? 8 : numberPageSize;
             }
             catch (Exception e) when (e is InvalidCastException || e is FormatException || e is ArgumentNullException)
             {
@@ -77,7 +80,7 @@ namespace tlcn_dotnet.Controllers
 
             return new DataResponse(await _inventoryService.FilterInventory(keyword, numberProductId,
                 numberMinQuantity, numberMaxQuantity, numberMinImportPrice, numberMaxImportPrice, dateFromDeliveryDate,
-                dateToDeliveryDate, dateFromExpireDate, dateToDeliveryDate, numberSupplierId, unit, inventoryOrderBy, sortOrder, numberPage.Value));
+                dateToDeliveryDate, dateFromExpireDate, dateToDeliveryDate, numberSupplierId, unit, inventoryOrderBy, sortOrder, numberPage.Value, numberPageSize.Value));
         }
 
         [HttpPut("{strId}")]
