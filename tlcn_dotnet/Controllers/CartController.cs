@@ -1,5 +1,6 @@
 ﻿
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.OpenApi.Extensions;
 using tlcn_dotnet.AuthorizationAttributes;
 using tlcn_dotnet.Constant;
 using tlcn_dotnet.CustomException;
@@ -75,9 +76,10 @@ namespace tlcn_dotnet.Controllers
         [CustomAuthorize]
         [HttpGet("cartHistory")]
         public async Task<DataResponse> GetCartHistory([FromHeader(Name = "Authorization")] string authorization,
-            string? status, string? paymentMethod, string? fromDate, string? toDate,
-            string? fromTotal, string? toTotal, string sortBy = "PURCHASEDATE", string order = "DESC", string? page = "1", string? pageSize = "5")
+            CartStatus? status, string? paymentMethod, string? fromDate, string? toDate,
+            string? fromTotal, string? toTotal, string? sortBy = "PURCHASEDATE", string? order = "DESC", string? page = "1", string? pageSize = "5")
         {
+            Console.WriteLine($"CHECKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKK {status}");
             return await _cartService.GetCartHistory(authorization, status, paymentMethod,
                 fromDate, toDate, fromTotal, toTotal, sortBy, order, page, pageSize);
         }

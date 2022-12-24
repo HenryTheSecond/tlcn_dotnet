@@ -180,7 +180,7 @@ namespace tlcn_dotnet.Services
             return items;
         }
 
-        public async Task<DataResponse> GetCartHistory(string authorization, string? strStatus, string? strPaymentMethod,
+        public async Task<DataResponse> GetCartHistory(string authorization, CartStatus? status, string? strPaymentMethod,
             string? strFromDate, string? strToDate, string? strFromTotal,
             string? strToTotal, string? sortBy, string? order, string? strPage, string? strPageSize)
         {
@@ -207,7 +207,7 @@ namespace tlcn_dotnet.Services
             {
                 throw new GeneralException(ApplicationConstant.BAD_REQUEST, ApplicationConstant.BAD_REQUEST_CODE);
             }
-            dynamic result = await _cartRepository.GetUserCartHistory(accountId, strStatus, strPaymentMethod, fromDate, toDate,
+            dynamic result = await _cartRepository.GetUserCartHistory(accountId, status, strPaymentMethod, fromDate, toDate,
                 fromTotal, toTotal, sortBy, order, page.Value, pageSize.Value);
             return new DataResponse
                 (
