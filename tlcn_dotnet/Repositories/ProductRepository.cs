@@ -58,19 +58,22 @@ namespace tlcn_dotnet.Repositories
         public async Task<Product> GetBestProduct()
         {
             string query = @"SELECT TOP 1 Product.Id, Product.Name, Product.Price, Product.MinPurchase, Product.Status, Product.Unit, Product.Quantity,
-			                            Image.Id, Image.Url, Image.FileName
+			                            Image.Id, Image.Url, Image.FileName,
+										Category.Id, Category.Name
                             FROM Product LEFT OUTER JOIN BillDetail ON Product.Id = BillDetail.ProductId
                             LEFT OUTER JOIN Bill ON Bill.Id = BillDetail.BillId AND Bill.PurchaseDate IS NOT NULL
+							LEFT OUTER JOIN Category ON Product.CategoryId = Category.Id
                             OUTER APPLY (SELECT TOP 1 ProductImage.Id, ProductImage.FileName, ProductImage.Url FROM ProductImage where ProductImage.ProductId = Product.Id) as Image
                             GROUP BY Product.Id, Product.Name, Product.Price, Product.MinPurchase, Product.Status, Product.Unit, Product.Quantity,
-			                            Image.Id, Image.Url, Image.FileName
+			                            Image.Id, Image.Url, Image.FileName, Category.Id, Category.Name
                             ORDER BY sum(BillDetail.Quantity / Product.MinPurchase) desc";
             using (var connection = _dapperContext.CreateConnection())
             {
-                var product = await connection.QueryAsync<Product, ProductImage, Product>(query, (product, image) =>
+                var product = await connection.QueryAsync<Product, ProductImage, Category, Product>(query, (product, image, category) =>
                 {
                     product.ProductImages = new List<ProductImage>();
                     product.ProductImages.Add(image);
+                    product.Category = category;
                     return product;
                 });
                 return product.SingleOrDefault();
@@ -87,19 +90,22 @@ namespace tlcn_dotnet.Repositories
         public async Task<IList<Product>> GetTop8Product()
         {
             string query = @"SELECT TOP 8 Product.Id, Product.Name, Product.Price, Product.MinPurchase, Product.Status, Product.Unit, Product.Quantity,
-			                            Image.Id, Image.Url, Image.FileName
+			                            Image.Id, Image.Url, Image.FileName,
+										Category.Id, Category.Name
                             FROM Product LEFT OUTER JOIN BillDetail ON Product.Id = BillDetail.ProductId
                             LEFT OUTER JOIN Bill ON Bill.Id = BillDetail.BillId AND Bill.PurchaseDate IS NOT NULL
+							LEFT OUTER JOIN Category ON Product.CategoryId = Category.Id
                             OUTER APPLY (SELECT TOP 1 ProductImage.Id, ProductImage.FileName, ProductImage.Url FROM ProductImage where ProductImage.ProductId = Product.Id) as Image
                             GROUP BY Product.Id, Product.Name, Product.Price, Product.MinPurchase, Product.Status, Product.Unit, Product.Quantity,
-			                            Image.Id, Image.Url, Image.FileName
+			                            Image.Id, Image.Url, Image.FileName, Category.Id, Category.Name
                             ORDER BY sum(BillDetail.Quantity / Product.MinPurchase) desc";
             using (var connection = _dapperContext.CreateConnection())
             {
-                var products = await connection.QueryAsync<Product, ProductImage, Product>(query, (product, image) =>
+                var products = await connection.QueryAsync<Product, ProductImage, Category, Product>(query, (product, image, category) =>
                 {
                     product.ProductImages = new List<ProductImage>();
                     product.ProductImages.Add(image);
+                    product.Category = category;
                     return product;
                 });
                 return products.ToList();
