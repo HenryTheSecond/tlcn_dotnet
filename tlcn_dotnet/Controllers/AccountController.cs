@@ -55,7 +55,7 @@ namespace tlcn_dotnet.Controllers
         [HttpGet("admin/account")]
         public async Task<DataResponse> FilterAccount(string? keyword,
             [IsEnum(EnumType = typeof(AccountKeywordType), ErrorMessage = "KEY WORD TYPE IS INVALID")] string? keywordType = "NAME", 
-            string? role = "", string? page = "1")
+            string? role = "", string? page = "1", string? pageSize = "10")
         {
             if (keyword == null)
                 keyword = string.Empty;
@@ -74,10 +74,13 @@ namespace tlcn_dotnet.Controllers
             }
 
             int numberPage;
+            int numberPageSize;
             Int32.TryParse(page, out numberPage);
+            Int32.TryParse(pageSize, out numberPageSize);
             numberPage = numberPage == 0 ? 1 : numberPage;
+            numberPageSize = numberPageSize > 0 ? numberPageSize : 10;
 
-            return await _authService.GetAccount(keyword.Trim(), enumKeyWordType, role, numberPage);
+            return await _authService.GetAccount(keyword.Trim(), enumKeyWordType, role, numberPage, numberPageSize);
         }
 
         [HttpPost("changePassword")]

@@ -180,7 +180,7 @@ namespace tlcn_dotnet.Services
             return items;
         }
 
-        public async Task<DataResponse> GetCartHistory(string authorization, string? strStatus, string? strPaymentMethod,
+        public async Task<DataResponse> GetCartHistory(string authorization, CartStatus? status, string? strPaymentMethod,
             string? strFromDate, string? strToDate, string? strFromTotal,
             string? strToTotal, string? sortBy, string? order, string? strPage, string? strPageSize)
         {
@@ -207,7 +207,7 @@ namespace tlcn_dotnet.Services
             {
                 throw new GeneralException(ApplicationConstant.BAD_REQUEST, ApplicationConstant.BAD_REQUEST_CODE);
             }
-            dynamic result = await _cartRepository.GetUserCartHistory(accountId, strStatus, strPaymentMethod, fromDate, toDate,
+            dynamic result = await _cartRepository.GetUserCartHistory(accountId, status, strPaymentMethod, fromDate, toDate,
                 fromTotal, toTotal, sortBy, order, page.Value, pageSize.Value);
             return new DataResponse
                 (
@@ -244,7 +244,6 @@ namespace tlcn_dotnet.Services
         {
             DateTime? fromCreatedDate = null, toCreatedDate = null;
             decimal? fromTotal = null, toTotal = null;
-            PaymentMethod? paymentMethod = null;
             int? page = 1, pageSize = 5;
             string? sortBy = requestFilterProcessCartDto.SortBy != null ? requestFilterProcessCartDto.SortBy.ToUpper() : "CREATEDDATE";
             sortBy = (sortBy != "CREATEDDATE" && sortBy != "TOTAL") ? "CREATEDDATE" : sortBy;
@@ -258,7 +257,6 @@ namespace tlcn_dotnet.Services
             toCreatedDate = toCreatedDate == null ? null : toCreatedDate.Value.AddDays(1).AddTicks(-1);
             Util.TryConvertStringToDataType<decimal>(requestFilterProcessCartDto.FromTotal, out fromTotal);
             Util.TryConvertStringToDataType<decimal>(requestFilterProcessCartDto.ToTotal, out toTotal);
-            Util.TryConvertStringToDataType<PaymentMethod>(requestFilterProcessCartDto.PaymentMethod, out paymentMethod);
             Util.TryConvertStringToDataType<int>(requestFilterProcessCartDto.Page, out page);
             page = page == null ? 1 : (page < 0 ? 1 : page);
             Util.TryConvertStringToDataType<int>(requestFilterProcessCartDto.PageSize, out pageSize);
@@ -267,7 +265,7 @@ namespace tlcn_dotnet.Services
             var result = await _cartRepository.GetCarts(keywordType, requestFilterProcessCartDto.KeyWord,
                 requestFilterProcessCartDto.CityId, requestFilterProcessCartDto.DistrictId,
                 requestFilterProcessCartDto.WardId, fromCreatedDate, toCreatedDate,
-                fromTotal, toTotal, paymentMethod, page.Value, pageSize.Value, status: CartStatus.PENDING,
+                fromTotal, toTotal, requestFilterProcessCartDto.PaymentMethod, page.Value, pageSize.Value, status: requestFilterProcessCartDto.CartStatus,
                 sortBy: sortBy, order: order);
             return new DataResponse(new
             {

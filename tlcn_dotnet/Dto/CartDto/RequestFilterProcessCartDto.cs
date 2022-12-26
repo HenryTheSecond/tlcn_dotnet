@@ -13,7 +13,8 @@ namespace tlcn_dotnet.Dto.CartDto
         public string? ToCreatedDate { get; set; }
         public string? FromTotal { get; set; }
         public string? ToTotal { get; set; }
-        public string? PaymentMethod { get; set; }
+        public PaymentMethod? PaymentMethod { get; set; }
+        public CartStatus? CartStatus { get; set; }
         public string? SortBy { get; set; } = "CREATEDDATE"; //ONLY ACCEPT 2 VALUES: CREATEDDATE OR TOTAL
         public string? Order { get; set; } = "ASC"; //ONLY ACCEPT 2 VALUES: ASC OR DESC
         public string? Page { get; set; } = "1";

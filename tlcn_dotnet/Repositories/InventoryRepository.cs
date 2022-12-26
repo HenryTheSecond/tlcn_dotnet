@@ -83,7 +83,7 @@ namespace tlcn_dotnet.RepositoriesImpl
         public async Task<dynamic> SearchInventory(string? keyword, long? productId,
             double? minQuantity, double? maxQuantity, decimal? minImportPrice, decimal? maxImportPrice, 
             DateTime? fromDeliveryDate, DateTime? toDeliveryDate, DateTime? fromExpireDate, 
-            DateTime? toExpireDate, long? supplierId, string? unit, InventoryOrderBy inventoryOrderBy, SortOrder sortOrder, int page = 1)
+            DateTime? toExpireDate, long? supplierId, string? unit, InventoryOrderBy inventoryOrderBy, SortOrder sortOrder, int page = 1, int pageSize = 8)
         {
             string query = SELECT + FROM + " WHERE 1=1 ";
             string countQuery = " SELECT COUNT(DISTINCT i.Id) " + FROM + " WHERE 1=1 ";
@@ -155,8 +155,8 @@ namespace tlcn_dotnet.RepositoriesImpl
                 }
                 query += conditions + " ORDER BY " + ParseToOrderBy(inventoryOrderBy) + " " + sortOrder.ToString() + " OFFSET @skip ROWS FETCH NEXT @take ROWS ONLY";
                 countQuery += conditions;
-                parameters.Add("skip", (page - 1) * 2);
-                parameters.Add("take", 2);
+                parameters.Add("skip", (page - 1) * pageSize);
+                parameters.Add("take", pageSize);
                 Console.WriteLine(query);
                 IEnumerable<Inventory> inventories = await connection.QueryAsync<Inventory, Product, Supplier, Category, ProductImage, Inventory>(query,
                    (inventory, product, supplier, category, productImage) =>

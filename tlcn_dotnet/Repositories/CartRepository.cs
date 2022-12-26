@@ -355,7 +355,7 @@ namespace tlcn_dotnet.Repositories
 
 
 
-        public async Task<dynamic> GetUserCartHistory(long accountId, string? status, string? paymentMethod, 
+        public async Task<dynamic> GetUserCartHistory(long accountId, CartStatus? status, string? paymentMethod, 
             DateTime? fromDate, DateTime? toDate, decimal? fromTotal, decimal? toTotal, 
             string? sortBy, string? order, int page, int pageSize)
         {
@@ -395,10 +395,10 @@ ORDER BY Cart.CreatedDate DESC*/
                 string query = @" SELECT * " + from;
                 DynamicParameters parameters = new DynamicParameters();
                 parameters.Add("AccountId", accountId);
-                if (status != null && Enum.TryParse<CartStatus>(status, out _))
+                if (status != null)
                 {
                     where += " AND Cart.Status = @Status ";
-                    parameters.Add("Status", status.ToUpper().Trim());
+                    parameters.Add("Status", status.GetDisplayName().ToUpper());
                 }
                 if (paymentMethod != null && Enum.TryParse<PaymentMethod>(paymentMethod, out _))
                 {

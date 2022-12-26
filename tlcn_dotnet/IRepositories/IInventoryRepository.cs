@@ -11,7 +11,7 @@ namespace tlcn_dotnet.Repositories
         public Task<dynamic> SearchInventory(string? keyword, long? productId, double? minQuantity,
             double? maxQuantity, decimal? minImportPrice, decimal? maxImportPrice, DateTime? fromDeliveryDate,
             DateTime? toDeliveryDate, DateTime? fromExpireDate, DateTime? toExpireDate,
-            long? supplierId, string? unit, InventoryOrderBy inventoryOrderBy, SortOrder sortOrder, int page = 1);
+            long? supplierId, string? unit, InventoryOrderBy inventoryOrderBy, SortOrder sortOrder, int page = 1, int pageSize = 8);
         public Task<Inventory> UpdateInventory(long id, EditInventoryDto editInventoryDto);
     }
 }
