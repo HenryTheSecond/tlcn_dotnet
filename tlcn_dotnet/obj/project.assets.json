@@ -8172,19 +8172,19 @@
     ]
   },
   "packageFolders": {
-    "C:\\Users\\tuyen\\.nuget\\packages\\": {}
+    "C:\\Users\\intern.vctuyen\\.nuget\\packages\\": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "E:\\dotnet\\tlcn_dotnet\\tlcn_dotnet\\tlcn_dotnet.csproj",
+      "projectUniqueName": "D:\\testing\\tlcn_dotnet\\tlcn_dotnet\\tlcn_dotnet.csproj",
       "projectName": "tlcn_dotnet",
-      "projectPath": "E:\\dotnet\\tlcn_dotnet\\tlcn_dotnet\\tlcn_dotnet.csproj",
-      "packagesPath": "C:\\Users\\tuyen\\.nuget\\packages\\",
-      "outputPath": "E:\\dotnet\\tlcn_dotnet\\tlcn_dotnet\\obj\\",
+      "projectPath": "D:\\testing\\tlcn_dotnet\\tlcn_dotnet\\tlcn_dotnet.csproj",
+      "packagesPath": "C:\\Users\\intern.vctuyen\\.nuget\\packages\\",
+      "outputPath": "D:\\testing\\tlcn_dotnet\\tlcn_dotnet\\obj\\",
       "projectStyle": "PackageReference",
       "configFilePaths": [
-        "C:\\Users\\tuyen\\AppData\\Roaming\\NuGet\\NuGet.Config",
+        "C:\\Users\\intern.vctuyen\\AppData\\Roaming\\NuGet\\NuGet.Config",
         "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
       ],
       "originalTargetFrameworks": [
