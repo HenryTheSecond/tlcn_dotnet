@@ -18,5 +18,9 @@ namespace tlcn_dotnet.Dto.ProductDto
         public string? Description { get; set; }
         public SimpleCategoryDto? Category { get; set; }
         public double? Quantity { get; set; }
+        
+        public double? Rating { get; set; }
+        public double? Sales { get; set; } = 0;
+
     }
 }

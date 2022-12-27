@@ -71,6 +71,7 @@ namespace tlcn_dotnet.ServicesImpl
         {
             var result = await _productRepository.FilterProduct(keyword, minPrice, maxPrice, categoryId, 
                 productOrderBy, sortOrder, page, pageSize);
+
             var products = _mapper.Map<List<SingleImageProductDto>>(result.Products);
             var maxPage = Util.CalculateMaxPage(result.Total, pageSize);
 

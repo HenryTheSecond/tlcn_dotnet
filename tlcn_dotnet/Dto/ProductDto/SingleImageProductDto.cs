@@ -1,4 +1,6 @@
 ﻿using tlcn_dotnet.Dto.ProductImageDto;
+using tlcn_dotnet.Entity;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace tlcn_dotnet.Dto.ProductDto
 {

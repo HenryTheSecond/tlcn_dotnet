@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using tlcn_dotnet.Constant;
 using tlcn_dotnet.Dto;
 using tlcn_dotnet.Dto.AccountDto;
 using tlcn_dotnet.Dto.BillDetailDto;
@@ -14,7 +15,7 @@ using tlcn_dotnet.Entity;
 
 namespace tlcn_dotnet.Mapper
 {
-    public class ManageMapper: Profile
+    public class ManageMapper : Profile
     {
         public ManageMapper()
         {
@@ -30,22 +31,49 @@ namespace tlcn_dotnet.Mapper
             CreateMap<Supplier, SupplierIdAndName>();
 
             CreateMap<AddProductDto, Product>();
-            CreateMap<Product, SimpleProductDto>();
-            CreateMap<Product, ProductWithImageDto>();
+            CreateMap<Product, SimpleProductDto>()
+                .AfterMap((src, dest) =>
+                {
+                    if (src.Reviews != null)
+                    {
+                        dest.Rating = src.Reviews.Average(review => review.Rating);
+                    }
+                });
+            CreateMap<Product, ProductWithImageDto>()
+                .AfterMap((src, dest) =>
+                {
+                    if (src.Reviews != null)
+                    {
+                        dest.Rating = src.Reviews.Average(review => review.Rating);
+                    }
+                });
             //CreateMap<Product, SingleImageProductDto>();
             CreateMap<Product, SingleImageProductDto>()
                 .AfterMap((src, dest) =>
                 {
                     ProductImage image = src.ProductImages.FirstOrDefault();
-                    if (image == null)
-                        return;
-                    dest.Image = new SimpleProductImageDto
+                    if (image != null)
                     {
-                        Id = image.Id,
-                        FileName = image.FileName,
-                        ProductId = src.Id,
-                        Url = image.Url
-                    };
+                        dest.Image = new SimpleProductImageDto
+                        {
+                            Id = image.Id,
+                            FileName = image.FileName,
+                            ProductId = src.Id,
+                            Url = image.Url
+                        };
+                    }
+
+                    if (src.Reviews != null)
+                    {
+                        dest.Rating = src.Reviews.Average(review => review.Rating);
+                    }
+
+                    if (src.BillDetails != null)
+                    {
+                        dest.Sales = src.BillDetails
+                            .Where(bd => bd.Bill.Cart.Status == CartStatus.DELIVERIED)
+                            .Sum(bd => bd.Quantity);
+                    }
                 });
             CreateMap<ProductImage, SimpleProductImageDto>();
             CreateMap<Product, ProductIdAndNameDto>();

@@ -21,7 +21,11 @@ namespace tlcn_dotnet.Repositories
         {
             IQueryable<Product> queryProduct = _dbContext.Product
                 .Include(product => product.Category)
-                .Include(product => product.ProductImages);
+                .Include(product => product.ProductImages)
+                .Include(product => product.Reviews)
+                .Include(product => product.BillDetails)
+                    .ThenInclude(bd => bd.Bill)
+                    .ThenInclude(bill => bill.Cart);
 
             if (keyword != null)
                 queryProduct = queryProduct.Where(product => product.Name.Contains(keyword) || product.Description.Contains(keyword));
@@ -84,6 +88,7 @@ namespace tlcn_dotnet.Repositories
         {
             return await _dbContext.Product.Include(product => product.ProductImages)
                 .Include(product => product.Category)
+                .Include(product => product.Reviews)
                 .FirstOrDefaultAsync(product => product.Id == id);
         }
 

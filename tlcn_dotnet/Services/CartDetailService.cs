@@ -42,6 +42,9 @@ namespace tlcn_dotnet.Services
             Product productDb = await _productRepository.GetById(addCartDetailDto.ProductId) ??
                 throw new GeneralException("PRODUCT NOT FOUND", ApplicationConstant.NOT_FOUND_CODE);
 
+            if (productDb.Status == ProductStatus.UNSOLD)
+                throw new GeneralException("PRODUCT IS UNSOLD", ApplicationConstant.BAD_REQUEST_CODE);
+
             if (ValidateQuantityCartDetail(productDb, addCartDetailDto.Quantity) == false)
                 throw new GeneralException("QUANTITY IS NOT VALID", ApplicationConstant.BAD_REQUEST_CODE);
 
@@ -103,6 +106,10 @@ namespace tlcn_dotnet.Services
             accountId = Convert.ToInt64(accountId);
 
             Product product = await _productRepository.GetById(updateCartDetailQuantityDto.ProductId);
+
+            if (product.Status == ProductStatus.UNSOLD)
+                throw new GeneralException("PRODUCT IS UNSOLD", ApplicationConstant.BAD_REQUEST_CODE);
+
             if(ValidateQuantityCartDetail(product, updateCartDetailQuantityDto.Quantity) == false)
                 throw new GeneralException("QUANTITY IS NOT VALID", ApplicationConstant.BAD_REQUEST_CODE);
 
