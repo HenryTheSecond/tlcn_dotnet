@@ -3,6 +3,9 @@ using Microsoft.EntityFrameworkCore;
 using System.Dynamic;
 using tlcn_dotnet.Constant;
 using tlcn_dotnet.DatabaseContext;
+using tlcn_dotnet.Dto.CategoryDto;
+using tlcn_dotnet.Dto.ProductDto;
+using tlcn_dotnet.Dto.ProductImageDto;
 using tlcn_dotnet.Entity;
 using tlcn_dotnet.IRepositories;
 
@@ -59,28 +62,35 @@ namespace tlcn_dotnet.Repositories
             return await _dbContext.Product.Include(product => product.ProductImages).ToListAsync();
         }
 
-        public async Task<Product> GetBestProduct()
+        public async Task<SingleImageProductDto> GetBestProduct()
         {
             string query = @"SELECT TOP 1 Product.Id, Product.Name, Product.Price, Product.MinPurchase, Product.Status, Product.Unit, Product.Quantity,
+										AVG(Review.Rating) as Rating,
+										SUM(BillDetail.Quantity) as Sales,
 			                            Image.Id, Image.Url, Image.FileName,
 										Category.Id, Category.Name
                             FROM Product LEFT OUTER JOIN BillDetail ON Product.Id = BillDetail.ProductId
                             LEFT OUTER JOIN Bill ON Bill.Id = BillDetail.BillId AND Bill.PurchaseDate IS NOT NULL
 							LEFT OUTER JOIN Category ON Product.CategoryId = Category.Id
+							LEFT OUTER JOIN Review ON Review.ProductId = Product.Id
                             OUTER APPLY (SELECT TOP 1 ProductImage.Id, ProductImage.FileName, ProductImage.Url FROM ProductImage where ProductImage.ProductId = Product.Id) as Image
                             GROUP BY Product.Id, Product.Name, Product.Price, Product.MinPurchase, Product.Status, Product.Unit, Product.Quantity,
 			                            Image.Id, Image.Url, Image.FileName, Category.Id, Category.Name
-                            ORDER BY sum(BillDetail.Quantity / Product.MinPurchase) desc";
+                            ORDER BY sum(
+								CASE Product.MinPurchase
+								WHEN 0 THEN BillDetail.Quantity / 1
+								ELSE BillDetail.Quantity / Product.MinPurchase
+								END
+							) desc";
             using (var connection = _dapperContext.CreateConnection())
             {
-                var product = await connection.QueryAsync<Product, ProductImage, Category, Product>(query, (product, image, category) =>
+                var products = await connection.QueryAsync<SingleImageProductDto, SimpleProductImageDto, SimpleCategoryDto, SingleImageProductDto>(query, (product, image, category) =>
                 {
-                    product.ProductImages = new List<ProductImage>();
-                    product.ProductImages.Add(image);
                     product.Category = category;
+                    product.Image = image;
                     return product;
                 });
-                return product.SingleOrDefault();
+                return products.SingleOrDefault();
             }
         }
 
@@ -92,25 +102,35 @@ namespace tlcn_dotnet.Repositories
                 .FirstOrDefaultAsync(product => product.Id == id);
         }
 
-        public async Task<IList<Product>> GetTop8Product()
+        public async Task<IList<SingleImageProductDto>> GetTop8Product()
         {
             string query = @"SELECT TOP 8 Product.Id, Product.Name, Product.Price, Product.MinPurchase, Product.Status, Product.Unit, Product.Quantity,
+										AVG(Review.Rating) as Rating,
+										SUM(CASE Product.MinPurchase
+											WHEN 0 THEN BillDetail.Quantity / 1
+											ELSE BillDetail.Quantity / Product.MinPurchase
+											END) as Sales,
 			                            Image.Id, Image.Url, Image.FileName,
 										Category.Id, Category.Name
                             FROM Product LEFT OUTER JOIN BillDetail ON Product.Id = BillDetail.ProductId
                             LEFT OUTER JOIN Bill ON Bill.Id = BillDetail.BillId AND Bill.PurchaseDate IS NOT NULL
 							LEFT OUTER JOIN Category ON Product.CategoryId = Category.Id
+							LEFT OUTER JOIN Review ON Review.ProductId = Product.Id
                             OUTER APPLY (SELECT TOP 1 ProductImage.Id, ProductImage.FileName, ProductImage.Url FROM ProductImage where ProductImage.ProductId = Product.Id) as Image
                             GROUP BY Product.Id, Product.Name, Product.Price, Product.MinPurchase, Product.Status, Product.Unit, Product.Quantity,
 			                            Image.Id, Image.Url, Image.FileName, Category.Id, Category.Name
-                            ORDER BY sum(BillDetail.Quantity / Product.MinPurchase) desc";
+                            ORDER BY sum(
+								CASE Product.MinPurchase
+								WHEN 0 THEN BillDetail.Quantity / 1
+								ELSE BillDetail.Quantity / Product.MinPurchase
+								END
+							) desc";
             using (var connection = _dapperContext.CreateConnection())
             {
-                var products = await connection.QueryAsync<Product, ProductImage, Category, Product>(query, (product, image, category) =>
+                var products = await connection.QueryAsync<SingleImageProductDto, SimpleProductImageDto, SimpleCategoryDto, SingleImageProductDto>(query, (product, image, category) =>
                 {
-                    product.ProductImages = new List<ProductImage>();
-                    product.ProductImages.Add(image);
                     product.Category = category;
+                    product.Image = image;
                     return product;
                 });
                 return products.ToList();

@@ -98,7 +98,7 @@ namespace tlcn_dotnet.ServicesImpl
         public async Task<DataResponse> GetBestProduct()
         {
             var product = await _productRepository.GetBestProduct();
-            return new DataResponse(_mapper.Map<SingleImageProductDto>(product));
+            return new DataResponse(product);
         }
 
         public async Task<DataResponse> GetProductById(long? id)
@@ -113,7 +113,7 @@ namespace tlcn_dotnet.ServicesImpl
         public async Task<DataResponse> GetTop8Product()
         {
             var products = await _productRepository.GetTop8Product();
-            return new DataResponse(_mapper.Map<IList<SingleImageProductDto>>(products));
+            return new DataResponse(products);
         }
     }
 }
