@@ -293,7 +293,7 @@ namespace tlcn_dotnet.Repositories
             string from = $@" FROM (SELECT Cart.Id, Cart.Phone, Cart.Name, Cart.CityId, Cart.DistrictId, Cart.WardId,
                                                     Cart.DetailLocation, Cart.Status, Cart.CreatedDate, Cart.ProcessDescription, ProcessAccountId,
                                                     Bill.Id as BillId, Bill.PurchaseDate, Bill.Total, Bill.PaymentMethod, Bill.OrderCode
-                                                FROM Cart JOIN Bill ON Cart.BillId = Bill.Id 
+                                                FROM Cart LEFT OUTER JOIN Bill ON Cart.BillId = Bill.Id 
                                                 {where}
                                                 {orderBy} OFFSET @Skip ROWS FETCH NEXT @Take ROWS ONLY) as CartBill
                                         JOIN CartDetail ON CartBill.Id = CartDetail.CartId
@@ -330,8 +330,11 @@ namespace tlcn_dotnet.Repositories
                                 cartEntry = cart;
                                 cartEntry.CartDetails = new List<CartDetail>();
                                 cartDictionary.Add(cartEntry.Id.Value, cartEntry);
-                                cartEntry.Bill = bill;
-                                cartEntry.BillId = bill.Id;
+                                if (bill != null)
+                                {
+                                    cartEntry.Bill = bill;
+                                    cartEntry.BillId = bill.Id;
+                                }
                             }
                             cartEntry.CartDetails.Add(cartDetail);
                             Console.WriteLine($"CHECK {cart.BillId}");
@@ -342,7 +345,7 @@ namespace tlcn_dotnet.Repositories
                     )).Distinct().ToList();
                 long count = await connection.ExecuteScalarAsync<long>($@"SELECT COUNT(DISTINCT(Cart.Id)) 
                                                                             FROM Cart JOIN CartDetail ON Cart.Id = CartDetail.CartId
-                                                                                    JOIN Bill ON Bill.Id = Cart.BillId
+                                                                                    LEFT OUTER JOIN Bill ON Bill.Id = Cart.BillId
                                                                                     JOIN Product ON CartDetail.ProductId = Product.Id
                                                                                     JOIN Account ON Account.Id = CartDetail.AccountId
                                                                                     OUTER APPLY(SELECT TOP 1 * FROM ProductImage WHERE ProductImage.ProductId = Product.Id) as img 
@@ -387,7 +390,7 @@ ORDER BY Cart.CreatedDate DESC*/
             using (var connection = _dapperContext.CreateConnection())
             {
                 string from = @" FROM Cart JOIN CartDetail ON Cart.Id = CartDetail.CartId
-                                    JOIN Bill ON Bill.Id = Cart.BillId
+                                    LEFT OUTER JOIN Bill ON Bill.Id = Cart.BillId
                                     JOIN Product ON CartDetail.ProductId = Product.Id
                                     JOIN Account ON Account.Id = CartDetail.AccountId
                                     OUTER APPLY (SELECT TOP 1 * FROM ProductImage WHERE ProductImage.ProductId = Product.Id) as img ";
@@ -465,8 +468,11 @@ ORDER BY Cart.CreatedDate DESC*/
                                 cartEntry = cart;
                                 cartEntry.CartDetails = new List<CartDetail>();
                                 cartDictionary.Add(cartEntry.Id.Value, cartEntry);
-                                cartEntry.Bill = bill;
-                                cartEntry.BillId = bill.Id;
+                                if (bill != null)
+                                {
+                                    cartEntry.Bill = bill;
+                                    cartEntry.BillId = bill.Id;
+                                }
                             }
                             cartEntry.CartDetails.Add(cartDetail);
                             return cartEntry;
