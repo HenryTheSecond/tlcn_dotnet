@@ -56,9 +56,12 @@ namespace tlcn_dotnet.Services
         }
         public async Task<DataResponse> ReviewProduct(string authorization, long productId, ReviewRequest reviewRequest)
         {
-            /*Product product = await _productRepository.GetById(productId)
-                ?? throw new GeneralException("PRODUCT NOT FOUND", ApplicationConstant.NOT_FOUND_CODE);*/
+            Product product = await _productRepository.GetById(productId)
+                ?? throw new GeneralException("PRODUCT NOT FOUND", ApplicationConstant.NOT_FOUND_CODE);
             long accountId = Util.ReadJwtTokenAndGetAccountId(authorization);
+
+            if (!(await _productRepository.CheckAccountBuyItem(accountId, productId)))
+                throw new GeneralException("USER DIDN'T BUY PRODUCT", ApplicationConstant.BAD_REQUEST_CODE);
 
             long id = 0;
             try

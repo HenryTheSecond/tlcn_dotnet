@@ -12,5 +12,6 @@ namespace tlcn_dotnet.IRepositories
         public Task<IList<SingleImageProductDto>> GetTop8Product();
         public Task<SingleImageProductDto> GetBestProduct();
         public Task<IList<Product>> GetAllProudctWithImage();
+        public Task<bool> CheckAccountBuyItem(long accountId, long productId);
     }
 }

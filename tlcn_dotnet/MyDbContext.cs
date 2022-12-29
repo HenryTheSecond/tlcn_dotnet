@@ -5,14 +5,14 @@ namespace tlcn_dotnet
 {
     public class MyDbContext : DbContext
     {
-        public MyDbContext(DbContextOptions<MyDbContext> options): base(options)
+        public MyDbContext(DbContextOptions<MyDbContext> options) : base(options)
         {
 
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            
+
         }
 
         public DbSet<Account> Account { get; set; }
@@ -25,5 +25,6 @@ namespace tlcn_dotnet
         public DbSet<ProductImage> ProductImage { get; set; }
         public DbSet<Supplier> Supplier { get; set; }
         public DbSet<ChangePasswordToken> ChangePasswordToken { get; set; }
+        public DbSet<CartDetail> CartDetail { get; set; }
     }
 }

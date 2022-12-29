@@ -19,6 +19,15 @@ namespace tlcn_dotnet.Repositories
             _dapperContext = dapperContext;
         }
 
+        public async Task<bool> CheckAccountBuyItem(long accountId, long productId)
+        {
+            int count = _dbContext.CartDetail.Include(cd => cd.Product)
+                .Include(cd => cd.Cart)
+                .Include(cd => cd.Account)
+                .Where(cd => cd.Account.Id == accountId && cd.Product.Id == productId && cd.Cart.Status == CartStatus.DELIVERIED).Count();
+            return count > 0;
+        }
+
         public async Task<dynamic> FilterProduct(string? keyword, decimal? minPrice, decimal? maxPrice,
             long? categoryId, ProductOrderBy? productOrderBy, SortOrder? sortOrder, int page, int pageSize)
         {
