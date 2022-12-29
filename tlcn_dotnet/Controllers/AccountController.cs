@@ -116,5 +116,12 @@ namespace tlcn_dotnet.Controllers
         {
             return await _authService.UploadPhoto(authorization, photo);
         }
+
+        [HttpPut("updateProfile")]
+        [CustomAuthorize]
+        public async Task<DataResponse> UpdateProfile([FromHeader(Name = "Authorization")] string authorization, [FromBody] UpdateProfileRequest request)
+        {
+            return await _authService.UpdateProfile(authorization, request);
+        }
     }
 }

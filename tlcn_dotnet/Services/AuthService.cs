@@ -248,5 +248,29 @@ namespace tlcn_dotnet.ServicesImpl
             }
 
         }
+
+        public async Task<DataResponse> UpdateProfile(string authorization, UpdateProfileRequest request)
+        {
+            long accountId = Util.ReadJwtTokenAndGetAccountId(authorization);
+
+            var checkLocation = await Util.CheckVietnameseAddress(request.CityId, request.DistrictId, request.WardId);
+            if (checkLocation != null)
+                return new DataResponse
+                {
+                    Message = checkLocation,
+                    Status = ApplicationConstant.BAD_REQUEST_CODE
+                };
+            Account account = await _accountRepository.GetById(accountId);
+            account.Phone = request.Phone != null ? request.Phone : account.Phone;
+            account.CityId = request.CityId;
+            account.DistrictId = request.DistrictId;
+            account.WardId = request.WardId;
+            account.DetailLocation = request.DetailLocation != null ? request.DetailLocation : account.DetailLocation;
+            account.FirstName = request.FirstName != null ? request.FirstName : account.FirstName;
+            account.LastName = request.LastName != null ? request.LastName : account.LastName;
+
+            Account accountDb = await _accountRepository.Update(account);
+            return new DataResponse(_mapper.Map<AccountResponse>(accountDb));
+        }
     }
 }
