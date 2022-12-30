@@ -24,5 +24,23 @@ namespace tlcn_dotnet.Controllers
         {
             return await _locationService.GetAllCountryAndCity();
         }
+
+        [HttpGet("city")]
+        public async Task<DataResponse> GetAllVietnamCity()
+        {
+            return await _locationService.GetAllVietnamCity();
+        }
+
+        [HttpGet("district/{cityId}")]
+        public async Task<DataResponse> GetAllDistrictByCityId(string cityId)
+        {
+            return await _locationService.GetAllDistrictByCityId(cityId);
+        }
+
+        [HttpGet("ward/{cityId}/{districtId}")]
+        public async Task<DataResponse> GetAllWardByDistrictId(string cityId, string districtId)
+        { 
+            return await _locationService.GetAllWardByDistrictId(cityId, districtId);
+        }
     }
 }
