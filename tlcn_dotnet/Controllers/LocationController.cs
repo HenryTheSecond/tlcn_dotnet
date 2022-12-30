@@ -42,5 +42,23 @@ namespace tlcn_dotnet.Controllers
         { 
             return await _locationService.GetAllWardByDistrictId(cityId, districtId);
         }
+
+        [HttpGet("city/{cityId}")]
+        public async Task<DataResponse> GetCityById(string cityId)
+        { 
+            return await _locationService.GetCityById(cityId);
+        }
+
+        [HttpGet("district/{cityId}/{districtId}")]
+        public async Task<DataResponse> GetDistrictById(string cityId, string districtId)
+        { 
+            return await _locationService.GetDistrictById(cityId, districtId);
+        }
+
+        [HttpGet("ward/{cityId}/{districtId}/{wardId}")]
+        public async Task<DataResponse> GetWardById(string cityId, string districtId, string wardId)
+        {
+            return await _locationService.GetWardById(cityId, districtId, wardId);
+        }
     }
 }

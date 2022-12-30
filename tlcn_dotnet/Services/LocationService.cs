@@ -97,12 +97,95 @@ namespace tlcn_dotnet.ServicesImpl
             }
         }
 
+        public async Task<DataResponse> GetCityById(string cityId)
+        {
+            using (StreamReader reader = new StreamReader(ApplicationConstant.VIETNAM_REGION))
+            {
+                var json = JsonSerializer.Deserialize<JsonNode>(reader.ReadToEnd())["data"];
+                IList<dynamic> list = new List<dynamic>();
+                foreach (var item in json.AsArray())
+                {
+                    if (item["level1_id"].GetValue<string>() == cityId)
+                        return new DataResponse(new
+                        {
+                            level1_id = item["level1_id"],
+                            name = item["name"],
+                            type = item["type"]
+                        });
+                }
+            }
+            return new DataResponse(null);
+        }
+
+        public async Task<DataResponse> GetDistrictById(string cityId, string districtId)
+        {
+            using (StreamReader reader = new StreamReader(ApplicationConstant.VIETNAM_REGION))
+            {
+                var json = JsonSerializer.Deserialize<JsonNode>(reader.ReadToEnd())["data"];
+                IList<dynamic> list = new List<dynamic>();
+                foreach (var item in json.AsArray())
+                {
+                    if (item["level1_id"].GetValue<string>() == cityId)
+                    {
+                        foreach (var district in item["level2s"].AsArray())
+                        {
+                            if (district["level2_id"].GetValue<string>() == districtId)
+                            {
+                                return new DataResponse(new
+                                {
+                                    level2_id = district["level2_id"],
+                                    name = district["name"],
+                                    type = district["type"]
+                                });
+                            }
+                        }
+                        break;
+                    }
+                }
+            }
+            return new DataResponse(null);
+        }
+
         public async Task<DataResponse> GetVietnamLocation()
         {
             using (StreamReader r = new StreamReader(ApplicationConstant.VIETNAM_REGION))
             {
                 return new DataResponse(JsonSerializer.Deserialize<JsonNode>(r.ReadToEnd())["data"]);
             }
+        }
+
+        public async Task<DataResponse> GetWardById(string cityId, string districtId, string wardId)
+        {
+            using (StreamReader reader = new StreamReader(ApplicationConstant.VIETNAM_REGION))
+            {
+                var json = JsonSerializer.Deserialize<JsonNode>(reader.ReadToEnd())["data"];
+                IList<dynamic> list = new List<dynamic>();
+                foreach (var item in json.AsArray())
+                {
+                    if (item["level1_id"].GetValue<string>() == cityId)
+                    {
+                        foreach (var district in item["level2s"].AsArray())
+                        {
+                            if (district["level2_id"].GetValue<string>() == districtId)
+                            {
+                                foreach (var ward in district["level3s"].AsArray())
+                                {
+                                    if (ward["level3_id"].GetValue<string>() == wardId)
+                                        return new DataResponse(new
+                                        {
+                                            level3_id = ward["level3_id"],
+                                            name = ward["name"],
+                                            type = ward["type"]
+                                        });
+                                }
+                                break;
+                            }
+                        }
+                        break;
+                    }
+                }
+            }
+            return new DataResponse(null);
         }
     }
 }
