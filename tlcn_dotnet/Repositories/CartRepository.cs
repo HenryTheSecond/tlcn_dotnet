@@ -1,4 +1,6 @@
 ﻿using Dapper;
+using DocumentFormat.OpenXml.Office2010.Excel;
+using MailKit.Search;
 using Microsoft.OpenApi.Extensions;
 using System.Data;
 using tlcn_dotnet.Constant;
@@ -349,7 +351,7 @@ namespace tlcn_dotnet.Repositories
                                                                                     JOIN Product ON CartDetail.ProductId = Product.Id
                                                                                     JOIN Account ON Account.Id = CartDetail.AccountId
                                                                                     OUTER APPLY(SELECT TOP 1 * FROM ProductImage WHERE ProductImage.ProductId = Product.Id) as img 
-                                                                            {where}"  ,
+                                                                            {where}",
                                                                         parameters);
                 return new { carts, count };
             }
@@ -358,34 +360,34 @@ namespace tlcn_dotnet.Repositories
 
 
 
-        public async Task<dynamic> GetUserCartHistory(long accountId, CartStatus? status, string? paymentMethod, 
-            DateTime? fromDate, DateTime? toDate, decimal? fromTotal, decimal? toTotal, 
+        public async Task<dynamic> GetUserCartHistory(long accountId, CartStatus? status, string? paymentMethod,
+            DateTime? fromDate, DateTime? toDate, decimal? fromTotal, decimal? toTotal,
             string? sortBy, string? order, int page, int pageSize)
         {
-/*            SELECT*
-FROM Cart JOIN CartDetail ON Cart.Id = CartDetail.CartId
-                                    JOIN Bill ON Bill.Id = Cart.BillId
-                                    JOIN Product ON CartDetail.ProductId = Product.Id
-                                    JOIN Account ON Account.Id = CartDetail.AccountId
-                                    OUTER APPLY(SELECT TOP 1 * FROM ProductImage WHERE ProductImage.ProductId = Product.Id) as img
-                                WHERE Cart.Id IN(
-                                    SELECT DISTINCT(Cart.Id)
-                                    FROM Cart JOIN CartDetail ON Cart.Id = CartDetail.CartId
+            /*            SELECT*
+            FROM Cart JOIN CartDetail ON Cart.Id = CartDetail.CartId
+                                                JOIN Bill ON Bill.Id = Cart.BillId
+                                                JOIN Product ON CartDetail.ProductId = Product.Id
+                                                JOIN Account ON Account.Id = CartDetail.AccountId
+                                                OUTER APPLY(SELECT TOP 1 * FROM ProductImage WHERE ProductImage.ProductId = Product.Id) as img
+                                            WHERE Cart.Id IN(
+                                                SELECT DISTINCT(Cart.Id)
+                                                FROM Cart JOIN CartDetail ON Cart.Id = CartDetail.CartId
 
-                                        JOIN Bill ON Bill.Id = Cart.BillId
+                                                    JOIN Bill ON Bill.Id = Cart.BillId
 
-                                        JOIN Product ON CartDetail.ProductId = Product.Id
+                                                    JOIN Product ON CartDetail.ProductId = Product.Id
 
-                                        JOIN Account ON Account.Id = CartDetail.AccountId
+                                                    JOIN Account ON Account.Id = CartDetail.AccountId
 
-                                        OUTER APPLY (SELECT TOP 1 * FROM ProductImage WHERE ProductImage.ProductId = Product.Id) as img
+                                                    OUTER APPLY (SELECT TOP 1 * FROM ProductImage WHERE ProductImage.ProductId = Product.Id) as img
 
-                                    WHERE Account.Id = 39
+                                                WHERE Account.Id = 39
 
-                                    ORDER BY Cart.Id
-                                    OFFSET 0 ROWS FETCH NEXT 5 ROWS ONLY
-								)
-ORDER BY Cart.CreatedDate DESC*/
+                                                ORDER BY Cart.Id
+                                                OFFSET 0 ROWS FETCH NEXT 5 ROWS ONLY
+                                            )
+            ORDER BY Cart.CreatedDate DESC*/
 
             using (var connection = _dapperContext.CreateConnection())
             {
@@ -414,7 +416,7 @@ ORDER BY Cart.CreatedDate DESC*/
                     parameters.Add("FromDate", fromDate);
                 }
                 if (toDate != null)
-                { 
+                {
                     where += " AND Bill.PurchaseDate <= @ToDate ";
                     parameters.Add("ToDate", toDate);
                 }
@@ -480,7 +482,7 @@ ORDER BY Cart.CreatedDate DESC*/
                         param: parameters
                     )).Distinct().Skip((page - 1) * pageSize).Take(pageSize).ToList();
                 long count = await connection.ExecuteScalarAsync<long>("SELECT COUNT(DISTINCT(Cart.Id)) " + from + where, parameters);
-                return new { carts, count};
+                return new { carts, count };
             }
         }
 
@@ -516,7 +518,7 @@ ORDER BY Cart.CreatedDate DESC*/
                     {
                         Cart cartEntry;
                         if (!cartDictionary.TryGetValue(cart.Id.Value, out cartEntry))
-                        { 
+                        {
                             cartEntry = cart;
                             cartEntry.CartDetails = new List<CartDetail>();
                             cartEntry.Bill = bill;
@@ -529,6 +531,55 @@ ORDER BY Cart.CreatedDate DESC*/
                     }, parameters,
                     commandType: CommandType.StoredProcedure))
                     .Distinct().SingleOrDefault();
+                return cart;
+            }
+        }
+
+        public async Task<Cart> ProcessCartById(long id)
+        {
+            using (var connection = _dapperContext.CreateConnection())
+            {
+                string query = @$" SELECT  CartBill.Id, CartBill.Phone, CartBill.Name, CartBill.CityId, CartBill.DistrictId, CartBill.WardId,
+                                       CartBill.DetailLocation, CartBill.Status, CartBill.CreatedDate, CartBill.ProcessDescription, ProcessAccountId,
+                                       CartBill.BillId as Id, CartBill.PurchaseDate, CartBill.Total, CartBill.PaymentMethod, CartBill.OrderCode,
+	                                   CartDetail.Id, CartDetail.Price, CartDetail.Status, CartDetail.Unit, CartDetail.Quantity,
+	                                   Product.Id, Product.Name, Product.Price, Product.Unit, Product.MinPurchase, Product.Status, Product.Description, Product.Quantity,
+	                                   Account.Id, Account.Phone, Account.Email, Account.FirstName, Account.LastName, Account.CityId, Account.DistrictId, Account.WardId,
+	                                   img.Id, img.Url, img.FileName ";
+                string from = $@" FROM (SELECT Cart.Id, Cart.Phone, Cart.Name, Cart.CityId, Cart.DistrictId, Cart.WardId,
+                                                    Cart.DetailLocation, Cart.Status, Cart.CreatedDate, Cart.ProcessDescription, ProcessAccountId,
+                                                    Bill.Id as BillId, Bill.PurchaseDate, Bill.Total, Bill.PaymentMethod, Bill.OrderCode
+                                                FROM Cart LEFT OUTER JOIN Bill ON Cart.BillId = Bill.Id) as CartBill
+                                        JOIN CartDetail ON CartBill.Id = CartDetail.CartId
+                                        JOIN Product ON CartDetail.ProductId = Product.Id
+                                        JOIN Account ON Account.Id = CartDetail.AccountId
+                                        OUTER APPLY(SELECT TOP 1 * FROM ProductImage WHERE ProductImage.ProductId = Product.Id) as img ";
+                string where = " WHERE CartBill.Id = @Id ";
+                var cartDictionary = new Dictionary<long, Cart>();
+                Cart cart = (await connection.QueryAsync<Cart, Bill, CartDetail, Product, Account, ProductImage, Cart>(query + from + where, (cart, bill, cartDetail, product, account, productImage) =>
+                {
+                    product.ProductImages.Add(productImage);
+                    cartDetail.Account = account;
+                    cartDetail.Product = product;
+                    cartDetail.ProductId = product.Id;
+
+                    Cart cartEntry;
+                    if (cartDictionary.TryGetValue(cart.Id.Value, out cartEntry) == false)
+                    {
+                        cartEntry = cart;
+                        cartEntry.CartDetails = new List<CartDetail>();
+                        cartDictionary.Add(cartEntry.Id.Value, cartEntry);
+                        if (bill != null)
+                        {
+                            cartEntry.Bill = bill;
+                            cartEntry.BillId = bill.Id;
+                        }
+                    }
+                    cartEntry.CartDetails.Add(cartDetail);
+                    Console.WriteLine($"CHECK {cart.BillId}");
+                    return cartEntry;
+                }, param: new { Id = id },
+                splitOn: "Id, Id, Id, Id, Id, Id ")).Distinct().SingleOrDefault();
                 return cart;
             }
         }

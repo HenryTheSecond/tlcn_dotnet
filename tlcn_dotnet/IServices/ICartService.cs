@@ -14,5 +14,6 @@ namespace tlcn_dotnet.IServices
         public Task<DataResponse> CancelCart(string authorization, long id);
         public Task<DataResponse> ManageCart(RequestFilterProcessCartDto requestFilterProcessCartDto);
         public Task<DataResponse> DeleteCurrentCart(string authorization);
+        public Task<DataResponse> ProcessCartDetailById(long id);
     }
 }

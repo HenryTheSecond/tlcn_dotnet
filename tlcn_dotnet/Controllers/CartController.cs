@@ -100,6 +100,14 @@ namespace tlcn_dotnet.Controllers
             return await _cartService.ManageCart(requestFilterProcessCart);
         }
 
+        [CustomAuthorize(Roles = "ROLE_ADMIN, ROLE_EMPLOYEE")]
+        [HttpGet("processCart/{strId}")]
+        public async Task<DataResponse> ProcessCartDetailById(string strId)
+        {
+            long? id = Util.ParseId(strId) ?? throw new GeneralException(ApplicationConstant.INVALID_ID, ApplicationConstant.BAD_REQUEST_CODE);
+            return await _cartService.ProcessCartDetailById(id.Value);
+        }
+
         [CustomAuthorize]
         [HttpDelete("deleteCurrentCart")]
         public async Task<DataResponse> DeleteCurrentCart([FromHeader(Name = "Authorization")] string authorization)

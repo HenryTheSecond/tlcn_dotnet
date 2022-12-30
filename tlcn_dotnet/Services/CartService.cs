@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using CloudinaryDotNet.Actions;
+using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 using System.IdentityModel.Tokens.Jwt;
 using System.Text.Json;
@@ -28,6 +29,7 @@ namespace tlcn_dotnet.Services
         private readonly IMapper _mapper;
         private readonly IDeliveryService _deliveryService;
         private readonly IBillRepository _billRepository;
+        private readonly MyDbContext _dbContext;
         public CartService(ICartDetailRepository cartDetailRepository, IBillService billService,
             ICartRepository cartRepository, IMapper mapper, IDeliveryService deliveryService, IBillRepository billRepository)
         {
@@ -284,6 +286,11 @@ namespace tlcn_dotnet.Services
             if (affectedRow == 0)
                 throw new GeneralException("NO ITEM IN CART", ApplicationConstant.NOT_FOUND_CODE);
             return new DataResponse(true);
+        }
+
+        public async Task<DataResponse> ProcessCartDetailById(long id)
+        {
+            return new DataResponse(_mapper.Map<CartResponse>(await _cartRepository.ProcessCartById(id)));
         }
     }
 }
