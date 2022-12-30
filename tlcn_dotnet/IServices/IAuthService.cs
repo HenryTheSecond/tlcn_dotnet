@@ -15,5 +15,6 @@ namespace tlcn_dotnet.Services
         public Task<DataResponse> GetProfile(string authorization);
         public Task<DataResponse> UploadPhoto(string authorization, IFormFile photo);
         public Task<DataResponse> UpdateProfile(string authorization, UpdateProfileRequest request);
+        public Task<DataResponse> UpdateAccountRole(UpdateRoleRequest request);
     }
 }

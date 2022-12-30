@@ -19,7 +19,7 @@ namespace tlcn_dotnet.Controllers
 
         public AccountController(IAuthService authService)
         {
-               _authService = authService;
+            _authService = authService;
         }
 
         [HttpPost("user/register")]
@@ -42,12 +42,12 @@ namespace tlcn_dotnet.Controllers
 
         [HttpPost("{strRole}/register")]
         [Authorize(Roles = "ROLE_ADMIN")]
-        public async Task<DataResponse> EmployeeRegister([FromBody] RegisterAccountDto registerAccountDto, string strRole)
+        public async Task<DataResponse> EmployeeRegister([FromBody] RegisterEmployeeDto registerEmployeeDto, string strRole)
         {
             Role role;
             if (Enum.TryParse<Role>(strRole, out role))
             {
-                return await _authService.RegisterAccount(registerAccountDto, role: role);
+                return await _authService.RegisterAccount(registerEmployeeDto, role: role);
             }
             throw new GeneralException("ROLE NOT FOUND", ApplicationConstant.NOT_FOUND_CODE);
         }
@@ -122,6 +122,13 @@ namespace tlcn_dotnet.Controllers
         public async Task<DataResponse> UpdateProfile([FromHeader(Name = "Authorization")] string authorization, [FromBody] UpdateProfileRequest request)
         {
             return await _authService.UpdateProfile(authorization, request);
+        }
+
+        [HttpPut("updateRole")]
+        [CustomAuthorize(Roles = "ROLE_ADMIN")]
+        public async Task<DataResponse> UpdateRole(UpdateRoleRequest request)
+        {
+            return await _authService.UpdateAccountRole(request);
         }
     }
 }

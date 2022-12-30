@@ -52,5 +52,13 @@ namespace tlcn_dotnet.ServicesImpl
                 _mapper.Map<IEnumerable<SimpleCategoryDto>>(
                     await _categoryRepository.GetAll()));
         }
+
+        public async Task<DataResponse> GetCategoryById(long id)
+        {
+            Category category = await _categoryRepository.GetById(id);
+            if (category == null)
+                throw new GeneralException("CATEGORY NOT FOUND", ApplicationConstant.NOT_FOUND_CODE);
+            return new DataResponse(_mapper.Map<SimpleCategoryDto>(category));
+        }
     }
 }

@@ -26,5 +26,6 @@ namespace tlcn_dotnet
         public DbSet<Supplier> Supplier { get; set; }
         public DbSet<ChangePasswordToken> ChangePasswordToken { get; set; }
         public DbSet<CartDetail> CartDetail { get; set; }
+        public DbSet<Employee> Employee { get; set; }
     }
 }

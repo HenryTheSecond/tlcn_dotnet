@@ -8,5 +8,6 @@ namespace tlcn_dotnet.Services
         public Task<DataResponse> AddCategory(SimpleCategoryDto category);
         public Task<DataResponse> DeleteCategory(long? id);
         public Task<DataResponse> EditCategory(long? id, SimpleCategoryDto simpleCategoryDto);
+        public Task<DataResponse> GetCategoryById(long id);
     }
 }

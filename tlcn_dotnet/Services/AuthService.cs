@@ -128,17 +128,6 @@ namespace tlcn_dotnet.ServicesImpl
             if (accountDb != null)
             {
                 //if employee or admin has created a account as user role before, just need to change the role
-                if (role == Role.ROLE_EMPLOYEE || role == Role.ROLE_ADMIN)
-                {
-                    accountDb.Role = role;
-                    if (accountDb.Status == UserStatus.INACTIVE)
-                    {
-                        confirmToken = await _confirmTokenService.CreateConfirmToken(accountDb);
-                        _emailService.SendRegisterConfirmationToken(confirmToken);
-                    }
-                    _dbContext.SaveChanges();
-                    return new DataResponse(_mapper.Map<AccountResponse>(accountDb));
-                }
 
                 throw new GeneralException("Account already existed", ApplicationConstant.FAILED_CODE);
             }
@@ -154,6 +143,16 @@ namespace tlcn_dotnet.ServicesImpl
                 throw new GeneralException(checkLocation, ApplicationConstant.BAD_REQUEST_CODE);
             }
             accountDb = _dbContext.Account.Add(account).Entity;
+            if (role != Role.ROLE_USER)
+            {
+                Employee employee = new Employee()
+                {
+                    Account = accountDb,
+                    Id = accountDb.Id,
+                    Salary = ((RegisterEmployeeDto)registerAccountDto).Salary
+                };
+                _dbContext.Add(employee);
+            }
             await _dbContext.SaveChangesAsync();
 
             confirmToken = await _confirmTokenService.CreateConfirmToken(accountDb);
@@ -271,6 +270,42 @@ namespace tlcn_dotnet.ServicesImpl
 
             Account accountDb = await _accountRepository.Update(account);
             return new DataResponse(_mapper.Map<AccountResponse>(accountDb));
+        }
+
+        public async Task<DataResponse> UpdateAccountRole(UpdateRoleRequest request)
+        {
+            Account account = await _accountRepository.FindByEmail(request.Email);
+            if(account == null)
+                throw new GeneralException("ACCOUNT NOT FOUND", ApplicationConstant.NOT_FOUND_CODE);
+            Role oldRole = account.Role;
+            account.Role = request.Role;
+            if (oldRole != Role.ROLE_USER && request.Role == Role.ROLE_USER)
+            {
+                Employee employee = _dbContext.Employee.Find(account.Id);
+                if (employee != null)
+                    _dbContext.Employee.Remove(employee);
+            }
+            else if (oldRole == Role.ROLE_USER && request.Role != Role.ROLE_USER)
+            {
+                Employee employee = new Employee
+                {
+                    Account = account,
+                    Id = account.Id,
+                    Salary = request.Salary
+                };
+                _dbContext.Employee.Add(employee);
+            }
+            else if (oldRole != Role.ROLE_USER && request.Role != Role.ROLE_USER)
+            {
+                Employee employee = _dbContext.Employee.Find(account.Id);
+                if (employee != null)
+                {
+                    employee.Salary = request.Salary != null ? request.Salary : employee.Salary;
+                    _dbContext.Update(employee);
+                }
+            }
+            _dbContext.SaveChanges();
+            return new DataResponse(_mapper.Map<AccountResponse>(account));
         }
     }
 }

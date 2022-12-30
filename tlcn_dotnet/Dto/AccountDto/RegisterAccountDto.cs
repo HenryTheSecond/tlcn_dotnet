@@ -19,9 +19,9 @@ namespace tlcn_dotnet.Dto.AccountDto
         public string FirstName { get; set; }
         public string LastName { get; set; }
 
-        public string CityId { get; set; }
-        public string DistrictId { get; set; }
-        public string WardId { get; set; }
-        public string DetailLocation { get; set; }
+        public string? CityId { get; set; }
+        public string? DistrictId { get; set; }
+        public string? WardId { get; set; }
+        public string? DetailLocation { get; set; }
     }
 }

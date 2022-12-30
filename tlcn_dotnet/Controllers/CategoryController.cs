@@ -47,5 +47,12 @@ namespace tlcn_dotnet.Controllers
             if (id == null) throw new GeneralException(ApplicationConstant.INVALID_ID, ApplicationConstant.BAD_REQUEST_CODE);
             return await _categoryService.EditCategory(id, simpleCategoryDto);
         }
+
+        [HttpGet("{strId}")]
+        public async Task<DataResponse> GetCategoryById(string strId)
+        { 
+            long? id = Util.ParseId(strId) ?? throw new GeneralException(ApplicationConstant.INVALID_ID, ApplicationConstant.BAD_REQUEST_CODE);
+            return await _categoryService.GetCategoryById(id.Value);
+        }
     }
 }
