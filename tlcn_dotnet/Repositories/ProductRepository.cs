@@ -75,22 +75,25 @@ namespace tlcn_dotnet.Repositories
         {
             string query = @"SELECT TOP 1 Product.Id, Product.Name, Product.Price, Product.MinPurchase, Product.Status, Product.Unit, Product.Quantity,
 										AVG(Review.Rating) as Rating,
-										SUM(BillDetail.Quantity) as Sales,
+										SUM(CASE Cart.Status
+											WHEN 'DELIVERIED' THEN 
+																CASE Product.MinPurchase
+																WHEN 0 THEN BillDetail.Quantity / 1
+																ELSE BillDetail.Quantity / Product.MinPurchase
+																END
+											ELSE 0
+											END) as Sales,
 			                            Image.Id, Image.Url, Image.FileName,
 										Category.Id, Category.Name
                             FROM Product LEFT OUTER JOIN BillDetail ON Product.Id = BillDetail.ProductId
-                            LEFT OUTER JOIN Bill ON Bill.Id = BillDetail.BillId AND Bill.PurchaseDate IS NOT NULL
+                            LEFT OUTER JOIN Bill ON Bill.Id = BillDetail.BillId
+							LEFT OUTER JOIN Cart ON Cart.BillId = Bill.Id
 							LEFT OUTER JOIN Category ON Product.CategoryId = Category.Id
 							LEFT OUTER JOIN Review ON Review.ProductId = Product.Id
                             OUTER APPLY (SELECT TOP 1 ProductImage.Id, ProductImage.FileName, ProductImage.Url FROM ProductImage where ProductImage.ProductId = Product.Id) as Image
                             GROUP BY Product.Id, Product.Name, Product.Price, Product.MinPurchase, Product.Status, Product.Unit, Product.Quantity,
 			                            Image.Id, Image.Url, Image.FileName, Category.Id, Category.Name
-                            ORDER BY sum(
-								CASE Product.MinPurchase
-								WHEN 0 THEN BillDetail.Quantity / 1
-								ELSE BillDetail.Quantity / Product.MinPurchase
-								END
-							) desc";
+                            ORDER BY Sales desc";
             using (var connection = _dapperContext.CreateConnection())
             {
                 var products = await connection.QueryAsync<SingleImageProductDto, SimpleProductImageDto, SimpleCategoryDto, SingleImageProductDto>(query, (product, image, category) =>
@@ -115,25 +118,25 @@ namespace tlcn_dotnet.Repositories
         {
             string query = @"SELECT TOP 8 Product.Id, Product.Name, Product.Price, Product.MinPurchase, Product.Status, Product.Unit, Product.Quantity,
 										AVG(Review.Rating) as Rating,
-										SUM(CASE Product.MinPurchase
-											WHEN 0 THEN BillDetail.Quantity / 1
-											ELSE BillDetail.Quantity / Product.MinPurchase
+										SUM(CASE Cart.Status
+											WHEN 'DELIVERIED' THEN 
+																CASE Product.MinPurchase
+																WHEN 0 THEN BillDetail.Quantity / 1
+																ELSE BillDetail.Quantity / Product.MinPurchase
+																END
+											ELSE 0
 											END) as Sales,
 			                            Image.Id, Image.Url, Image.FileName,
 										Category.Id, Category.Name
                             FROM Product LEFT OUTER JOIN BillDetail ON Product.Id = BillDetail.ProductId
-                            LEFT OUTER JOIN Bill ON Bill.Id = BillDetail.BillId AND Bill.PurchaseDate IS NOT NULL
+                            LEFT OUTER JOIN Bill ON Bill.Id = BillDetail.BillId
+							LEFT OUTER JOIN Cart ON Cart.BillId = Bill.Id
 							LEFT OUTER JOIN Category ON Product.CategoryId = Category.Id
 							LEFT OUTER JOIN Review ON Review.ProductId = Product.Id
                             OUTER APPLY (SELECT TOP 1 ProductImage.Id, ProductImage.FileName, ProductImage.Url FROM ProductImage where ProductImage.ProductId = Product.Id) as Image
                             GROUP BY Product.Id, Product.Name, Product.Price, Product.MinPurchase, Product.Status, Product.Unit, Product.Quantity,
 			                            Image.Id, Image.Url, Image.FileName, Category.Id, Category.Name
-                            ORDER BY sum(
-								CASE Product.MinPurchase
-								WHEN 0 THEN BillDetail.Quantity / 1
-								ELSE BillDetail.Quantity / Product.MinPurchase
-								END
-							) desc";
+                            ORDER BY Sales desc";
             using (var connection = _dapperContext.CreateConnection())
             {
                 var products = await connection.QueryAsync<SingleImageProductDto, SimpleProductImageDto, SimpleCategoryDto, SingleImageProductDto>(query, (product, image, category) =>

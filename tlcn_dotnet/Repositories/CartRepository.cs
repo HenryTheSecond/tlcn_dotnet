@@ -360,7 +360,7 @@ namespace tlcn_dotnet.Repositories
 
 
 
-        public async Task<dynamic> GetUserCartHistory(long accountId, CartStatus? status, string? paymentMethod,
+        public async Task<dynamic> GetUserCartHistory(long accountId, CartStatus? status, PaymentMethod? paymentMethod,
             DateTime? fromDate, DateTime? toDate, decimal? fromTotal, decimal? toTotal,
             string? sortBy, string? order, int page, int pageSize)
         {
@@ -405,19 +405,19 @@ namespace tlcn_dotnet.Repositories
                     where += " AND Cart.Status = @Status ";
                     parameters.Add("Status", status.GetDisplayName().ToUpper());
                 }
-                if (paymentMethod != null && Enum.TryParse<PaymentMethod>(paymentMethod, out _))
+                if (paymentMethod != null)
                 {
                     where += " AND Bill.PaymentMethod = @PaymentMethod ";
-                    parameters.Add("PaymentMethod", paymentMethod.ToUpper().Trim());
+                    parameters.Add("PaymentMethod", paymentMethod.GetDisplayName());
                 }
                 if (fromDate != null)
                 {
-                    where += " AND Bill.PurchaseDate >= @FromDate ";
+                    where += " AND Cart.CreatedDate >= @FromDate ";
                     parameters.Add("FromDate", fromDate);
                 }
                 if (toDate != null)
                 {
-                    where += " AND Bill.PurchaseDate <= @ToDate ";
+                    where += " AND Cart.CreatedDate <= @ToDate ";
                     parameters.Add("ToDate", toDate);
                 }
                 if (fromTotal != null)

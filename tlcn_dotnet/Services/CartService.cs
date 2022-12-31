@@ -131,9 +131,11 @@ namespace tlcn_dotnet.Services
             }
             else if (cart.Status == CartStatus.CANCELLED)
             {
-                //await _billRepository.UpdateBillPurchaseDate(cart.Bill.Id.Value, null);
-                await _billRepository.DeleteBillById(cart.Bill.Id.Value);
-                cart.Bill = null;
+                await _billRepository.UpdateBillPurchaseDate(cart.Bill.Id.Value, null);
+                cart.Bill.PurchaseDate = null;
+
+/*                await _billRepository.DeleteBillById(cart.Bill.Id.Value);
+                cart.Bill = null;*/
 
                 //TODO Refund payment
             }
@@ -184,7 +186,7 @@ namespace tlcn_dotnet.Services
             return items;
         }
 
-        public async Task<DataResponse> GetCartHistory(string authorization, CartStatus? status, string? strPaymentMethod,
+        public async Task<DataResponse> GetCartHistory(string authorization, CartStatus? status, PaymentMethod? paymentMethod,
             string? strFromDate, string? strToDate, string? strFromTotal,
             string? strToTotal, string? sortBy, string? order, string? strPage, string? strPageSize)
         {
@@ -211,7 +213,7 @@ namespace tlcn_dotnet.Services
             {
                 throw new GeneralException(ApplicationConstant.BAD_REQUEST, ApplicationConstant.BAD_REQUEST_CODE);
             }
-            dynamic result = await _cartRepository.GetUserCartHistory(accountId, status, strPaymentMethod, fromDate, toDate,
+            dynamic result = await _cartRepository.GetUserCartHistory(accountId, status, paymentMethod, fromDate, toDate,
                 fromTotal, toTotal, sortBy, order, page.Value, pageSize.Value);
             return new DataResponse
                 (
@@ -233,8 +235,13 @@ namespace tlcn_dotnet.Services
                 throw new GeneralException("CART ALREADY DELIVERIED, CANNOT CANCELLED", ApplicationConstant.FAILED_CODE);
             else if (cart.Status == CartStatus.CANCELLED)
                 throw new GeneralException("CART HAS BEEN CANCELLED", ApplicationConstant.FAILED_CODE);
+
             await _cartRepository.UpdateCartStatus(id, CartStatus.CANCELLED);
-            await _billRepository.DeleteBillById(cart.Bill.Id.Value);
+
+            //await _billRepository.DeleteBillById(cart.Bill.Id.Value);
+            await _billRepository.UpdateBillPurchaseDate(cart.Bill.Id.Value, null);
+
+
             return new DataResponse()
             {
                 Message = ApplicationConstant.SUCCESSFUL,

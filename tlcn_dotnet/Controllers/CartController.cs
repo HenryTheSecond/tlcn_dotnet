@@ -76,7 +76,7 @@ namespace tlcn_dotnet.Controllers
         [CustomAuthorize]
         [HttpGet("cartHistory")]
         public async Task<DataResponse> GetCartHistory([FromHeader(Name = "Authorization")] string authorization,
-            CartStatus? status, string? paymentMethod, string? fromDate, string? toDate,
+            CartStatus? status, PaymentMethod? paymentMethod, string? fromDate, string? toDate,
             string? fromTotal, string? toTotal, string? sortBy = "PURCHASEDATE", string? order = "DESC", string? page = "1", string? pageSize = "5")
         {
             Console.WriteLine($"CHECKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKK {status}");

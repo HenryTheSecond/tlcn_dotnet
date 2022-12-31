@@ -23,7 +23,7 @@ namespace tlcn_dotnet.Repositories
 
         public async Task<decimal> CalculateProfit(DateTime? fromDate, DateTime? toDate)
         {
-            var query = _dbContext.Bill.Where(bill => bill.PurchaseDate != null);
+            var query = _dbContext.Bill.Include(bill => bill.Cart).Where(bill => bill.Cart.Status == CartStatus.DELIVERIED);
             if (fromDate != null)
             {
                 query = query.Where(bill => bill.PurchaseDate >= fromDate);
@@ -99,10 +99,11 @@ namespace tlcn_dotnet.Repositories
         public async Task<IList<dynamic>> ProductStatistic(string keyword, DateTime? fromDate, DateTime? toDate, string sortBy, string order)
         {
             string selectFrom = @" select Product.Id, Product.Name, Product.Unit,
-		                                sum(CASE WHEN Bill.PurchaseDate IS NULL THEN 0 ELSE BillDetail.Quantity * BillDetail.Price END) as Profit,
-		                                sum(CASE WHEN Bill.PurchaseDate IS NULL THEN 0 ELSE BillDetail.Quantity END) as Sale
+		                                sum(BillDetail.Quantity * BillDetail.Price) as Profit,
+		                                sum(BillDetail.Quantity) as Sale
                                 from (Product left outer join BillDetail on Product.Id = BillDetail.ProductId)
-	                                left outer join Bill on BillDetail.BillId = Bill.Id ";
+	                                left outer join Bill on BillDetail.BillId = Bill.Id
+                                    left outer join Cart on Cart.BillId = Bill.Id ";
             List<string> conditions = new List<string>();
             DynamicParameters parameters = new DynamicParameters();
             string where = "  ";
@@ -132,6 +133,7 @@ namespace tlcn_dotnet.Repositories
                 conditions.Add(" Bill.PurchaseDate <= @ToDate ");
                 parameters.Add("ToDate", toDate);
             }
+            conditions.Add(" Cart.Status = 'DELIVERIED' ");
             if(conditions.Count > 0)
                 where += " WHERE " + string.Join(" AND ", conditions);
             string query = $"{selectFrom} {where} {groupBy} {orderBy}";
@@ -183,6 +185,7 @@ namespace tlcn_dotnet.Repositories
                 conditions.Add(" Bill.PaymentMethod = @PaymentMethod ");
                 parameters.Add("PaymentMethod", paymentMethod.GetDisplayName());
             }
+            conditions.Add(" Cart.Status = 'DELIVERIED' ");
             if (conditions.Count > 0)
             {
                 where = $" WHERE {string.Join(" AND ", conditions)} ";
@@ -190,13 +193,14 @@ namespace tlcn_dotnet.Repositories
             string query = $@" SELECT * 
                                 FROM Bill JOIN BillDetail ON Bill.Id = BillDetail.BillId 
                                     JOIN Product ON BillDetail.ProductId = Product.Id
+                                    JOIN Cart ON Cart.BillId = Bill.Id
                                 {where} 
                                 {orderBy} ";
             using (var connection = _dapperContext.CreateConnection())
             {
                 Dictionary<long, Bill> billDictionary = new Dictionary<long, Bill>();
-                IList<Bill> bills = (await connection.QueryAsync<Bill, BillDetail, Product, Bill>(query, 
-                    (bill, billDetail, product) =>
+                IList<Bill> bills = (await connection.QueryAsync<Bill, BillDetail, Product, Cart, Bill>(query, 
+                    (bill, billDetail, product, cart) =>
                     {
                         Bill billEntry;
                         billDetail.Product = product;
