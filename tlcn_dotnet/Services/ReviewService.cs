@@ -61,7 +61,7 @@ namespace tlcn_dotnet.Services
             long accountId = Util.ReadJwtTokenAndGetAccountId(authorization);
 
             if (!(await _productRepository.CheckAccountBuyItem(accountId, productId)))
-                throw new GeneralException("USER DIDN'T BUY PRODUCT", ApplicationConstant.BAD_REQUEST_CODE);
+                throw new GeneralException("Bạn chưa thể bình luận nếu chưa mua sản phẩm", ApplicationConstant.BAD_REQUEST_CODE);
 
             long id = 0;
             try
@@ -71,7 +71,7 @@ namespace tlcn_dotnet.Services
             catch (SqlException e)
             {
                 if (e.Message.Contains("duplicate"))
-                    throw new GeneralException("YOU HAVE ALREADY REVIEWED", ApplicationConstant.FAILED_CODE);
+                    throw new GeneralException("Bạn đã bình luận ở sản phẩm này", ApplicationConstant.FAILED_CODE);
                 throw e;
             }
             AccountReviewDto accountReviewDto = _mapper.Map<AccountReviewDto>(Util.ReadJwtTokenAndParseToAccount(authorization));
