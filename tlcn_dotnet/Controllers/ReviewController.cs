@@ -67,5 +67,14 @@ namespace tlcn_dotnet.Controllers
                 throw new GeneralException(ApplicationConstant.INVALID_ID, ApplicationConstant.BAD_REQUEST_CODE);
             return await _reviewService.DeleteReview(authorization, id.Value);
         }
+
+        [HttpGet("product/{strId}/userReview")]
+        [CustomAuthorize]
+        public async Task<DataResponse> GetUserReviewOfProduct([FromHeader(Name = "Authorization")] string authorization, string strId)
+        { 
+            long? id = Util.ParseId(strId) ??
+                throw new GeneralException(ApplicationConstant.INVALID_ID, ApplicationConstant.BAD_REQUEST_CODE);
+            return await _reviewService.GetUserReviewOfProduct(authorization, id.Value);
+        }
     }
 }

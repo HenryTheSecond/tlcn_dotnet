@@ -16,11 +16,13 @@ namespace tlcn_dotnet.Services
         private readonly IReviewRepository _reviewRepository;
         private readonly IProductRepository _productRepository;
         private readonly IMapper _mapper;
-        public ReviewService(IReviewRepository reviewRepository, IMapper mapper, IProductRepository productRepository)
+        private readonly MyDbContext _dbContext;
+        public ReviewService(IReviewRepository reviewRepository, IMapper mapper, IProductRepository productRepository, MyDbContext dbContext)
         {
             _reviewRepository = reviewRepository;
             _mapper = mapper;
             _productRepository = productRepository;
+            _dbContext = dbContext;
         }
 
         public async Task<DataResponse> DeleteReview(string authorization, long id)
@@ -54,6 +56,16 @@ namespace tlcn_dotnet.Services
                 currentPage = page
             });
         }
+
+        public async Task<DataResponse> GetUserReviewOfProduct(string authorization, long productId)
+        {
+            Product product = await _productRepository.GetById(productId)
+                ?? throw new GeneralException("PRODUCT NOT FOUND", ApplicationConstant.NOT_FOUND_CODE);
+            long accountId = Util.ReadJwtTokenAndGetAccountId(authorization);
+            Review review = _dbContext.Review.Where(review => review.Account.Id == accountId && review.Product.Id == productId).SingleOrDefault();
+            return new DataResponse(_mapper.Map<ReviewResponse>(review));
+        }
+
         public async Task<DataResponse> ReviewProduct(string authorization, long productId, ReviewRequest reviewRequest)
         {
             Product product = await _productRepository.GetById(productId)
