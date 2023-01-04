@@ -35,9 +35,11 @@ namespace tlcn_dotnet.Repositories
                 .Include(product => product.Category)
                 .Include(product => product.ProductImages)
                 .Include(product => product.Reviews)
+                .AsSplitQuery()
                 .Include(product => product.BillDetails)
                     .ThenInclude(bd => bd.Bill)
-                    .ThenInclude(bill => bill.Cart);
+                    .ThenInclude(bill => bill.Cart)
+                    .AsSplitQuery();
 
             if (keyword != null)
                 queryProduct = queryProduct.Where(product => product.Name.Contains(keyword) || product.Description.Contains(keyword));
