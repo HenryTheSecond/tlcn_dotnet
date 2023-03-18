@@ -67,13 +67,6 @@ namespace tlcn_dotnet.Mapper
                     {
                         dest.Rating = src.Reviews.Average(review => review.Rating);
                     }
-
-                    if (src.BillDetails != null)
-                    {
-                        dest.Sales = src.BillDetails
-                            .Where(bd => bd.Bill.Cart.Status == CartStatus.DELIVERIED)
-                            .Sum(bd => bd.Quantity);
-                    }
                 });
             CreateMap<ProductImage, SimpleProductImageDto>();
             CreateMap<Product, ProductIdAndNameDto>();

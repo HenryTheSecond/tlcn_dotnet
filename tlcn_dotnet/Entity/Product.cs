@@ -32,6 +32,8 @@ namespace tlcn_dotnet.Entity
         public string? Description { get; set; }
         public double? Quantity { get; set; } = 0;
 
+        public double Sales { get; set; } = 0;
+
         public virtual Category? Category { get; set; }
         
         public virtual ICollection<ProductImage> ProductImages { get; set; }

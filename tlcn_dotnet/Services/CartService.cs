@@ -29,16 +29,19 @@ namespace tlcn_dotnet.Services
         private readonly IMapper _mapper;
         private readonly IDeliveryService _deliveryService;
         private readonly IBillRepository _billRepository;
+        private readonly IProductRepository _productRepository;
         private readonly MyDbContext _dbContext;
-        public CartService(ICartDetailRepository cartDetailRepository, IBillService billService,
-            ICartRepository cartRepository, IMapper mapper, IDeliveryService deliveryService, IBillRepository billRepository)
+        public CartService(MyDbContext dbContext, ICartDetailRepository cartDetailRepository, IBillService billService,
+            ICartRepository cartRepository, IMapper mapper, IDeliveryService deliveryService, IBillRepository billRepository, IProductRepository productRepository)
         {
+            _dbContext = dbContext;
             _cartDetailRepository = cartDetailRepository;
             _billService = billService;
             _cartRepository = cartRepository;
             _mapper = mapper;
             _deliveryService = deliveryService;
             _billRepository = billRepository;
+            _productRepository = productRepository;
         }
 
         public async Task<DataResponse> PayCurrentCart(string authorization, CartPaymentDto cartPaymentDto)
@@ -128,6 +131,7 @@ namespace tlcn_dotnet.Services
                     cart.Bill.PurchaseDate = now;
                 }
                 cart.Bill.OrderCode = orderCode;
+                await UpdateProductSales(cart.CartDetails);
             }
             else if (cart.Status == CartStatus.CANCELLED)
             {
@@ -140,6 +144,17 @@ namespace tlcn_dotnet.Services
                 //TODO Refund payment
             }
             return new DataResponse(_mapper.Map<CartResponse>(cart));
+        }
+
+        private async Task UpdateProductSales(IList<CartDetail> cartDetails)
+        {
+            var listProductId = cartDetails.Select(x => x.Product.Id);
+            var products = _dbContext.Product.Where(p => listProductId.Contains(p.Id)).ToDictionary(p => p.Id, p => p);
+            foreach (var cartDetail in cartDetails)
+            {
+                products[cartDetail.ProductId].Sales += cartDetail.Quantity;
+            }
+            await _dbContext.SaveChangesAsync();
         }
 
         private async Task<Dictionary<string, object>> GhnParameters(Cart cart, ProcessCartDto processCartDto)

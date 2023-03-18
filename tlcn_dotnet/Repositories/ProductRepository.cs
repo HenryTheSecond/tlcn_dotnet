@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using System.Dynamic;
 using tlcn_dotnet.Constant;
+using tlcn_dotnet.CustomException;
 using tlcn_dotnet.DatabaseContext;
 using tlcn_dotnet.Dto.CategoryDto;
 using tlcn_dotnet.Dto.ProductDto;
@@ -35,11 +36,7 @@ namespace tlcn_dotnet.Repositories
                 .Include(product => product.Category)
                 .Include(product => product.ProductImages)
                 .Include(product => product.Reviews)
-                .AsSplitQuery()
-                .Include(product => product.BillDetails)
-                    .ThenInclude(bd => bd.Bill)
-                    .ThenInclude(bill => bill.Cart)
-                    .AsSplitQuery();
+                .AsSplitQuery();
 
             if (keyword != null)
                 queryProduct = queryProduct.Where(product => product.Name.Contains(keyword) || product.Description.Contains(keyword));
@@ -75,16 +72,8 @@ namespace tlcn_dotnet.Repositories
 
         public async Task<SingleImageProductDto> GetBestProduct()
         {
-            string query = @"SELECT TOP 1 Product.Id, Product.Name, Product.Price, Product.MinPurchase, Product.Status, Product.Unit, Product.Quantity,
+            string query = @"SELECT TOP 1 Product.Id, Product.Name, Product.Price, Product.MinPurchase, Product.Status, Product.Unit, Product.Quantity, Sales,
 										AVG(Review.Rating) as Rating,
-										SUM(CASE Cart.Status
-											WHEN 'DELIVERIED' THEN 
-																CASE Product.MinPurchase
-																WHEN 0 THEN BillDetail.Quantity / 1
-																ELSE BillDetail.Quantity / Product.MinPurchase
-																END
-											ELSE 0
-											END) as Sales,
 			                            Image.Id, Image.Url, Image.FileName,
 										Category.Id, Category.Name
                             FROM Product LEFT OUTER JOIN BillDetail ON Product.Id = BillDetail.ProductId
@@ -93,9 +82,13 @@ namespace tlcn_dotnet.Repositories
 							LEFT OUTER JOIN Category ON Product.CategoryId = Category.Id
 							LEFT OUTER JOIN Review ON Review.ProductId = Product.Id
                             OUTER APPLY (SELECT TOP 1 ProductImage.Id, ProductImage.FileName, ProductImage.Url FROM ProductImage where ProductImage.ProductId = Product.Id) as Image
-                            GROUP BY Product.Id, Product.Name, Product.Price, Product.MinPurchase, Product.Status, Product.Unit, Product.Quantity,
+                            GROUP BY Product.Id, Product.Name, Product.Price, Product.MinPurchase, Product.Status, Product.Unit, Product.Quantity, Sales,
 			                            Image.Id, Image.Url, Image.FileName, Category.Id, Category.Name
-                            ORDER BY Sales desc";
+                            ORDER BY CASE Product.MinPurchase
+                                            WHEN 0 THEN Sales/1
+                                            ELSE Sales/Product.MinPurchase
+                                     END
+                            DESC";
             using (var connection = _dapperContext.CreateConnection())
             {
                 var products = await connection.QueryAsync<SingleImageProductDto, SimpleProductImageDto, SimpleCategoryDto, SingleImageProductDto>(query, (product, image, category) =>
@@ -118,16 +111,8 @@ namespace tlcn_dotnet.Repositories
 
         public async Task<IList<SingleImageProductDto>> GetTop8Product()
         {
-            string query = @"SELECT TOP 8 Product.Id, Product.Name, Product.Price, Product.MinPurchase, Product.Status, Product.Unit, Product.Quantity,
+            string query = @"SELECT TOP 8 Product.Id, Product.Name, Product.Price, Product.MinPurchase, Product.Status, Product.Unit, Product.Quantity, Sales,
 										AVG(Review.Rating) as Rating,
-										SUM(CASE Cart.Status
-											WHEN 'DELIVERIED' THEN 
-																CASE Product.MinPurchase
-																WHEN 0 THEN BillDetail.Quantity / 1
-																ELSE BillDetail.Quantity / Product.MinPurchase
-																END
-											ELSE 0
-											END) as Sales,
 			                            Image.Id, Image.Url, Image.FileName,
 										Category.Id, Category.Name
                             FROM Product LEFT OUTER JOIN BillDetail ON Product.Id = BillDetail.ProductId
@@ -136,9 +121,13 @@ namespace tlcn_dotnet.Repositories
 							LEFT OUTER JOIN Category ON Product.CategoryId = Category.Id
 							LEFT OUTER JOIN Review ON Review.ProductId = Product.Id
                             OUTER APPLY (SELECT TOP 1 ProductImage.Id, ProductImage.FileName, ProductImage.Url FROM ProductImage where ProductImage.ProductId = Product.Id) as Image
-                            GROUP BY Product.Id, Product.Name, Product.Price, Product.MinPurchase, Product.Status, Product.Unit, Product.Quantity,
+                            GROUP BY Product.Id, Product.Name, Product.Price, Product.MinPurchase, Product.Status, Product.Unit, Product.Quantity, Sales,
 			                            Image.Id, Image.Url, Image.FileName, Category.Id, Category.Name
-                            ORDER BY Sales desc";
+                            ORDER BY CASE Product.MinPurchase
+                                            WHEN 0 THEN Sales/1
+                                            ELSE Sales/Product.MinPurchase
+                                     END
+                            DESC";
             using (var connection = _dapperContext.CreateConnection())
             {
                 var products = await connection.QueryAsync<SingleImageProductDto, SimpleProductImageDto, SimpleCategoryDto, SingleImageProductDto>(query, (product, image, category) =>
@@ -149,6 +138,14 @@ namespace tlcn_dotnet.Repositories
                 });
                 return products.ToList();
             }
+        }
+
+        public async Task UpdateProductSales(long productId, double sales)
+        {
+            Product product = await _dbContext.Product.FindAsync(productId) ?? throw new GeneralException(ApplicationConstant.NOT_FOUND, ApplicationConstant.NOT_FOUND_CODE);
+            product.Sales += sales;
+            _dbContext.Product.Update(product);
+            await _dbContext.SaveChangesAsync();
         }
     }
 }
