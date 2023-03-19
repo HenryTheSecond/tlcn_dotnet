@@ -21,6 +21,6 @@ namespace tlcn_dotnet.Dto.ProductDto
         
         public double? Rating { get; set; }
         public double? Sales { get; set; } = 0;
-
+        public bool IsDeleted { get; set; }
     }
 }

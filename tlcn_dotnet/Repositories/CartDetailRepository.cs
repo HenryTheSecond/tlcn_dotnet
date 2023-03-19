@@ -191,5 +191,16 @@ namespace tlcn_dotnet.Repositories
                 return await GetById(id);
             }
         }
+
+        public async Task DeleteCartDetailHavingDeletedProductByAccountId(long accountId)
+        {
+            using (var connection = _dapperContext.CreateConnection())
+            {
+                await connection.ExecuteAsync(@"DELETE CartDetail 
+                                                FROM CartDetail JOIN Product ON CartDetail.ProductId = Product.Id 
+                                                WHERE CartId IS NULL AND Product.IsDeleted = 1 AND CartDetail.AccountId = @AccountId",
+                                            new { AccountId = accountId });
+            }
+        }
     }
 }

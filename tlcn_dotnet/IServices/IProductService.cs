@@ -10,7 +10,7 @@ namespace tlcn_dotnet.Services
         public Task<DataResponse> GetProductById(long? id);
         public Task<DataResponse> EditProduct(long? id, EditProductDto editProductDto, IFormFileCollection files);
         public Task<DataResponse> FilterProduct(string? keyword, decimal? minPrice, decimal? maxPrice, 
-            long? categoryId, ProductOrderBy? productOrderBy, SortOrder? sortOrder, int page, int pageSize);
+            long? categoryId, ProductOrderBy? productOrderBy, SortOrder? sortOrder, int page, int pageSize, bool? isDeleted);
         public Task<DataResponse> DeleteProduct(long? id);
         public Task<DataResponse> GetAllProductIdAndNameAndUnit();
         public Task<DataResponse> GetTop8Product();

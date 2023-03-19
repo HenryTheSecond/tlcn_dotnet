@@ -37,9 +37,9 @@ namespace tlcn_dotnet.ServicesImpl
 
         public async Task<DataResponse> DeleteProduct(long? id)
         {
-            await _productImageService.DeleteAllImageOfProduct(id);
-            await _productRepository.Remove(id.Value);
-            return new DataResponse(true);
+            //await _productImageService.DeleteAllImageOfProduct(id);
+            bool isDeletedSuccessful = await _productRepository.DeleteProduct(id.Value);
+            return new DataResponse(isDeletedSuccessful);
         }
 
         public async Task<DataResponse> EditProduct(long? id, EditProductDto editProductDto, IFormFileCollection files)
@@ -67,10 +67,10 @@ namespace tlcn_dotnet.ServicesImpl
         }
 
         public async Task<DataResponse> FilterProduct(string? keyword, decimal? minPrice, decimal? maxPrice,
-            long? categoryId, ProductOrderBy? productOrderBy, SortOrder? sortOrder, int page, int pageSize)
+            long? categoryId, ProductOrderBy? productOrderBy, SortOrder? sortOrder, int page, int pageSize, bool? isDeleted)
         {
             var result = await _productRepository.FilterProduct(keyword, minPrice, maxPrice, categoryId, 
-                productOrderBy, sortOrder, page, pageSize);
+                productOrderBy, sortOrder, page, pageSize, isDeleted);
 
             var products = _mapper.Map<List<SingleImageProductDto>>(result.Products);
             var maxPage = Util.CalculateMaxPage(result.Total, pageSize);

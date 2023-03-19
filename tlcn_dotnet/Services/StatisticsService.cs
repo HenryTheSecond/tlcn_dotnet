@@ -1,10 +1,12 @@
 ﻿using AutoMapper;
 using ClosedXML.Excel;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Extensions;
 using System.Data;
 using tlcn_dotnet.Constant;
 using tlcn_dotnet.Dto.BillDto;
+using tlcn_dotnet.Dto.StatisticsDto;
 using tlcn_dotnet.Entity;
 using tlcn_dotnet.IRepositories;
 using tlcn_dotnet.IServices;
@@ -14,13 +16,17 @@ namespace tlcn_dotnet.Services
 {
     public class StatisticsService : IStatisticsService
     {
+        private readonly MyDbContext _dbContext;
         private readonly ICartRepository _cartRepository;
         private readonly IBillRepository _billRepository;
         private readonly IMapper _mapper;
-        public StatisticsService(ICartRepository cartRepository, IBillRepository billRepository, IMapper mapper)
+        private readonly ICategoryRepository _categoryRepository;
+        public StatisticsService(MyDbContext dbContext, ICartRepository cartRepository, IBillRepository billRepository, ICategoryRepository categoryRepository, IMapper mapper)
         {
+            _dbContext = dbContext;
             _cartRepository = cartRepository;
             _billRepository = billRepository;
+            _categoryRepository = categoryRepository;
             _mapper = mapper;
         }
 
@@ -144,6 +150,28 @@ namespace tlcn_dotnet.Services
             toDate = toDate == null ? null : toDate.Value.AddDays(1).AddTicks(-1);
 
             return new DataResponse(await _billRepository.ProductStatistic(keyword, fromDate, toDate, sortBy, order));
+        }
+
+        public async Task<DataResponse> StatisticsByProductCategory(DateTime? from, DateTime? to)
+        {
+            /*var query = _dbContext.BillDetail.Include(billDetail => billDetail.Bill)
+                .Include(billDetail => billDetail.Product)
+                .ThenInclude(product => product.Category);
+            if (from != null)
+                query.Where(billDetail => billDetail.Bill.PurchaseDate >= from);
+            if (to != null)
+                query.Where(billDetail => billDetail.Bill.PurchaseDate <= to);
+            var groups = query.GroupBy(billDetail => new { billDetail.Product.Category.Id, billDetail.Product.Category.Name });
+            var statistics = groups.Select(group => new CategoryStatisticsDto
+            {
+                Id = group.Key.Id.Value,
+                Name = group.Key.Name,
+                Profit = group.Sum(_ => _.Bill.Total ?? 0),
+                Sales = group.Sum(_ => _.Quantity)
+            }).ToList();
+            return new DataResponse(statistics);*/
+
+            return new DataResponse(await _categoryRepository.StatisticsByCategory(from, to));
         }
     }
 }

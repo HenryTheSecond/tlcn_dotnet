@@ -7,7 +7,7 @@ namespace tlcn_dotnet.IRepositories
     public interface IProductRepository: IGenericRepository<Product>
     {
         public Task<dynamic> FilterProduct(string? keyword, decimal? minPrice, decimal? maxPrice,
-            long? categoryId, ProductOrderBy? productOrderBy, SortOrder? sortOrder, int page, int pageSize);
+            long? categoryId, ProductOrderBy? productOrderBy, SortOrder? sortOrder, int page, int pageSize, bool? isDeleted);
         public Task<Product> GetProductWithImageById(long? id);
         public Task<IList<SingleImageProductDto>> GetTop8Product();
         public Task<SingleImageProductDto> GetBestProduct();
@@ -15,5 +15,6 @@ namespace tlcn_dotnet.IRepositories
         public Task<bool> CheckAccountBuyItem(long accountId, long productId);
 
         public Task UpdateProductSales(long productId, double sales);
+        public Task<bool> DeleteProduct(long id);
     }
 }

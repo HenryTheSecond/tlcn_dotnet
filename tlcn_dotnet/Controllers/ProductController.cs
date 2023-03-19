@@ -6,6 +6,7 @@ using System.Text.Json;
 using tlcn_dotnet.Constant;
 using tlcn_dotnet.CustomException;
 using tlcn_dotnet.Dto.ProductDto;
+using tlcn_dotnet.Entity;
 using tlcn_dotnet.Services;
 using tlcn_dotnet.Utils;
 
@@ -59,8 +60,9 @@ namespace tlcn_dotnet.Controllers
         }
 
         [HttpGet]
-        public async Task<DataResponse> FilterProduct(string? keyword, string? minPrice, string? maxPrice,
-            string? categoryId, string? orderBy, string? order, string? page = "1", string? pageSize = "8")
+        public async Task<DataResponse> FilterProduct([FromHeader(Name = "Authorization")] string? auth, 
+            string? keyword, string? minPrice, string? maxPrice,
+            string? categoryId, string? orderBy, string? order, string? page = "1", string? pageSize = "8", bool? isDeleted = null)
         {
             int numberPage = 1;
             int numberPageSize = 8;
@@ -69,6 +71,14 @@ namespace tlcn_dotnet.Controllers
             long? numberCategoryId = null;
             ProductOrderBy? productOrderBy = null;
             SortOrder? sortOrder = null;
+            if (auth != null)
+            {
+                Account account = Util.ReadJwtTokenAndParseToAccount(auth);
+                if (account.Role == Role.ROLE_USER)
+                    isDeleted = false;
+            }
+            else
+                isDeleted = false;
             try
             {
                 numberPage = Int32.Parse(page);
@@ -81,16 +91,13 @@ namespace tlcn_dotnet.Controllers
 
                 productOrderBy = Util.ConvertStringToDataType<ProductOrderBy>(orderBy, ProductOrderBy.ID);
                 sortOrder = Util.ConvertStringToDataType<SortOrder>(order, SortOrder.DESC);
-                Console.WriteLine(productOrderBy); Console.WriteLine(sortOrder);
             }
             catch (Exception e) when (e is ArgumentNullException || e is FormatException || e is ArgumentException)
             {
                 throw new GeneralException(ApplicationConstant.BAD_REQUEST, ApplicationConstant.BAD_REQUEST_CODE);
             }
-            Console.WriteLine("MIN PRICE " + minPrice);
-            Console.WriteLine("MIN PRICE PARSED" + numberMinPrice);
             return await _productService.FilterProduct(keyword, numberMinPrice, numberMaxPrice,
-                numberCategoryId, productOrderBy, sortOrder, numberPage, numberPageSize);
+                numberCategoryId, productOrderBy, sortOrder, numberPage, numberPageSize, isDeleted);
         }
 
         [HttpDelete("{strId}")]

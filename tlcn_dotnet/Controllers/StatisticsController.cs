@@ -71,5 +71,12 @@ namespace tlcn_dotnet.Controllers
                     "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", DateTime.Now.ToString() + ".xlsx");
             }
         }
+
+        [HttpGet("category")]
+        [CustomAuthorize(Roles = "ROLE_ADMIN")]
+        public async Task<DataResponse> StatisticsByProductCategory(DateTime? from, DateTime? to)
+        { 
+            return await _statisticsService.StatisticsByProductCategory(from, to);
+        }
     }
 }

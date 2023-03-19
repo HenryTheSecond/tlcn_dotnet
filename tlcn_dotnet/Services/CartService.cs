@@ -55,7 +55,7 @@ namespace tlcn_dotnet.Services
             object accountId;
             jwtToken.Payload.TryGetValue("userId", out accountId);
             accountId = Convert.ToInt64(accountId);
-
+            await _cartDetailRepository.DeleteCartDetailHavingDeletedProductByAccountId((long)accountId);
             IList<CartDetail> cartDetails = await _cartDetailRepository.GetListCart((long)accountId, cartPaymentDto.ListCartDetailId);
             if (cartDetails.Count < 1)
                 throw new GeneralException("NO ITEM TO PAY", ApplicationConstant.BAD_REQUEST_CODE);

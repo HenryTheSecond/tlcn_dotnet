@@ -29,8 +29,18 @@ namespace tlcn_dotnet.Repositories
             return count > 0;
         }
 
+        public async Task<bool> DeleteProduct(long id)
+        {
+            var product = await _dbContext.Product.FindAsync(id);
+            if (product == null)
+                return false;
+            product.IsDeleted = true;
+            int affectedRows = await _dbContext.SaveChangesAsync();
+            return affectedRows > 0;
+        }
+
         public async Task<dynamic> FilterProduct(string? keyword, decimal? minPrice, decimal? maxPrice,
-            long? categoryId, ProductOrderBy? productOrderBy, SortOrder? sortOrder, int page, int pageSize)
+            long? categoryId, ProductOrderBy? productOrderBy, SortOrder? sortOrder, int page, int pageSize, bool? isDeleted)
         {
             IQueryable<Product> queryProduct = _dbContext.Product
                 .Include(product => product.Category)
@@ -46,6 +56,10 @@ namespace tlcn_dotnet.Repositories
                 queryProduct = queryProduct.Where(product => product.Price <= maxPrice);
             if (categoryId != null)
                 queryProduct = queryProduct.Where(product => product.Category.Id == categoryId);
+            if(isDeleted != null)
+            {
+                queryProduct = queryProduct.Where(product => product.IsDeleted == isDeleted);
+            }
 
             if (productOrderBy == null || productOrderBy == ProductOrderBy.ID)
                 queryProduct = sortOrder == SortOrder.ASC ? 

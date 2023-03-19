@@ -23,15 +23,15 @@ namespace tlcn_dotnet.Entity
         public Decimal? Price { get; set; }
 
         [Column(TypeName = "varchar(255)")]
-        public ProductUnit Unit { get; set; }
+        public ProductUnit Unit { get; set; } = ProductUnit.UNIT;
 
-        public double? MinPurchase { get; set; } = 0;
+        public double? MinPurchase { get; set; } = 1;
         [Column(TypeName = "varchar(50)")]
         public ProductStatus Status { get; set; }
 
         public string? Description { get; set; }
         public double? Quantity { get; set; } = 0;
-
+        public bool IsDeleted { get; set; } = false;
         public double Sales { get; set; } = 0;
 
         public virtual Category? Category { get; set; }
