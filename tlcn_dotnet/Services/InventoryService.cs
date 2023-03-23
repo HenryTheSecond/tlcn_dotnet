@@ -12,15 +12,20 @@ namespace tlcn_dotnet.ServicesImpl
     public class InventoryService : IInventoryService
     {
         private readonly IInventoryRepository _inventoryRepository;
+        private readonly MyDbContext _dbContext;
         private readonly IMapper _mapper;
-        public InventoryService(IInventoryRepository inventoryRepository, IMapper mapper)
+        public InventoryService(IInventoryRepository inventoryRepository, IMapper mapper, MyDbContext dbContext)
         {
             _inventoryRepository = inventoryRepository;
             _mapper = mapper;
+            _dbContext = dbContext;
         }
 
         public async Task<DataResponse> AddInventory(AddInventoryDto addInventoryDto)
         {
+            Product product = await _dbContext.Product.FindAsync(addInventoryDto.ProductId);
+            product.Quantity += addInventoryDto.Quantity;
+            await _dbContext.SaveChangesAsync();
             return new DataResponse(
                 _mapper.Map<SimpleInventoryDto>(
                     await _inventoryRepository.AddInventory(addInventoryDto)));
@@ -28,6 +33,10 @@ namespace tlcn_dotnet.ServicesImpl
 
         public async Task<DataResponse> EditInventory(long id, EditInventoryDto editInventoryDto)
         {
+            Inventory oldInventory = await _dbContext.Inventory.FindAsync(id);
+            Product product = await _dbContext.Product.FindAsync(editInventoryDto.ProductId);
+            product.Quantity += editInventoryDto.Quantity - oldInventory.Quantity;
+            await _dbContext.SaveChangesAsync();
             Inventory inventoryDb = await _inventoryRepository.UpdateInventory(id, editInventoryDto);
             return new DataResponse(_mapper.Map<SimpleInventoryDto>(inventoryDb));
         }
