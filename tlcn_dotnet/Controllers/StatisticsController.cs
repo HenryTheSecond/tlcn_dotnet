@@ -1,7 +1,9 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using System.Collections.Immutable;
 using tlcn_dotnet.AuthorizationAttributes;
 using tlcn_dotnet.Constant;
+using tlcn_dotnet.Dto.StatisticsDto;
 using tlcn_dotnet.IServices;
 
 namespace tlcn_dotnet.Controllers
@@ -77,6 +79,34 @@ namespace tlcn_dotnet.Controllers
         public async Task<DataResponse> StatisticsByProductCategory(DateTime? from, DateTime? to)
         { 
             return await _statisticsService.StatisticsByProductCategory(from, to);
+        }
+
+        [HttpGet("countAllProduct")]
+        [CustomAuthorize(Roles = "ROLE_ADMIN")]
+        public async Task<DataResponse> CountAllProduct()
+        {
+            return await _statisticsService.CountAllProduct();
+        }
+
+        [HttpGet("profitIn7Days")]
+        [CustomAuthorize(Roles = "ROLE_ADMIN")]
+        public async Task<DataResponse> CalculateProfitIn7Days()
+        {
+            return await _statisticsService.CalculateProfitIn7Days();
+        }
+
+        [HttpGet("countAllUser")]
+        [CustomAuthorize(Roles = "ROLE_ADMIN")]
+        public async Task<DataResponse> CountAllUser()
+        {
+            return await _statisticsService.CountAllUser();
+        }
+
+        [HttpGet("top5User")]
+        //[CustomAuthorize(Roles = "ROLE_ADMIN")]
+        public async Task<DataResponse> Top5User(string? fromDate, string? toDate)
+        {
+            return await _statisticsService.Top5User(fromDate, toDate);
         }
     }
 }

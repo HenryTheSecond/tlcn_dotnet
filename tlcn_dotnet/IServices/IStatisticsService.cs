@@ -13,5 +13,9 @@ namespace tlcn_dotnet.IServices
             string? strToTotal, string? strPaymentMethod, string sortBy, string order);
         public Task<MemoryStream> ExportStatisticProductToExcel(string keyword, string strFromDate, string strToDate, string sortBy, string order);
         public Task<DataResponse> StatisticsByProductCategory(DateTime? from, DateTime? to);
+        public Task<DataResponse> CountAllProduct();
+        public Task<DataResponse> CalculateProfitIn7Days();
+        public Task<DataResponse> CountAllUser();
+        public Task<DataResponse> Top5User(string strFromDate, string strToDate);
     }
 }

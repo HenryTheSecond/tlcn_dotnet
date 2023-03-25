@@ -87,6 +87,7 @@ try
     builder.Services.AddScoped<IBillRepository, BillRepository>();
     builder.Services.AddScoped<IBillDetailRepository, BillDetailRepository>();
     builder.Services.AddScoped<IReviewRepository, ReviewRepository>();
+    builder.Services.AddScoped<IStatisticsRepository, StatisticsRepository>();
 
     /*builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         .AddJwtBearer(options => {

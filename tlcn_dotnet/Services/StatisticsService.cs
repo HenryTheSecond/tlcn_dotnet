@@ -3,8 +3,11 @@ using ClosedXML.Excel;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Extensions;
+using System.Collections.Immutable;
 using System.Data;
 using tlcn_dotnet.Constant;
+using tlcn_dotnet.CustomException;
+using tlcn_dotnet.Dto.AccountDto;
 using tlcn_dotnet.Dto.BillDto;
 using tlcn_dotnet.Dto.StatisticsDto;
 using tlcn_dotnet.Entity;
@@ -21,13 +24,15 @@ namespace tlcn_dotnet.Services
         private readonly IBillRepository _billRepository;
         private readonly IMapper _mapper;
         private readonly ICategoryRepository _categoryRepository;
-        public StatisticsService(MyDbContext dbContext, ICartRepository cartRepository, IBillRepository billRepository, ICategoryRepository categoryRepository, IMapper mapper)
+        private readonly IStatisticsRepository _statisticsRepository;
+        public StatisticsService(MyDbContext dbContext, ICartRepository cartRepository, IBillRepository billRepository, ICategoryRepository categoryRepository, IMapper mapper, IStatisticsRepository statisticsRepository)
         {
             _dbContext = dbContext;
             _cartRepository = cartRepository;
             _billRepository = billRepository;
             _categoryRepository = categoryRepository;
             _mapper = mapper;
+            _statisticsRepository = statisticsRepository;
         }
 
         public async Task<DataResponse> CalculateProfit(string strFromDate, string strToDate)
@@ -37,6 +42,39 @@ namespace tlcn_dotnet.Services
             Util.TryConvertStringToDataType<DateTime>(strToDate, out toDate);
             toDate = toDate == null ? null : toDate.Value.AddDays(1).AddTicks(-1);
             return new DataResponse(new { profit = await _billRepository.CalculateProfit(fromDate, toDate) });
+        }
+
+        public async Task<DataResponse> CalculateProfitIn7Days()
+        {
+            DateTime fromDate = DateTime.Now.AddDays(-7).Date;
+            var profitIn7Days = _dbContext.Bill
+                .Where(bill => bill.PurchaseDate > fromDate)
+                .GroupBy(bill => bill.PurchaseDate.Value.Date)
+                .Select(group => new ProfitByDayDto
+                {
+                    Date = group.Key.Date,
+                    Profit = group.Sum(bill => bill.Total == null ? 0 : bill.Total.Value)
+                }).ToDictionary(_ => _.Date, _ => _);
+
+            for (int i = 0; i < 7; i++)
+            {
+                fromDate = fromDate.AddDays(1);
+                if (!profitIn7Days.ContainsKey(fromDate.Date))
+                    profitIn7Days.Add(fromDate.Date, new ProfitByDayDto { Date = fromDate.Date, Profit = 0 });
+            }
+            return new DataResponse(profitIn7Days.Values.OrderByDescending(_ => _.Date).ToList());
+        }
+
+        public async Task<DataResponse> CountAllProduct()
+        {
+            int count = await _dbContext.Product.Where(product => product.IsDeleted == false).CountAsync();
+            return new DataResponse(count);
+        }
+
+        public async Task<DataResponse> CountAllUser()
+        {
+            int count = await _dbContext.Account.Where(account => account.Status == UserStatus.ACTIVE).CountAsync();
+            return new DataResponse(count);
         }
 
         public async Task<DataResponse> CountCartByStatus(string strFromDate, string strToDate)
@@ -172,6 +210,17 @@ namespace tlcn_dotnet.Services
             return new DataResponse(statistics);*/
 
             return new DataResponse(await _categoryRepository.StatisticsByCategory(from, to));
+        }
+
+        public async Task<DataResponse> Top5User(string strFromDate, string strToDate)
+        {
+            DateTime? from = null, to = null;
+            if (strFromDate != null && Util.TryConvertStringToDataType<DateTime>(strFromDate, out from) == false)
+                throw new GeneralException("FROM DATE IS INVALID");
+            if (strToDate != null && Util.TryConvertStringToDataType<DateTime>(strToDate, out to) == false)
+                throw new GeneralException("TO DATE IS INVALID");
+            to = to.Value.AddDays(1).AddTicks(-1);
+            return new DataResponse(await _statisticsRepository.ProfitByAccount(from, to));
         }
     }
 }
