@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "dgSpecHash": "SpS5U40LCShyag770zpf61aMGu4HbjR3IVLfkRY7ycUIepHoHA8dA+bmfqashJ8cYJiUvpcWrz+EO5Mhoofj5Q==",
+  "dgSpecHash": "0tJ1EaFEagw+n28sp0Hx3dTpULMgPP5m2yppbG5EoLUbncf9V3ZigfwU1kdHp3SNjRtiRr+zCseWFIPrFuvOJA==",
   "success": true,
   "projectFilePath": "E:\\dotnet\\tlcn_dotnet\\tlcn_dotnet\\tlcn_dotnet.csproj",
   "expectedPackageFiles": [
@@ -13,6 +13,9 @@
     "C:\\Users\\tuyen\\.nuget\\packages\\dapper-querybuilder\\1.2.7\\dapper-querybuilder.1.2.7.nupkg.sha512",
     "C:\\Users\\tuyen\\.nuget\\packages\\documentformat.openxml\\2.16.0\\documentformat.openxml.2.16.0.nupkg.sha512",
     "C:\\Users\\tuyen\\.nuget\\packages\\excelnumberformat\\1.1.0\\excelnumberformat.1.1.0.nupkg.sha512",
+    "C:\\Users\\tuyen\\.nuget\\packages\\google.apis\\1.57.0\\google.apis.1.57.0.nupkg.sha512",
+    "C:\\Users\\tuyen\\.nuget\\packages\\google.apis.auth\\1.57.0\\google.apis.auth.1.57.0.nupkg.sha512",
+    "C:\\Users\\tuyen\\.nuget\\packages\\google.apis.core\\1.57.0\\google.apis.core.1.57.0.nupkg.sha512",
     "C:\\Users\\tuyen\\.nuget\\packages\\humanizer.core\\2.8.26\\humanizer.core.2.8.26.nupkg.sha512",
     "C:\\Users\\tuyen\\.nuget\\packages\\irony.netcore\\1.0.11\\irony.netcore.1.0.11.nupkg.sha512",
     "C:\\Users\\tuyen\\.nuget\\packages\\mailkit\\3.4.2\\mailkit.3.4.2.nupkg.sha512",

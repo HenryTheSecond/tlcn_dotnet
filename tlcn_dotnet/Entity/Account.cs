@@ -17,7 +17,7 @@ namespace tlcn_dotnet.Entity
         [Column(TypeName = "varchar(30)")]
         public Role Role { get; set; }
 
-        public string Email { get; set; }
+        public string? Email { get; set; }
         public string FirstName { get; set; }
         public string LastName { get; set; }
 

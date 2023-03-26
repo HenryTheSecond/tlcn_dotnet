@@ -29,5 +29,6 @@ namespace tlcn_dotnet
         public DbSet<Cart> Cart { get; set; }
         public DbSet<Employee> Employee { get; set; }
         public DbSet<Review> Review { get; set; }
+        public DbSet<GoogleAccount> GoogleAccount { get; set; }
     }
 }

@@ -73,6 +73,7 @@ try
     builder.Services.AddScoped<IReviewService, ReviewService>();
     builder.Services.AddScoped<IDeliveryService, GhnDeliveryService>();
     builder.Services.AddScoped<IStatisticsService, StatisticsService>();
+    builder.Services.AddScoped<IGoogleAccountService, GoogleAccountService>();
 
     //Add repositories
     builder.Services.AddScoped<IInventoryRepository, InventoryRepository>();

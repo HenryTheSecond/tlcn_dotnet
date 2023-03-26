@@ -48,7 +48,8 @@ namespace tlcn_dotnet.Services
         {
             DateTime fromDate = DateTime.Now.AddDays(-7).Date;
             var profitIn7Days = _dbContext.Bill
-                .Where(bill => bill.PurchaseDate > fromDate)
+                .Include(bill => bill.Cart)
+                .Where(bill => bill.PurchaseDate > fromDate && bill.Cart.Status == CartStatus.DELIVERIED)
                 .GroupBy(bill => bill.PurchaseDate.Value.Date)
                 .Select(group => new ProfitByDayDto
                 {
@@ -219,7 +220,8 @@ namespace tlcn_dotnet.Services
                 throw new GeneralException("FROM DATE IS INVALID");
             if (strToDate != null && Util.TryConvertStringToDataType<DateTime>(strToDate, out to) == false)
                 throw new GeneralException("TO DATE IS INVALID");
-            to = to.Value.AddDays(1).AddTicks(-1);
+            if(to != null)
+                to = to.Value.AddDays(1).AddTicks(-1);
             return new DataResponse(await _statisticsRepository.ProfitByAccount(from, to));
         }
     }

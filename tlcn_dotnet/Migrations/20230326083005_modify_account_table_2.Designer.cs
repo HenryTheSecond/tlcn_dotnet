@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using tlcn_dotnet;
 
@@ -11,9 +12,10 @@ using tlcn_dotnet;
 namespace tlcn_dotnet.Migrations
 {
     [DbContext(typeof(MyDbContext))]
-    partial class MyDbContextModelSnapshot : ModelSnapshot
+    [Migration("20230326083005_modify_account_table_2")]
+    partial class modify_account_table_2
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -346,31 +348,6 @@ namespace tlcn_dotnet.Migrations
                     b.ToTable("Employee");
                 });
 
-            modelBuilder.Entity("tlcn_dotnet.Entity.GoogleAccount", b =>
-                {
-                    b.Property<long?>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long?>("Id"), 1L, 1);
-
-                    b.Property<long>("AccountId")
-                        .HasColumnType("bigint");
-
-                    b.Property<string>("Email")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("AccountId");
-
-                    b.HasIndex("Email")
-                        .IsUnique();
-
-                    b.ToTable("GoogleAccount");
-                });
-
             modelBuilder.Entity("tlcn_dotnet.Entity.Inventory", b =>
                 {
                     b.Property<long?>("Id")
@@ -627,17 +604,6 @@ namespace tlcn_dotnet.Migrations
                     b.HasOne("tlcn_dotnet.Entity.Account", "Account")
                         .WithOne("Employee")
                         .HasForeignKey("tlcn_dotnet.Entity.Employee", "Id")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Account");
-                });
-
-            modelBuilder.Entity("tlcn_dotnet.Entity.GoogleAccount", b =>
-                {
-                    b.HasOne("tlcn_dotnet.Entity.Account", "Account")
-                        .WithMany()
-                        .HasForeignKey("AccountId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
