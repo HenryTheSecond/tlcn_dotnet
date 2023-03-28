@@ -45,6 +45,7 @@ namespace tlcn_dotnet.Services
             {
                 googleAccount = await InitializeGoogleAccount(googlePayload);
             }
+            googleAccount.Account.Email = googleAccount.Email;
             string token = CreateJwtToken(googleAccount.Account);
             return new DataResponse(new
             {
@@ -86,8 +87,6 @@ namespace tlcn_dotnet.Services
         {
             Account account = new Account()
             {
-                Email = payload.Email,
-                Password = string.Empty,
                 Role = Role.ROLE_USER,
                 Status = UserStatus.ACTIVE,
                 CityId = string.Empty,

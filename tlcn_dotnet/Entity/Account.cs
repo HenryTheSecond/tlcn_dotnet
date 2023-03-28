@@ -12,7 +12,7 @@ namespace tlcn_dotnet.Entity
         [Key]
         public long? Id { get; set; }
         public string? Phone { get; set; }
-        public string Password { get; set; }
+        public string? Password { get; set; }
 
         [Column(TypeName = "varchar(30)")]
         public Role Role { get; set; }
