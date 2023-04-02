@@ -34,7 +34,7 @@ namespace tlcn_dotnet.Repositories
             var product = await _dbContext.Product.FindAsync(id);
             if (product == null)
                 return false;
-            product.IsDeleted = true;
+            product.IsDeleted = !product.IsDeleted;
             int affectedRows = await _dbContext.SaveChangesAsync();
             return affectedRows > 0;
         }

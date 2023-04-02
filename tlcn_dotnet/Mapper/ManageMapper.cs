@@ -5,6 +5,7 @@ using tlcn_dotnet.Dto.AccountDto;
 using tlcn_dotnet.Dto.BillDetailDto;
 using tlcn_dotnet.Dto.BillDto;
 using tlcn_dotnet.Dto.CartDetailDto;
+using tlcn_dotnet.Dto.CartNotificationDto;
 using tlcn_dotnet.Dto.CategoryDto;
 using tlcn_dotnet.Dto.InventoryDto;
 using tlcn_dotnet.Dto.ProductDto;
@@ -84,6 +85,8 @@ namespace tlcn_dotnet.Mapper
             CreateMap<BillDetail, BillDetailWithProductDto>();
 
             CreateMap<Review, ReviewResponse>();
+
+            CreateMap<CartNotification, CartNotificationResponse>();
         }
     }
 }
