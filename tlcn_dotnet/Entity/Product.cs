@@ -34,6 +34,8 @@ namespace tlcn_dotnet.Entity
         public bool IsDeleted { get; set; } = false;
         public double Sales { get; set; } = 0;
 
+        public double SalesUntilCheckExpire { get; set; } = 0;
+
         public virtual Category? Category { get; set; }
         
         public virtual ICollection<ProductImage> ProductImages { get; set; }

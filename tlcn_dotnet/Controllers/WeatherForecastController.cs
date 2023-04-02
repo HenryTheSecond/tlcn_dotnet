@@ -9,6 +9,10 @@ using tlcn_dotnet.Dto.ProductDto;
 using tlcn_dotnet.AuthorizationAttributes;
 using tlcn_dotnet.IServices;
 using tlcn_dotnet.IRepositories;
+using System.Linq.Expressions;
+using tlcn_dotnet.Entity;
+using Microsoft.EntityFrameworkCore;
+using Account = CloudinaryDotNet.Account;
 
 namespace tlcn_dotnet.Controllers
 {
@@ -16,20 +20,18 @@ namespace tlcn_dotnet.Controllers
     [Route("[controller]")]
     public class WeatherForecastController : ControllerBase
     {
-        private static readonly string[] Summaries = new[]
-        {
-        "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
-    };
 
         private readonly ILogger<WeatherForecastController> _logger;
         private readonly IPaymentService _paymentService;
         private readonly ICartRepository _cartRepository;
+        private readonly MyDbContext _dbContext;
 
-        public WeatherForecastController(ILogger<WeatherForecastController> logger, IPaymentService paymentService, ICartRepository cartRepository)
+        public WeatherForecastController(ILogger<WeatherForecastController> logger, IPaymentService paymentService, ICartRepository cartRepository, MyDbContext dbContext)
         {
             _logger = logger;
             _paymentService = paymentService;
             _cartRepository = cartRepository;
+            _dbContext = dbContext;
         }
 
         [HttpGet(Name = "GetWeatherForecast")]
@@ -130,7 +132,7 @@ namespace tlcn_dotnet.Controllers
 
         [HttpGet("testMomo")]
         public async Task<IActionResult> TestMomo()
-        { 
+        {
             Dictionary<string, object> dict = new Dictionary<string, object>();
             dict.Add("orderId", "1");
             dict.Add("amount", 150000);
@@ -146,6 +148,29 @@ namespace tlcn_dotnet.Controllers
         {
             Console.WriteLine("IPN test successful with data: " + body);
             return Ok();
+        }
+
+        [HttpGet("checkExpire")]
+        public async Task CheckExpire()
+        {
+            var a = _dbContext.Inventory
+                .Where(i => i.ExpireDate != null && i.ExpireDate.Value.Date <= DateTime.Now.Date)
+                .Include(i => i.Product).ToList();
+            var aa = a.GroupBy(i => i.Product).Select(group => new { Product = group.Key, Quantity = group.Sum(i => i.Quantity) });
+            foreach (var b in aa)
+            {
+                Console.WriteLine($"{b.Product.Name}");
+                double sales = b.Product.SalesUntilCheckExpire - b.Quantity;
+                if(sales >= 0)
+                    b.Product.SalesUntilCheckExpire = sales;
+                else
+                {
+                    b.Product.SalesUntilCheckExpire = 0;
+                    b.Product.Quantity += sales;
+                }
+                Console.WriteLine($"{b.Product.SalesUntilCheckExpire} {b.Product.Quantity}");
+                Console.WriteLine("============================================");
+            }
         }
     }
 }

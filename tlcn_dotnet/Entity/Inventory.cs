@@ -24,6 +24,7 @@ namespace tlcn_dotnet.Entity
 
         public string? Description { get; set; }
 
+        public bool IsChecked { get; set; } = false;
         public virtual Supplier? Supplier { get; set; }
     }
 }

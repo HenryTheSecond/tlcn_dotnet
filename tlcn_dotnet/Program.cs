@@ -4,6 +4,7 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using NLog;
 using NLog.Web;
+using Quartz;
 using Swashbuckle.AspNetCore.Filters;
 using System.Configuration;
 using System.Text;
@@ -11,6 +12,7 @@ using tlcn_dotnet;
 using tlcn_dotnet.DatabaseContext;
 using tlcn_dotnet.IRepositories;
 using tlcn_dotnet.IServices;
+using tlcn_dotnet.Jobs;
 using tlcn_dotnet.Repositories;
 using tlcn_dotnet.RepositoriesImpl;
 using tlcn_dotnet.Services;
@@ -74,6 +76,7 @@ try
     builder.Services.AddScoped<IDeliveryService, GhnDeliveryService>();
     builder.Services.AddScoped<IStatisticsService, StatisticsService>();
     builder.Services.AddScoped<IGoogleAccountService, GoogleAccountService>();
+    builder.Services.AddScoped<ICartNotificationService, CartNotificationService>();
 
     //Add repositories
     builder.Services.AddScoped<IInventoryRepository, InventoryRepository>();
@@ -101,6 +104,16 @@ try
             };
         });*/
     builder.Services.ConfigureJWT(builder.Configuration); //Jwt configure
+
+    builder.Services.AddQuartz(q =>
+    {
+        q.UseMicrosoftDependencyInjectionJobFactory();
+        var jobKey = new JobKey("CheckingExpireInventory");
+        q.AddJob<CheckExpireInventory>(opts => opts.WithIdentity(jobKey));
+
+        q.AddTrigger(opts => opts.ForJob(jobKey).WithIdentity("CheckingExpireInventoryTrigger").WithCronSchedule("59 * * ? * * *"));
+    });
+    builder.Services.AddQuartzHostedService(q => q.WaitForJobsToComplete = true);
 
     var app = builder.Build();
 

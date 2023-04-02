@@ -30,5 +30,6 @@ namespace tlcn_dotnet
         public DbSet<Employee> Employee { get; set; }
         public DbSet<Review> Review { get; set; }
         public DbSet<GoogleAccount> GoogleAccount { get; set; }
+        public DbSet<CartNotification> CartNotification { get; set; }
     }
 }

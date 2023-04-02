@@ -30,9 +30,11 @@ namespace tlcn_dotnet.Services
         private readonly IDeliveryService _deliveryService;
         private readonly IBillRepository _billRepository;
         private readonly IProductRepository _productRepository;
+        private readonly ICartNotificationService _cartNotificationService;
         private readonly MyDbContext _dbContext;
         public CartService(MyDbContext dbContext, ICartDetailRepository cartDetailRepository, IBillService billService,
-            ICartRepository cartRepository, IMapper mapper, IDeliveryService deliveryService, IBillRepository billRepository, IProductRepository productRepository)
+            ICartRepository cartRepository, IMapper mapper, IDeliveryService deliveryService, 
+            IBillRepository billRepository, IProductRepository productRepository, ICartNotificationService cartNotificationService)
         {
             _dbContext = dbContext;
             _cartDetailRepository = cartDetailRepository;
@@ -42,6 +44,7 @@ namespace tlcn_dotnet.Services
             _deliveryService = deliveryService;
             _billRepository = billRepository;
             _productRepository = productRepository;
+            _cartNotificationService = cartNotificationService;
         }
 
         public async Task<DataResponse> PayCurrentCart(string authorization, CartPaymentDto cartPaymentDto)
@@ -143,6 +146,7 @@ namespace tlcn_dotnet.Services
 
                 //TODO Refund payment
             }
+            await _cartNotificationService.CreateCartNotification(cart);
             return new DataResponse(_mapper.Map<CartResponse>(cart));
         }
 
@@ -153,6 +157,10 @@ namespace tlcn_dotnet.Services
             foreach (var cartDetail in cartDetails)
             {
                 products[cartDetail.ProductId].Sales += cartDetail.Quantity;
+                products[cartDetail.ProductId].SalesUntilCheckExpire += cartDetail.Quantity;
+                cartDetail.Product.Sales += cartDetail.Quantity;
+                cartDetail.Product.SalesUntilCheckExpire += cartDetail.Quantity;
+                cartDetail.Product.Quantity = products[cartDetail.ProductId].Quantity;
             }
             await _dbContext.SaveChangesAsync();
         }
