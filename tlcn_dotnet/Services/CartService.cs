@@ -322,5 +322,23 @@ namespace tlcn_dotnet.Services
         {
             return new DataResponse(_mapper.Map<CartResponse>(await _cartRepository.ProcessCartById(id)));
         }
+
+        public async Task<DataResponse> GetCartHistoryById(string authorization, long id)
+        {
+            long accountId = Util.ReadJwtTokenAndGetAccountId(authorization);
+            /*bool isCartExisted = await _dbContext.Cart
+                .Include(cart => cart.CartDetails)
+                .ThenInclude(cartDetail => cartDetail.Account)
+                .Where(cart => cart.Id == id && cart.CartDetails[0].Account.Id == accountId).AnyAsync();*/
+
+            bool isCartExisted = await (from cart in _dbContext.Cart
+                                  join cartDetail in _dbContext.CartDetail on cart.Id equals cartDetail.CartId
+                                  join account in _dbContext.Account on cartDetail.Account.Id equals account.Id
+                                  where cart.Id == id && account.Id == accountId
+                                  select cart).AnyAsync();
+            if (isCartExisted == false)
+                throw new GeneralException("CART NOT FOUND", ApplicationConstant.NOT_FOUND_CODE);
+            return new DataResponse(_mapper.Map<CartResponse>(await _cartRepository.ProcessCartById(id)));
+        }
     }
 }

@@ -85,6 +85,16 @@ namespace tlcn_dotnet.Controllers
         }
 
         [CustomAuthorize]
+        [HttpGet("cartHistory/{strId}")]
+        public async Task<DataResponse> GetCartHistoryById([FromHeader] string authorization,
+            string strId)
+        {
+            long? id = Util.ParseId(strId) ??
+                throw new GeneralException(ApplicationConstant.INVALID_ID, ApplicationConstant.BAD_REQUEST_CODE);
+            return await _cartService.GetCartHistoryById(authorization, id.Value);
+        }
+
+        [CustomAuthorize]
         [HttpGet("cartCancel/{strId}")]
         public async Task<DataResponse> CancelCart([FromHeader(Name = "Authorization")] string authorization, string strId)
         {
