@@ -35,6 +35,11 @@ namespace tlcn_dotnet.Repositories
             if (product == null)
                 return false;
             product.IsDeleted = !product.IsDeleted;
+            if(product.IsDeleted == true)
+            {
+                var cartDetails = await _dbContext.CartDetail.Where(cd => cd.CartId == null).ToListAsync();
+                _dbContext.CartDetail.RemoveRange(cartDetails);
+            }
             int affectedRows = await _dbContext.SaveChangesAsync();
             return affectedRows > 0;
         }

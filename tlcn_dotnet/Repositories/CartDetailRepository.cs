@@ -15,7 +15,7 @@ namespace tlcn_dotnet.Repositories
     public class CartDetailRepository : ICartDetailRepository
     {
         private readonly string CART_DETAIL_SELECT = @"SELECT CartDetail.Id, CartDetail.Price, CartDetail.Status, CartDetail.Unit, CartDetail.Quantity,
-		                                                        Product.Id, Product.Name, Product.Price, Product.Unit, Product.MinPurchase, Product.Status, Product.Description, Product.Quantity,
+		                                                        Product.Id, Product.Name, Product.Price, Product.Unit, Product.MinPurchase, Product.Status, Product.Description, Product.Quantity, Product.IsDeleted,
 		                                                        Category.Id, Category.Name,
 		                                                        Image.Id, Image.Url, Image.FileName
                                                         FROM ((CartDetail left outer join Product on CartDetail.ProductId = Product.Id)
