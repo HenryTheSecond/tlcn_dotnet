@@ -77,6 +77,7 @@ namespace tlcn_dotnet.ServicesImpl
             var result = query
                 .ToList()
                 .GroupBy(notification => notification.CreatedDate.Date)
+                .OrderByDescending(grp => grp.Key)
                 .Skip((page - 1) * pageSize)
                 .Take(pageSize)
                 .Select(grp => new { Date = grp.Key, Notification = grp.ToList() });
