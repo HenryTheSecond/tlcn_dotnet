@@ -90,5 +90,11 @@ namespace tlcn_dotnet.Controllers
                 throw new GeneralException(ApplicationConstant.INVALID_ID, ApplicationConstant.BAD_REQUEST_CODE);
             return await _inventoryService.EditInventory(id.Value, editInventoryDto);
         }
+
+        [HttpGet("notification")]
+        public async Task<DataResponse> GetInventoryNotification(DateTime? from, DateTime? to, int page = 1, int pageSize = 8)
+        {
+            return await _inventoryService.GetInventoryNotification(from, to, page, pageSize);
+        }
     }
 }

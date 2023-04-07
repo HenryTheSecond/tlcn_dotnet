@@ -12,5 +12,7 @@ namespace tlcn_dotnet.Services
             DateTime? toDeliveryDate, DateTime? fromExpireDate, DateTime? toExpireDate,
             long? supplierId, string? unit, InventoryOrderBy inventoryOrderBy, SortOrder sortOrder, int page = 1, int pageSize = 8);
         public Task<DataResponse> EditInventory(long id, EditInventoryDto editInventoryDto);
+
+        public Task<DataResponse> GetInventoryNotification(DateTime? from, DateTime? to, int page, int pageSize);
     }
 }

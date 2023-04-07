@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Microsoft.EntityFrameworkCore;
 using tlcn_dotnet.Constant;
 using tlcn_dotnet.CustomException;
 using tlcn_dotnet.Dto.InventoryDto;
@@ -64,6 +65,22 @@ namespace tlcn_dotnet.ServicesImpl
             if (inventory == null)
                 throw new GeneralException("INVENTORY NOT FOUND", ApplicationConstant.NOT_FOUND_CODE);
             return new DataResponse(_mapper.Map<SimpleInventoryDto>(inventory));
+        }
+
+        public async Task<DataResponse> GetInventoryNotification(DateTime? from, DateTime? to, int page, int pageSize)
+        {
+            var query = _dbContext.InventoryNotification.AsQueryable();
+            if (from != null)
+                query = query.Where(notification => notification.CreatedDate.Date >= from.Value.Date);
+            if (to != null)
+                query = query.Where(notfication => notfication.CreatedDate.Date <= to.Value.Date);
+            var result = query
+                .ToList()
+                .GroupBy(notification => notification.CreatedDate.Date)
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .Select(grp => new { Date = grp.Key, Notification = grp.ToList() });
+            return new DataResponse(result);
         }
     }
 }
