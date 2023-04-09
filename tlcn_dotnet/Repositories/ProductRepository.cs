@@ -95,9 +95,7 @@ namespace tlcn_dotnet.Repositories
 										AVG(Review.Rating) as Rating,
 			                            Image.Id, Image.Url, Image.FileName,
 										Category.Id, Category.Name
-                            FROM Product LEFT OUTER JOIN BillDetail ON Product.Id = BillDetail.ProductId
-                            LEFT OUTER JOIN Bill ON Bill.Id = BillDetail.BillId
-							LEFT OUTER JOIN Cart ON Cart.BillId = Bill.Id
+                            FROM Product
 							LEFT OUTER JOIN Category ON Product.CategoryId = Category.Id
 							LEFT OUTER JOIN Review ON Review.ProductId = Product.Id
                             OUTER APPLY (SELECT TOP 1 ProductImage.Id, ProductImage.FileName, ProductImage.Url FROM ProductImage where ProductImage.ProductId = Product.Id) as Image
@@ -134,9 +132,7 @@ namespace tlcn_dotnet.Repositories
 										AVG(Review.Rating) as Rating,
 			                            Image.Id, Image.Url, Image.FileName,
 										Category.Id, Category.Name
-                            FROM Product LEFT OUTER JOIN BillDetail ON Product.Id = BillDetail.ProductId
-                            LEFT OUTER JOIN Bill ON Bill.Id = BillDetail.BillId
-							LEFT OUTER JOIN Cart ON Cart.BillId = Bill.Id
+                            FROM Product
 							LEFT OUTER JOIN Category ON Product.CategoryId = Category.Id
 							LEFT OUTER JOIN Review ON Review.ProductId = Product.Id
                             OUTER APPLY (SELECT TOP 1 ProductImage.Id, ProductImage.FileName, ProductImage.Url FROM ProductImage where ProductImage.ProductId = Product.Id) as Image
