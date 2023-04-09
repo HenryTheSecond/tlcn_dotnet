@@ -14,12 +14,14 @@ namespace tlcn_dotnet.ServicesImpl
     public class ProductService : IProductService
     {
         private readonly IMapper _mapper;
+        private readonly MyDbContext _dbContext;
         private readonly IProductImageService _productImageService;
         private readonly IProductRepository _productRepository;
         private readonly ICategoryRepository _categoryRepository;
-        public ProductService(IMapper mapper, IProductImageService productImageService, IProductRepository productRepository, ICategoryRepository categoryRepository)
+        public ProductService(IMapper mapper, MyDbContext dbContext, IProductImageService productImageService, IProductRepository productRepository, ICategoryRepository categoryRepository)
         {
             _mapper = mapper;
+            _dbContext = dbContext;
             _productImageService = productImageService;
             _productRepository = productRepository;
             _categoryRepository = categoryRepository;   
@@ -113,6 +115,15 @@ namespace tlcn_dotnet.ServicesImpl
         public async Task<DataResponse> GetTop8Product()
         {
             var products = await _productRepository.GetTop8Product();
+            return new DataResponse(products);
+        }
+
+        public async Task<DataResponse> SuggestProduct(string keyword)
+        {
+            var products = await _dbContext.Product
+                .Where(p => p.Name.Contains(keyword))
+                .Select(p => new ProductWithIdAndNameDto { Id = p.Id.Value, Name = p.Name })
+                .ToListAsync();
             return new DataResponse(products);
         }
     }

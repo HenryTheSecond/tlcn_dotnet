@@ -132,5 +132,11 @@ namespace tlcn_dotnet.Controllers
         {
             return await _productService.GetAllProductWithImage();
         }
+
+        [HttpGet("suggestion")]
+        public async Task<DataResponse> SuggestProduct(string? keyword = "")
+        {
+            return await _productService.SuggestProduct(keyword);
+        }
     }
 }

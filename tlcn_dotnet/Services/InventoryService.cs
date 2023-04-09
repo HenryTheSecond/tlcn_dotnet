@@ -74,14 +74,17 @@ namespace tlcn_dotnet.ServicesImpl
                 query = query.Where(notification => notification.CreatedDate.Date >= from.Value.Date);
             if (to != null)
                 query = query.Where(notfication => notfication.CreatedDate.Date <= to.Value.Date);
-            var result = query
+            var group = query
                 .ToList()
                 .GroupBy(notification => notification.CreatedDate.Date)
-                .OrderByDescending(grp => grp.Key)
+                .OrderByDescending(grp => grp.Key);
+            var maxPage = group.Count();
+            maxPage = maxPage % pageSize == 0 ? maxPage / pageSize : maxPage / pageSize + 1;
+            var result = group
                 .Skip((page - 1) * pageSize)
                 .Take(pageSize)
                 .Select(grp => new { Date = grp.Key, Notification = grp.ToList() });
-            return new DataResponse(result);
+            return new DataResponse(new { MaxPage = maxPage, Result = result, CurrentPage = page});
         }
     }
 }
