@@ -1,4 +1,6 @@
 ﻿using AutoMapper;
+using DocumentFormat.OpenXml.Spreadsheet;
+using Microsoft.EntityFrameworkCore;
 using System.Data.SqlClient;
 using tlcn_dotnet.Constant;
 using tlcn_dotnet.CustomException;
@@ -23,6 +25,16 @@ namespace tlcn_dotnet.Services
             _mapper = mapper;
             _productRepository = productRepository;
             _dbContext = dbContext;
+        }
+
+        public async Task<DataResponse> AdminDeleteReview(long id)
+        {
+            var review = await _dbContext.Review.FindAsync(id);
+            if (review == null)
+                throw new GeneralException("REVIEW NOT FOUND", ApplicationConstant.NOT_FOUND_CODE);
+            _dbContext.Review.Remove(review);
+            int rowAffected = await _dbContext.SaveChangesAsync();
+            return new DataResponse(rowAffected > 0 ? true : false);
         }
 
         public async Task<DataResponse> DeleteReview(string authorization, long id)
@@ -97,6 +109,36 @@ namespace tlcn_dotnet.Services
                 Rating = reviewRequest.Rating
             };
             return new DataResponse(reviewResponse);
+        }
+
+        public async Task<DataResponse> SearchReview(string keyword, long productId, int page, int pageSize)
+        {
+            var query = from review in _dbContext.Review
+                        join account in _dbContext.Account on review.AccountId equals account.Id
+                        join googleAccount in _dbContext.GoogleAccount on account.Id equals googleAccount.Account.Id into grpGGAccount
+                        from googleAccount in grpGGAccount.DefaultIfEmpty()
+                        where review.ProductId == productId && (review.Content.Contains(keyword) ||
+                                account.Email.Contains(keyword) ||
+                                googleAccount.Email.Contains(keyword) ||
+                                (account.FirstName + " " + account.LastName).Contains(keyword))
+                        select new { Review = review, Account = account, GoogleAccount = googleAccount };
+
+            int count = await query.CountAsync();
+            var resultQuery = await query.Skip((page - 1) * pageSize).Take(pageSize).ToListAsync();
+            resultQuery.ForEach(row =>
+            {
+                row.Review.Account = row.Account;
+                row.Review.AccountId = row.Account.Id.Value;
+            });
+
+            var result = resultQuery.Select(row => row.Review);
+            return new DataResponse(new
+            {
+                reviews = _mapper.Map<IEnumerable<ReviewResponse>>(result),
+                maxPage = Util.CalculateMaxPage(count, pageSize),
+                currentPage = page
+            });
+
         }
     }
 }

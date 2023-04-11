@@ -76,5 +76,23 @@ namespace tlcn_dotnet.Controllers
                 throw new GeneralException(ApplicationConstant.INVALID_ID, ApplicationConstant.BAD_REQUEST_CODE);
             return await _reviewService.GetUserReviewOfProduct(authorization, id.Value);
         }
+
+        [HttpDelete("admin/deleteReview/{strId}")]
+        [CustomAuthorize(Roles = "ROLE_ADMIN")]
+        public async Task<DataResponse> AdminDeleteReview(string strId)
+        {
+            long? id = Util.ParseId(strId) ??
+                throw new GeneralException(ApplicationConstant.INVALID_ID, ApplicationConstant.BAD_REQUEST_CODE);
+            return await _reviewService.AdminDeleteReview(id.Value);
+        }
+
+        [HttpGet("admin/searchReview/{strProductId}")]
+        [CustomAuthorize(Roles = "ROLE_ADMIN")]
+        public async Task<DataResponse> AdminSearchReview(string strProductId, string? keyword = "", int? page = 1, int? pageSize = 5)
+        {
+            long? productId = Util.ParseId(strProductId) ??
+                throw new GeneralException(ApplicationConstant.INVALID_ID, ApplicationConstant.BAD_REQUEST_CODE);
+            return await _reviewService.SearchReview(keyword, productId.Value, page.Value, pageSize.Value);
+        }
     }
 }
