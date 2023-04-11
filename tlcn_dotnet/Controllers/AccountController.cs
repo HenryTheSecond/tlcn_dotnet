@@ -130,5 +130,11 @@ namespace tlcn_dotnet.Controllers
         {
             return await _authService.UpdateAccountRole(request);
         }
+
+        [HttpGet("admin/manageEmployee")]
+        public async Task<DataResponse> AdminManageEmployee([FromQuery] AdminManageEmployeeRequest request)
+        {
+            return await _authService.AdminManageEmployee(request);
+        }
     }
 }

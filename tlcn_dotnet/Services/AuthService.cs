@@ -307,5 +307,43 @@ namespace tlcn_dotnet.ServicesImpl
             _dbContext.SaveChanges();
             return new DataResponse(_mapper.Map<AccountResponse>(account));
         }
+
+        public async Task<DataResponse> AdminManageEmployee(AdminManageEmployeeRequest request)
+        {
+            var query = _dbContext.Account.AsQueryable();
+            if(request.Role == null)
+            {
+                query = query.Where(account => account.Role == Role.ROLE_EMPLOYEE || account.Role == Role.ROLE_ADMIN);
+            }
+            else
+            {
+                query = query.Where(account => account.Role == request.Role);
+            }
+            if(request.SearchBy != null)
+            {
+                request.Keyword = request.Keyword == null ? string.Empty : request.Keyword;
+                switch(request.SearchBy.Value)
+                {
+                    case ManageEmployeeSearchBy.EMAIL:
+                        query = query.Where(account => account.Email.Contains(request.Keyword));
+                        break;
+                    case ManageEmployeeSearchBy.PHONE:
+                        query = query.Where(account => account.Phone.Contains(request.Keyword));
+                        break;
+                    case ManageEmployeeSearchBy.NAME:
+                        query = query.Where(account => (account.LastName + " " + account.FirstName).Contains(request.Keyword));
+                        break;
+                }
+            }
+            int count = await query.CountAsync();
+            var result = await query.Skip((request.Page - 1) * request.PageSize).Take(request.PageSize).ToListAsync();
+            return new DataResponse(new
+            {
+                Accounts = _mapper.Map<List<AccountResponse>>(result),
+                Total = count,
+                MaxPage = Util.CalculateMaxPage(count, request.PageSize),
+                CurrentPage = request.Page
+            });
+        }
     }
 }
