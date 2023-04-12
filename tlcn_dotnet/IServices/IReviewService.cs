@@ -10,6 +10,6 @@ namespace tlcn_dotnet.IServices
         public Task<DataResponse> DeleteReview(string authorization, long id);
         public Task<DataResponse> GetUserReviewOfProduct(string authorization, long productId);
         public Task<DataResponse> AdminDeleteReview(long id);
-        public Task<DataResponse> SearchReview(string keyword, long productId, int page, int pageSize);
+        public Task<DataResponse> SearchReview(string keyword, long? productId, int page, int pageSize);
     }
 }

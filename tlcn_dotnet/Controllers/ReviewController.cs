@@ -71,7 +71,7 @@ namespace tlcn_dotnet.Controllers
         [HttpGet("product/{strId}/userReview")]
         [CustomAuthorize]
         public async Task<DataResponse> GetUserReviewOfProduct([FromHeader(Name = "Authorization")] string authorization, string strId)
-        { 
+        {
             long? id = Util.ParseId(strId) ??
                 throw new GeneralException(ApplicationConstant.INVALID_ID, ApplicationConstant.BAD_REQUEST_CODE);
             return await _reviewService.GetUserReviewOfProduct(authorization, id.Value);
@@ -86,13 +86,15 @@ namespace tlcn_dotnet.Controllers
             return await _reviewService.AdminDeleteReview(id.Value);
         }
 
-        [HttpGet("admin/searchReview/{strProductId}")]
+        [HttpGet("admin/searchReview")]
         [CustomAuthorize(Roles = "ROLE_ADMIN")]
-        public async Task<DataResponse> AdminSearchReview(string strProductId, string? keyword = "", int? page = 1, int? pageSize = 5)
+        public async Task<DataResponse> AdminSearchReview(string? strProductId, string? keyword = "", int? page = 1, int? pageSize = 5)
         {
-            long? productId = Util.ParseId(strProductId) ??
-                throw new GeneralException(ApplicationConstant.INVALID_ID, ApplicationConstant.BAD_REQUEST_CODE);
-            return await _reviewService.SearchReview(keyword, productId.Value, page.Value, pageSize.Value);
+            long? productId = null;
+            if (strProductId != null)
+                productId = Util.ParseId(strProductId) ??
+                    throw new GeneralException(ApplicationConstant.INVALID_ID, ApplicationConstant.BAD_REQUEST_CODE);
+            return await _reviewService.SearchReview(keyword, productId, page.Value, pageSize.Value);
         }
     }
 }

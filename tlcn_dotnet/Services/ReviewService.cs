@@ -111,17 +111,19 @@ namespace tlcn_dotnet.Services
             return new DataResponse(reviewResponse);
         }
 
-        public async Task<DataResponse> SearchReview(string keyword, long productId, int page, int pageSize)
+        public async Task<DataResponse> SearchReview(string keyword, long? productId, int page, int pageSize)
         {
             var query = from review in _dbContext.Review
                         join account in _dbContext.Account on review.AccountId equals account.Id
                         join googleAccount in _dbContext.GoogleAccount on account.Id equals googleAccount.Account.Id into grpGGAccount
                         from googleAccount in grpGGAccount.DefaultIfEmpty()
-                        where review.ProductId == productId && (review.Content.Contains(keyword) ||
+                        where (review.Content.Contains(keyword) ||
                                 account.Email.Contains(keyword) ||
                                 googleAccount.Email.Contains(keyword) ||
                                 (account.FirstName + " " + account.LastName).Contains(keyword))
                         select new { Review = review, Account = account, GoogleAccount = googleAccount };
+            if(productId != null)
+                query = query.Where(review => review.Review.ProductId == productId);
 
             int count = await query.CountAsync();
             var resultQuery = await query.Skip((page - 1) * pageSize).Take(pageSize).ToListAsync();
