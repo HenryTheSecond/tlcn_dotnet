@@ -26,6 +26,8 @@ namespace tlcn_dotnet.Mapper
             CreateMap<RegisterAccountDto, Account>();
             CreateMap<Account, AccountResponse>();
             CreateMap<Account, AccountReviewDto>();
+            CreateMap<Account, EmployeeResponse>()
+                .ForMember(dest => dest.Salary, map => map.MapFrom(src => src.Employee != null ? src.Employee.Salary : 0));
 
             CreateMap<Supplier, SimpleSupplierDto>();
             CreateMap<AddSupplierDto, Supplier>();

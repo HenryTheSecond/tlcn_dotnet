@@ -310,7 +310,7 @@ namespace tlcn_dotnet.ServicesImpl
 
         public async Task<DataResponse> AdminManageEmployee(AdminManageEmployeeRequest request)
         {
-            var query = _dbContext.Account.AsQueryable();
+            var query = _dbContext.Account.Include(account => account.Employee).AsQueryable();
             if(request.Role == null)
             {
                 query = query.Where(account => account.Role == Role.ROLE_EMPLOYEE || account.Role == Role.ROLE_ADMIN);
@@ -339,7 +339,7 @@ namespace tlcn_dotnet.ServicesImpl
             var result = await query.Skip((request.Page - 1) * request.PageSize).Take(request.PageSize).ToListAsync();
             return new DataResponse(new
             {
-                Accounts = _mapper.Map<List<AccountResponse>>(result),
+                Accounts = _mapper.Map<List<EmployeeResponse>>(result),
                 Total = count,
                 MaxPage = Util.CalculateMaxPage(count, request.PageSize),
                 CurrentPage = request.Page
