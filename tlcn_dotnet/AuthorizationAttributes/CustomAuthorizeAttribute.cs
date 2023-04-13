@@ -6,6 +6,7 @@ using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+using tlcn_dotnet.Constant;
 using tlcn_dotnet.CustomException;
 using tlcn_dotnet.IRepositories;
 using tlcn_dotnet.Services;
@@ -34,6 +35,12 @@ namespace tlcn_dotnet.AuthorizationAttributes
             if (verifyTokenClaim.ToString() != accountRepository.GetVerifyTokenById(Convert.ToInt64(id)))
             {
                 filterContext.Result = new UnauthorizedObjectResult(null);
+            }
+
+            tokenValidator.ReadJwtToken(jwtToken).Payload.TryGetValue("status", out object status);
+            if(Enum.Parse<UserStatus>(status.ToString()) == UserStatus.BANNED)
+            {
+                filterContext.Result = new UnauthorizedObjectResult("THIS ACCOUNT HAS BEEN BANNED");
             }
         }
     }

@@ -17,5 +17,6 @@ namespace tlcn_dotnet.Services
         public Task<DataResponse> UpdateProfile(string authorization, UpdateProfileRequest request);
         public Task<DataResponse> UpdateAccountRole(UpdateRoleRequest request);
         public Task<DataResponse> AdminManageEmployee(AdminManageEmployeeRequest request);
+        public Task<DataResponse> AdminManageUser(AdminManageUserRequest request);
     }
 }

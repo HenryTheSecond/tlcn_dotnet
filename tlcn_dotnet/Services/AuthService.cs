@@ -22,7 +22,7 @@ using Role = tlcn_dotnet.Constant.Role;
 
 namespace tlcn_dotnet.ServicesImpl
 {
-    public class AuthService: IAuthService
+    public class AuthService : IAuthService
     {
         private readonly IConfiguration _configuration;
         private readonly MyDbContext _dbContext;
@@ -33,7 +33,7 @@ namespace tlcn_dotnet.ServicesImpl
         private readonly IChangePasswordTokenRepository _changePasswordTokenRepository;
         private readonly Cloudinary _cloudinary;
 
-        public AuthService(IConfiguration configuration, MyDbContext dbContext, IMapper mapper, 
+        public AuthService(IConfiguration configuration, MyDbContext dbContext, IMapper mapper,
             IConfirmTokenService confirmTokenService, IEmailService emailService, IAccountRepository accountRepository,
             IChangePasswordTokenRepository changePasswordTokenRepository)
         {
@@ -59,10 +59,10 @@ namespace tlcn_dotnet.ServicesImpl
             ConfirmToken confirmToken = _dbContext.ConfirmToken.Include(confirmToken => confirmToken.Account).FirstOrDefault(confirmToken => confirmToken.Token == token);
             if (confirmToken == null)
                 throw new GeneralException(ApplicationConstant.TOKEN_NOT_FOUND, ApplicationConstant.NOT_FOUND_CODE);
-            if(confirmToken.ConfirmAt != null)
+            if (confirmToken.ConfirmAt != null)
                 throw new GeneralException(ApplicationConstant.EMAIL_HAS_BEEN_CONFIRMED, ApplicationConstant.FAILED_CODE);
             DateTime now = DateTime.Now;
-            if(now > confirmToken.ExpireAt)
+            if (now > confirmToken.ExpireAt)
                 throw new GeneralException(ApplicationConstant.TOKEN_EXPIRED, ApplicationConstant.FAILED_CODE);
             confirmToken.ConfirmAt = now;
             confirmToken.Account.Status = UserStatus.ACTIVE;
@@ -108,18 +108,22 @@ namespace tlcn_dotnet.ServicesImpl
             {
                 throw new GeneralException(ApplicationConstant.EMAIL_OR_PASSWORD_INCORRECT, ApplicationConstant.FAILED_CODE);
             }
-           
+
             if (accountDb.Status == UserStatus.INACTIVE)
             {
                 throw new GeneralException(ApplicationConstant.USER_INACTIVE, ApplicationConstant.FAILED_CODE);
             }
+            if (accountDb.Status == UserStatus.BANNED)
+            {
+                throw new GeneralException("USER HAS BEEN BANNED", ApplicationConstant.FAILED_CODE);
+            }
             return new DataResponse(new
-            { 
+            {
                 accessToken = CreateJwtToken(accountDb),
                 user = _mapper.Map<AccountResponse>(accountDb)
             });
         }
-        
+
 
         public async Task<DataResponse> RegisterAccount(RegisterAccountDto registerAccountDto, Role role = Role.ROLE_USER)
         {
@@ -139,7 +143,7 @@ namespace tlcn_dotnet.ServicesImpl
 
             string checkLocation = await Util.CheckVietnameseAddress(account.CityId, account.DistrictId, account.WardId);
             if (checkLocation != null)
-            { 
+            {
                 throw new GeneralException(checkLocation, ApplicationConstant.BAD_REQUEST_CODE);
             }
             accountDb = _dbContext.Account.Add(account).Entity;
@@ -168,7 +172,7 @@ namespace tlcn_dotnet.ServicesImpl
             var result = await _accountRepository.GetAccount(keyword, keywordType, role, page, pageSize);
 
             return new DataResponse(new
-            { 
+            {
                 accounts = _mapper.Map<IEnumerable<AccountResponse>>(result.Accounts),
                 maxPage = Util.CalculateMaxPage(result.Total, pageSize),
                 currentPage = page
@@ -195,7 +199,7 @@ namespace tlcn_dotnet.ServicesImpl
 
         public async Task<DataResponse> ConfirmChangePassword(string token)
         {
-            ChangePasswordToken changePasswordTokenDb = (await _changePasswordTokenRepository.FindByToken(token)) 
+            ChangePasswordToken changePasswordTokenDb = (await _changePasswordTokenRepository.FindByToken(token))
                 ?? throw new GeneralException("TOKEN NOT FOUND", ApplicationConstant.NOT_FOUND_CODE);
             DateTime now = DateTime.Now;
             if (changePasswordTokenDb.ConfirmAt != null)
@@ -204,14 +208,14 @@ namespace tlcn_dotnet.ServicesImpl
                 throw new GeneralException(ApplicationConstant.TOKEN_EXPIRED, ApplicationConstant.FAILED_CODE);
             changePasswordTokenDb.ConfirmAt = now;
             changePasswordTokenDb.Account.Password = changePasswordTokenDb.Password;
-            changePasswordTokenDb.Account.VerifyToken = Guid.NewGuid().ToString(); 
+            changePasswordTokenDb.Account.VerifyToken = Guid.NewGuid().ToString();
             ChangePasswordToken changePasswordTokenSaved = await _changePasswordTokenRepository.Update(changePasswordTokenDb);
             return new DataResponse(_mapper.Map<AccountResponse>(changePasswordTokenSaved.Account));
         }
 
         public async Task<DataResponse> GetAccountById(long id)
         {
-            Account account = (await _accountRepository.GetById(id)) 
+            Account account = (await _accountRepository.GetById(id))
                 ?? throw new GeneralException("ACCOUNT NOT FOUND", ApplicationConstant.NOT_FOUND_CODE);
             return new DataResponse(_mapper.Map<AccountResponse>(account));
         }
@@ -275,7 +279,7 @@ namespace tlcn_dotnet.ServicesImpl
         public async Task<DataResponse> UpdateAccountRole(UpdateRoleRequest request)
         {
             Account account = await _accountRepository.FindByEmail(request.Email);
-            if(account == null)
+            if (account == null)
                 throw new GeneralException("ACCOUNT NOT FOUND", ApplicationConstant.NOT_FOUND_CODE);
             Role oldRole = account.Role;
             account.Role = request.Role;
@@ -311,7 +315,7 @@ namespace tlcn_dotnet.ServicesImpl
         public async Task<DataResponse> AdminManageEmployee(AdminManageEmployeeRequest request)
         {
             var query = _dbContext.Account.Include(account => account.Employee).AsQueryable();
-            if(request.Role == null)
+            if (request.Role == null)
             {
                 query = query.Where(account => account.Role == Role.ROLE_EMPLOYEE || account.Role == Role.ROLE_ADMIN);
             }
@@ -319,10 +323,10 @@ namespace tlcn_dotnet.ServicesImpl
             {
                 query = query.Where(account => account.Role == request.Role);
             }
-            if(request.SearchBy != null)
+            if (request.SearchBy != null)
             {
                 request.Keyword = request.Keyword == null ? string.Empty : request.Keyword;
-                switch(request.SearchBy.Value)
+                switch (request.SearchBy.Value)
                 {
                     case ManageEmployeeSearchBy.EMAIL:
                         query = query.Where(account => account.Email.Contains(request.Keyword));
@@ -340,6 +344,52 @@ namespace tlcn_dotnet.ServicesImpl
             return new DataResponse(new
             {
                 Accounts = _mapper.Map<List<EmployeeResponse>>(result),
+                Total = count,
+                MaxPage = Util.CalculateMaxPage(count, request.PageSize),
+                CurrentPage = request.Page
+            });
+        }
+
+        public async Task<DataResponse> AdminManageUser(AdminManageUserRequest request)
+        {
+            var query = from account in _dbContext.Account
+                        join googleAccount in _dbContext.GoogleAccount on account.Id equals googleAccount.Account.Id into grpGoogleAccount
+                        from googleAccount in grpGoogleAccount.DefaultIfEmpty()
+                        select new { Account = account, GoogleAccount = googleAccount };
+            request.Keyword = request.Keyword == null ? string.Empty : request.Keyword.Trim();
+            if (request.SearchBy != null)
+            {
+                switch (request.SearchBy)
+                {
+                    case ManageUserSearchBy.EMAIL:
+                        query = query.Where(row => row.Account.Email.Contains(request.Keyword) || (row.GoogleAccount != null && row.GoogleAccount.Email.Contains(request.Keyword)));
+                        break;
+                    case ManageUserSearchBy.PHONE:
+                        query = query.Where(row => row.Account.Phone.Contains(request.Keyword));
+                        break;
+                    case ManageUserSearchBy.NAME:
+                        query = query.Where(row => (row.Account.FirstName + " " + row.Account.LastName).Contains(request.Keyword));
+                        break;
+                }
+            }
+            else
+            {
+                query = query.Where(row => (row.Account.Email.Contains(request.Keyword) || (row.GoogleAccount != null && row.GoogleAccount.Email.Contains(request.Keyword))) ||
+                                    (row.Account.Phone.Contains(request.Keyword)) ||
+                                    ((row.Account.FirstName + " " + row.Account.LastName).Contains(request.Keyword)));
+            }
+            long count = await query.LongCountAsync();
+            var result = (await query.Skip((request.Page - 1) * request.PageSize).Take(request.PageSize).ToListAsync()).Select(row =>
+            {
+                row.Account.Email = row.GoogleAccount != null ? row.GoogleAccount.Email : row.Account.Email;
+                AccountWithProviderResponse accountWithProvider = _mapper.Map<AccountWithProviderResponse>(row.Account);
+                if (row.GoogleAccount != null)
+                    accountWithProvider.Provider = "Google";
+                return accountWithProvider;
+            });
+            return new DataResponse(new
+            {
+                Accounts = result,
                 Total = count,
                 MaxPage = Util.CalculateMaxPage(count, request.PageSize),
                 CurrentPage = request.Page
