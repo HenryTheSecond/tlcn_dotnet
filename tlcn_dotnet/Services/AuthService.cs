@@ -307,6 +307,15 @@ namespace tlcn_dotnet.ServicesImpl
                     employee.Salary = request.Salary != null ? request.Salary : employee.Salary;
                     _dbContext.Update(employee);
                 }
+                else
+                {
+                    _dbContext.Employee.Add(new Employee
+                    {
+                        Account = account,
+                        Id = account.Id,
+                        Salary = request.Salary
+                    });
+                }
             }
             _dbContext.SaveChanges();
             return new DataResponse(_mapper.Map<AccountResponse>(account));
@@ -394,6 +403,15 @@ namespace tlcn_dotnet.ServicesImpl
                 MaxPage = Util.CalculateMaxPage(count, request.PageSize),
                 CurrentPage = request.Page
             });
+        }
+
+        public async Task<DataResponse> AdminUpdateUserStatus(UpdateUserStatusRequest request)
+        {
+            Account account = await _dbContext.Account.FindAsync(request.UserId) 
+                ?? throw new GeneralException("ACCOUNT NOT FOUND", ApplicationConstant.NOT_FOUND_CODE);
+            account.Status = request.Status;
+            int affectedRow = await _dbContext.SaveChangesAsync();
+            return new DataResponse(affectedRow > 0);
         }
     }
 }

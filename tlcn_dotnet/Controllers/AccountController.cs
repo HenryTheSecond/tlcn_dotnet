@@ -132,15 +132,24 @@ namespace tlcn_dotnet.Controllers
         }
 
         [HttpGet("admin/manageEmployee")]
+        [CustomAuthorize(Roles = "ROLE_ADMIN")]
         public async Task<DataResponse> AdminManageEmployee([FromQuery] AdminManageEmployeeRequest request)
         {
             return await _authService.AdminManageEmployee(request);
         }
 
         [HttpGet("admin/manageUser")]
+        [CustomAuthorize(Roles = "ROLE_ADMIN")]
         public async Task<DataResponse> AdminManageUser([FromQuery] AdminManageUserRequest request)
         {
             return await _authService.AdminManageUser(request);
+        }
+
+        [HttpPut("admin/updateUserStatus")]
+        [CustomAuthorize(Roles = "ROLE_ADMIN")]
+        public async Task<DataResponse> AdminUpdateUserStatus([FromBody] UpdateUserStatusRequest request)
+        {
+            return await _authService.AdminUpdateUserStatus(request);
         }
     }
 }
