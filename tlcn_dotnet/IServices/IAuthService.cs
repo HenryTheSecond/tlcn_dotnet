@@ -19,5 +19,6 @@ namespace tlcn_dotnet.Services
         public Task<DataResponse> AdminManageEmployee(AdminManageEmployeeRequest request);
         public Task<DataResponse> AdminManageUser(AdminManageUserRequest request);
         public Task<DataResponse> AdminUpdateUserStatus(UpdateUserStatusRequest request);
+        public Task<DataResponse> AdminManageUserDetail(long userId, AdminManageUserDetailRequest request);
     }
 }

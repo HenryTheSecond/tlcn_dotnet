@@ -151,5 +151,12 @@ namespace tlcn_dotnet.Controllers
         {
             return await _authService.AdminUpdateUserStatus(request);
         }
+
+        [HttpGet("admin/userDetail/{userId}")]
+        [CustomAuthorize(Roles = "ROLE_ADMIN")]
+        public async Task<DataResponse> Test(long userId, [FromQuery] AdminManageUserDetailRequest request)
+        {
+            return await _authService.AdminManageUserDetail(userId, request);
+        }
     }
 }

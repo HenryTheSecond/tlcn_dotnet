@@ -19,6 +19,7 @@ using Account = tlcn_dotnet.Entity.Account;
 using CloudinaryDotNet.Actions;
 using static System.Net.Mime.MediaTypeNames;
 using Role = tlcn_dotnet.Constant.Role;
+using System.Collections.Generic;
 
 namespace tlcn_dotnet.ServicesImpl
 {
@@ -217,7 +218,14 @@ namespace tlcn_dotnet.ServicesImpl
         {
             Account account = (await _accountRepository.GetById(id))
                 ?? throw new GeneralException("ACCOUNT NOT FOUND", ApplicationConstant.NOT_FOUND_CODE);
-            return new DataResponse(_mapper.Map<AccountResponse>(account));
+            GoogleAccount googleAccount = await _dbContext.GoogleAccount.FirstOrDefaultAsync(googleAccount => googleAccount.Account.Id == account.Id);
+            var accountResponse = _mapper.Map<AccountWithProviderResponse>(account);
+            if (googleAccount != null)
+            {
+                accountResponse.Email = googleAccount.Email;
+                accountResponse.Provider = "Google";
+            }
+            return new DataResponse(accountResponse);
         }
 
         public async Task<DataResponse> GetProfile(string authorization)
@@ -407,11 +415,51 @@ namespace tlcn_dotnet.ServicesImpl
 
         public async Task<DataResponse> AdminUpdateUserStatus(UpdateUserStatusRequest request)
         {
-            Account account = await _dbContext.Account.FindAsync(request.UserId) 
+            Account account = await _dbContext.Account.FindAsync(request.UserId)
                 ?? throw new GeneralException("ACCOUNT NOT FOUND", ApplicationConstant.NOT_FOUND_CODE);
             account.Status = request.Status;
             int affectedRow = await _dbContext.SaveChangesAsync();
             return new DataResponse(affectedRow > 0);
+        }
+
+        public async Task<DataResponse> AdminManageUserDetail(long userId, AdminManageUserDetailRequest request)
+        {
+            var cartIds = await _dbContext.CartDetail
+                .Where(cd => cd.Account.Id == userId)
+                .Select(cd => cd.CartId).Distinct().ToListAsync();
+            var query = from cart in _dbContext.Cart
+                        join bill in _dbContext.Bill on cart.BillId equals bill.Id
+                        where cartIds.Contains(cart.Id.Value)
+                        select new { cart, bill };
+            if(request.From != null)
+            {
+                query = query.Where(row => row.cart.CreatedDate >= request.From);
+            }
+            if(request.To != null)
+            {
+                query = query.Where(row => row.cart.CreatedDate <= request.To);
+            }
+            long count = await query.LongCountAsync();
+            IList<UserCartDto> listCarts = await query
+                .Skip((request.Page - 1) * request.PageSize).Take(request.PageSize)
+                .Select(row => new UserCartDto
+                {
+                    Id = row.cart.Id.Value,
+                    CreatedDate = row.cart.CreatedDate,
+                    DetailLocation = row.cart.DetailLocation,
+                    ProcessDescription = row.cart.ProcessDescription,
+                    Status = row.cart.Status
+                }).ToListAsync();
+            UserListCartDto userListCartDto = new UserListCartDto
+            {
+                Carts = listCarts,
+                Count = count,
+                CurrentPage = request.Page,
+                MaxPage = Util.CalculateMaxPage(count, request.PageSize),
+                Total = query.Sum(row => row.cart.Status == CartStatus.DELIVERIED ? row.bill.Total.Value : 0)
+            };
+            return new DataResponse(userListCartDto);
+
         }
     }
 }
