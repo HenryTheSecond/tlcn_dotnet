@@ -77,6 +77,7 @@ try
     builder.Services.AddScoped<IStatisticsService, StatisticsService>();
     builder.Services.AddScoped<IGoogleAccountService, GoogleAccountService>();
     builder.Services.AddScoped<ICartNotificationService, CartNotificationService>();
+    builder.Services.AddScoped<IProductPromotionService, ProductPromotionService>();
 
     //Add repositories
     builder.Services.AddScoped<IInventoryRepository, InventoryRepository>();
@@ -92,6 +93,7 @@ try
     builder.Services.AddScoped<IBillDetailRepository, BillDetailRepository>();
     builder.Services.AddScoped<IReviewRepository, ReviewRepository>();
     builder.Services.AddScoped<IStatisticsRepository, StatisticsRepository>();
+    builder.Services.AddScoped<IProductPromotionRepository, ProductPromotionRepository>();
 
     /*builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         .AddJwtBearer(options => {
@@ -113,7 +115,7 @@ try
 
         q.AddTrigger(opts => opts.ForJob(jobKey).WithIdentity("CheckingExpireInventoryTrigger").WithCronSchedule("59 * * ? * * *"));
     });
-    builder.Services.AddQuartzHostedService(q => q.WaitForJobsToComplete = true);
+    //builder.Services.AddQuartzHostedService(q => q.WaitForJobsToComplete = true);
 
     var app = builder.Build();
 
