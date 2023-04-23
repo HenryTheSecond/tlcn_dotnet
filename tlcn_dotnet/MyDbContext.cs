@@ -33,5 +33,6 @@ namespace tlcn_dotnet
         public DbSet<CartNotification> CartNotification { get; set; }
         public DbSet<CountCartNotificationByUser> CountCartNotificationByUser { get; set; }
         public DbSet<InventoryNotification> InventoryNotification { get; set; }
+        public DbSet<ProductPromotion> ProductPromotion { get; set; }
     }
 }

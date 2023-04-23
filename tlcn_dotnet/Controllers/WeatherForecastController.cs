@@ -13,6 +13,7 @@ using System.Linq.Expressions;
 using tlcn_dotnet.Entity;
 using Microsoft.EntityFrameworkCore;
 using Account = CloudinaryDotNet.Account;
+using AutoMapper;
 
 namespace tlcn_dotnet.Controllers
 {
@@ -25,13 +26,15 @@ namespace tlcn_dotnet.Controllers
         private readonly IPaymentService _paymentService;
         private readonly ICartRepository _cartRepository;
         private readonly MyDbContext _dbContext;
+        private readonly IMapper _mapper;
 
-        public WeatherForecastController(ILogger<WeatherForecastController> logger, IPaymentService paymentService, ICartRepository cartRepository, MyDbContext dbContext)
+        public WeatherForecastController(ILogger<WeatherForecastController> logger, IPaymentService paymentService, ICartRepository cartRepository, MyDbContext dbContext, IMapper mapper)
         {
             _logger = logger;
             _paymentService = paymentService;
             _cartRepository = cartRepository;
             _dbContext = dbContext;
+            _mapper = mapper;
         }
 
         [HttpGet(Name = "GetWeatherForecast")]
@@ -171,6 +174,15 @@ namespace tlcn_dotnet.Controllers
                 Console.WriteLine($"{b.Product.SalesUntilCheckExpire} {b.Product.Quantity}");
                 Console.WriteLine("============================================");
             }
+        }
+
+        [HttpGet("testOuterApply")]
+        public async Task TestOuterApply()
+        {
+            var a = from product in _dbContext.Product
+            from promo in _dbContext.ProductPromotion.Where(p => p.ProductId == product.Id && p.ExpireDate > DateTime.Now).Take(1).DefaultIfEmpty()
+            select new {Product = _mapper.Map<SimpleProductDto>(product), promo};
+            var b = a.ToList();
         }
     }
 }

@@ -4,6 +4,7 @@ using System.ComponentModel.DataAnnotations;
 using tlcn_dotnet.Constant;
 using tlcn_dotnet.Entity;
 using tlcn_dotnet.Dto.CategoryDto;
+using tlcn_dotnet.Dto.ProductPromotionDto;
 
 namespace tlcn_dotnet.Dto.ProductDto
 {
@@ -22,5 +23,6 @@ namespace tlcn_dotnet.Dto.ProductDto
         public double? Rating { get; set; }
         public double? Sales { get; set; } = 0;
         public bool IsDeleted { get; set; }
+        public SimpleProductPromotionDto Promotion { get; set; }
     }
 }

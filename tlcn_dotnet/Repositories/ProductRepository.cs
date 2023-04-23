@@ -1,4 +1,5 @@
-﻿using Dapper;
+﻿using AutoMapper;
+using Dapper;
 using Microsoft.EntityFrameworkCore;
 using System.Dynamic;
 using tlcn_dotnet.Constant;
@@ -7,6 +8,7 @@ using tlcn_dotnet.DatabaseContext;
 using tlcn_dotnet.Dto.CategoryDto;
 using tlcn_dotnet.Dto.ProductDto;
 using tlcn_dotnet.Dto.ProductImageDto;
+using tlcn_dotnet.Dto.ProductPromotionDto;
 using tlcn_dotnet.Entity;
 using tlcn_dotnet.IRepositories;
 
@@ -15,9 +17,11 @@ namespace tlcn_dotnet.Repositories
     public class ProductRepository: GenericRepository<Product>, IProductRepository
     {
         private readonly DapperContext _dapperContext;
-        public ProductRepository(MyDbContext dbContext, DapperContext dapperContext): base(dbContext)
+        private readonly IMapper _mapper;
+        public ProductRepository(MyDbContext dbContext, DapperContext dapperContext, IMapper mapper): base(dbContext)
         {
             _dapperContext = dapperContext;
+            _mapper = mapper;
         }
 
         public async Task<bool> CheckAccountBuyItem(long accountId, long productId)
@@ -75,7 +79,14 @@ namespace tlcn_dotnet.Repositories
                     queryProduct.OrderBy(product => product.Price) :
                     queryProduct.OrderByDescending(product => product.Price);
 
-            IEnumerable<Product> products = await queryProduct.Skip((page - 1) * pageSize).Take(pageSize).ToListAsync();
+            var queryProductAndPromotion = from product in queryProduct
+                                           from promotion in _dbContext.ProductPromotion.Where(p => p.ProductId == product.Id && p.ExpireDate > DateTime.Now && p.IsEnable == true).Take(1).DefaultIfEmpty()
+                                           select new {Product = _mapper.Map<SingleImageProductDto>(product), Promotion = promotion };
+            IEnumerable<SingleImageProductDto> products = (await queryProductAndPromotion.Skip((page - 1) * pageSize).Take(pageSize).ToListAsync()).Select(row =>
+            {
+                row.Product.Promotion = _mapper.Map<SimpleProductPromotionDto>(row.Promotion);
+                return row.Product;
+            });
             long total = await queryProduct.LongCountAsync();
             return new
             {
@@ -91,16 +102,19 @@ namespace tlcn_dotnet.Repositories
 
         public async Task<SingleImageProductDto> GetBestProduct()
         {
-            string query = @"SELECT TOP 1 Product.Id, Product.Name, Product.Price, Product.MinPurchase, Product.Status, Product.Unit, Product.Quantity, Sales,
+            string query = $@"SELECT TOP 1 Product.Id, Product.Name, Product.Price, Product.MinPurchase, Product.Status, Product.Unit, Product.Quantity, Sales,
 										AVG(Review.Rating) as Rating,
 			                            Image.Id, Image.Url, Image.FileName,
-										Category.Id, Category.Name
+										Category.Id, Category.Name,
+										Promotion.Id, Promotion.Type, Promotion.CreatedDate, Promotion.ExpireDate, Promotion.IsEnable, Promotion.Value
                             FROM Product
 							LEFT OUTER JOIN Category ON Product.CategoryId = Category.Id
 							LEFT OUTER JOIN Review ON Review.ProductId = Product.Id
                             OUTER APPLY (SELECT TOP 1 ProductImage.Id, ProductImage.FileName, ProductImage.Url FROM ProductImage where ProductImage.ProductId = Product.Id) as Image
+							OUTER APPLY (SELECT TOP 1 pp.Id, pp.Type, pp.CreatedDate, pp.ExpireDate, pp.IsEnable, pp.Value FROM ProductPromotion pp WHERE pp.ProductId = ProductId AND pp.ExpireDate > @Now AND pp.IsEnable = 1 ) AS Promotion
                             GROUP BY Product.Id, Product.Name, Product.Price, Product.MinPurchase, Product.Status, Product.Unit, Product.Quantity, Sales,
-			                            Image.Id, Image.Url, Image.FileName, Category.Id, Category.Name
+			                            Image.Id, Image.Url, Image.FileName, Category.Id, Category.Name,
+										Promotion.Id, Promotion.Type, Promotion.CreatedDate, Promotion.ExpireDate, Promotion.IsEnable, Promotion.Value
                             ORDER BY CASE Product.MinPurchase
                                             WHEN 0 THEN Sales/1
                                             ELSE Sales/Product.MinPurchase
@@ -108,12 +122,13 @@ namespace tlcn_dotnet.Repositories
                             DESC";
             using (var connection = _dapperContext.CreateConnection())
             {
-                var products = await connection.QueryAsync<SingleImageProductDto, SimpleProductImageDto, SimpleCategoryDto, SingleImageProductDto>(query, (product, image, category) =>
+                var products = await connection.QueryAsync<SingleImageProductDto, SimpleProductImageDto, SimpleCategoryDto, SimpleProductPromotionDto, SingleImageProductDto >(query, (product, image, category, promotion) =>
                 {
                     product.Category = category;
                     product.Image = image;
+                    product.Promotion = promotion;
                     return product;
-                });
+                }, param: new { Now = DateTime.Now});
                 return products.SingleOrDefault();
             }
         }
@@ -128,16 +143,19 @@ namespace tlcn_dotnet.Repositories
 
         public async Task<IList<SingleImageProductDto>> GetTop8Product()
         {
-            string query = @"SELECT TOP 8 Product.Id, Product.Name, Product.Price, Product.MinPurchase, Product.Status, Product.Unit, Product.Quantity, Sales,
+            string query = $@"SELECT TOP 8 Product.Id, Product.Name, Product.Price, Product.MinPurchase, Product.Status, Product.Unit, Product.Quantity, Sales,
 										AVG(Review.Rating) as Rating,
 			                            Image.Id, Image.Url, Image.FileName,
-										Category.Id, Category.Name
+										Category.Id, Category.Name,
+										Promotion.Id, Promotion.Type, Promotion.CreatedDate, Promotion.ExpireDate, Promotion.IsEnable, Promotion.Value
                             FROM Product
 							LEFT OUTER JOIN Category ON Product.CategoryId = Category.Id
 							LEFT OUTER JOIN Review ON Review.ProductId = Product.Id
                             OUTER APPLY (SELECT TOP 1 ProductImage.Id, ProductImage.FileName, ProductImage.Url FROM ProductImage where ProductImage.ProductId = Product.Id) as Image
+							OUTER APPLY (SELECT TOP 1 pp.Id, pp.Type, pp.CreatedDate, pp.ExpireDate, pp.IsEnable, pp.Value FROM ProductPromotion pp WHERE pp.ProductId = ProductId AND pp.ExpireDate > @Now AND pp.IsEnable = 1 ) AS Promotion
                             GROUP BY Product.Id, Product.Name, Product.Price, Product.MinPurchase, Product.Status, Product.Unit, Product.Quantity, Sales,
-			                            Image.Id, Image.Url, Image.FileName, Category.Id, Category.Name
+			                            Image.Id, Image.Url, Image.FileName, Category.Id, Category.Name,
+										Promotion.Id, Promotion.Type, Promotion.CreatedDate, Promotion.ExpireDate, Promotion.IsEnable, Promotion.Value
                             ORDER BY CASE Product.MinPurchase
                                             WHEN 0 THEN Sales/1
                                             ELSE Sales/Product.MinPurchase
@@ -145,12 +163,13 @@ namespace tlcn_dotnet.Repositories
                             DESC";
             using (var connection = _dapperContext.CreateConnection())
             {
-                var products = await connection.QueryAsync<SingleImageProductDto, SimpleProductImageDto, SimpleCategoryDto, SingleImageProductDto>(query, (product, image, category) =>
+                var products = await connection.QueryAsync<SingleImageProductDto, SimpleProductImageDto, SimpleCategoryDto, SimpleProductPromotionDto, SingleImageProductDto>(query, (product, image, category, promotion) =>
                 {
                     product.Category = category;
                     product.Image = image;
+                    product.Promotion = promotion;
                     return product;
-                });
+                }, param: new { Now = DateTime.Now });
                 return products.ToList();
             }
         }

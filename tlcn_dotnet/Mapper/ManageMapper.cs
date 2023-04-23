@@ -10,6 +10,7 @@ using tlcn_dotnet.Dto.CategoryDto;
 using tlcn_dotnet.Dto.InventoryDto;
 using tlcn_dotnet.Dto.ProductDto;
 using tlcn_dotnet.Dto.ProductImageDto;
+using tlcn_dotnet.Dto.ProductPromotionDto;
 using tlcn_dotnet.Dto.ReviewDto;
 using tlcn_dotnet.Dto.SupplierDto;
 using tlcn_dotnet.Entity;
@@ -90,6 +91,12 @@ namespace tlcn_dotnet.Mapper
             CreateMap<Review, ReviewResponse>();
 
             CreateMap<CartNotification, CartNotificationResponse>();
+
+            CreateMap<ProductPromotionAddRequest, ProductPromotion>();
+            CreateMap<ProductPromotion, ProductPromotionResponse>()
+                .ForMember(p => p.ProductName, opt => opt.MapFrom(src => src.Product.Name));
+            CreateMap<ProductPromotion, SimpleProductPromotionDto>();
+            
         }
     }
 }

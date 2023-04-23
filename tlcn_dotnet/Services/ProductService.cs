@@ -4,6 +4,7 @@ using tlcn_dotnet.Constant;
 using tlcn_dotnet.CustomException;
 using tlcn_dotnet.Dto.ProductDto;
 using tlcn_dotnet.Dto.ProductImageDto;
+using tlcn_dotnet.Dto.ProductPromotionDto;
 using tlcn_dotnet.Entity;
 using tlcn_dotnet.IRepositories;
 using tlcn_dotnet.Services;
@@ -74,7 +75,7 @@ namespace tlcn_dotnet.ServicesImpl
             var result = await _productRepository.FilterProduct(keyword, minPrice, maxPrice, categoryId, 
                 productOrderBy, sortOrder, page, pageSize, isDeleted);
 
-            var products = _mapper.Map<List<SingleImageProductDto>>(result.Products);
+            var products = result.Products;
             var maxPage = Util.CalculateMaxPage(result.Total, pageSize);
 
             return new DataResponse(new { 
@@ -109,6 +110,8 @@ namespace tlcn_dotnet.ServicesImpl
             if (product == null)
                 throw new GeneralException("PRODUCT NOT FOUND", ApplicationConstant.NOT_FOUND_CODE);
             ProductWithImageDto productWithImageDto = _mapper.Map<ProductWithImageDto>(product);
+            var promotion = await _dbContext.ProductPromotion.FirstOrDefaultAsync(p => p.ProductId == product.Id && p.ExpireDate > DateTime.Now && p.IsEnable == true);
+            productWithImageDto.Promotion = _mapper.Map<SimpleProductPromotionDto>(promotion);
             return new DataResponse(productWithImageDto);
         }
 
