@@ -136,7 +136,10 @@ namespace tlcn_dotnet.Services
 
             CartDetail cartDetail = await _cartDetailRepository.UpdateCartDetailQuantity(updateCartDetailQuantityDto.ProductId, updateCartDetailQuantityDto.Quantity, (long)accountId)
                 ?? throw new GeneralException("CART DETAIL NOT FOUND", ApplicationConstant.NOT_FOUND_CODE);
-            return new DataResponse(_mapper.Map<CartDetailResponse>(cartDetail));
+            var promotion = await _productPromotionRepository.GetPromotionByProductId(cartDetail.ProductId.Value);
+            var mappedCartDetail = _mapper.Map<CartDetailResponse>(cartDetail);
+            mappedCartDetail.Product.Promotion = _mapper.Map<SimpleProductPromotionDto>(promotion);
+            return new DataResponse(mappedCartDetail);
         }
 
         private bool ValidateQuantityCartDetail(Product product, double quantity)

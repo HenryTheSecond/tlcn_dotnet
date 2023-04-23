@@ -100,7 +100,7 @@ namespace tlcn_dotnet.Services
             {
                 insertPriceAndCartIdTasks.Add(
                     _cartDetailRepository.UpdatePriceAndCartId(cartDetail.Id.Value,
-                                                    cartDetail.Product.Price.Value, id));
+                                                    cartDetail.Price.Value, id));
             }
             await Task.WhenAll(insertPriceAndCartIdTasks);
             cart.Id = id;
