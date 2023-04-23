@@ -6,5 +6,6 @@ namespace tlcn_dotnet.IServices
     {
         Task<DataResponse> AddProductPromotion(ProductPromotionAddRequest request);
         Task<DataResponse> UpdateProductPromotion(long id, ProductPromotionUpdateRequest request);
+        Task<DataResponse> GetPromotionByProductId(long productId);
     }
 }

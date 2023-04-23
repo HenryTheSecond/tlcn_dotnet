@@ -4,6 +4,7 @@ using tlcn_dotnet.Constant;
 using tlcn_dotnet.CustomException;
 using tlcn_dotnet.Dto.ProductPromotionDto;
 using tlcn_dotnet.Entity;
+using tlcn_dotnet.IRepositories;
 using tlcn_dotnet.IServices;
 
 namespace tlcn_dotnet.Services
@@ -12,10 +13,12 @@ namespace tlcn_dotnet.Services
     {
         private readonly MyDbContext _dbContext;
         private readonly IMapper _mapper;
-        public ProductPromotionService(MyDbContext dbContext, IMapper mapper)
+        private readonly IProductPromotionRepository _productPromotionRepository;
+        public ProductPromotionService(MyDbContext dbContext, IMapper mapper, IProductPromotionRepository productPromotionRepository)
         {
             _dbContext = dbContext;
             _mapper = mapper;
+            _productPromotionRepository = productPromotionRepository;
         }
 
         public async Task<DataResponse> AddProductPromotion(ProductPromotionAddRequest request)
@@ -34,6 +37,15 @@ namespace tlcn_dotnet.Services
             await _dbContext.SaveChangesAsync();
             promotion.Product = product;
             return new DataResponse(_mapper.Map<ProductPromotionResponse>(promotion));
+        }
+
+        public async Task<DataResponse> GetPromotionByProductId(long productId)
+        {
+            bool isProductExisted = await _dbContext.Product.AnyAsync(p => p.Id == productId);
+            if (isProductExisted == false)
+                throw new GeneralException("PRODUCT NOT FOUND", ApplicationConstant.NOT_FOUND_CODE);
+            var promotion = await _productPromotionRepository.GetPromotionByProductId(productId);
+            return new DataResponse(_mapper.Map<SimpleProductPromotionDto>(promotion));
         }
 
         public async Task<DataResponse> UpdateProductPromotion(long id, ProductPromotionUpdateRequest request)

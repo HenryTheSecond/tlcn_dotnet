@@ -26,5 +26,11 @@ namespace tlcn_dotnet.Controllers
         {
             return await _productPromotionService.UpdateProductPromotion(id, request);
         }
+
+        [HttpGet("promotionByProductId/{productId}")]
+        public async Task<DataResponse> GetPromotionByProductId(long productId)
+        {
+            return await _productPromotionService.GetPromotionByProductId(productId);
+        }
     }
 }
