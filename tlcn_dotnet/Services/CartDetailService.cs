@@ -5,6 +5,7 @@ using tlcn_dotnet.Constant;
 using tlcn_dotnet.CustomException;
 using tlcn_dotnet.Dto.BillDto;
 using tlcn_dotnet.Dto.CartDetailDto;
+using tlcn_dotnet.Dto.ProductPromotionDto;
 using tlcn_dotnet.Entity;
 using tlcn_dotnet.IRepositories;
 using tlcn_dotnet.IServices;
@@ -17,12 +18,13 @@ namespace tlcn_dotnet.Services
         private readonly ICartDetailRepository _cartDetailRepository;
         private readonly IProductRepository _productRepository;
         private readonly IMapper _mapper;
-
-        public CartDetailService(ICartDetailRepository cartDetailRepository, IProductRepository productRepository, IMapper mapper)
+        private readonly IProductPromotionRepository _productPromotionRepository;
+        public CartDetailService(ICartDetailRepository cartDetailRepository, IProductRepository productRepository, IMapper mapper, IProductPromotionRepository productPromotionRepository)
         {
             _cartDetailRepository = cartDetailRepository;
             _productRepository = productRepository;
             _mapper = mapper;
+            _productPromotionRepository = productPromotionRepository;
         }
 
         /// <summary>
@@ -72,8 +74,10 @@ namespace tlcn_dotnet.Services
             {
                 cartDetail = await _cartDetailRepository.UpdateCartDetailQuantity(cartDetailExistId, addCartDetailDto.Quantity);
             }
-
-            return new DataResponse(_mapper.Map<CartDetailResponse>(cartDetail));
+            var promotion = await _productPromotionRepository.GetPromotionByProductId(cartDetail.ProductId.Value);
+            var mappedCartDetail = _mapper.Map<CartDetailResponse>(cartDetail);
+            mappedCartDetail.Product.Promotion = _mapper.Map<SimpleProductPromotionDto>(promotion);
+            return new DataResponse(mappedCartDetail);
         }
 
         public async Task<DataResponse> DeleteCartDetail(string authorization, long id)
@@ -97,8 +101,16 @@ namespace tlcn_dotnet.Services
             accountId = Convert.ToInt64(accountId);
 
             IList<CartDetail> cartDetails = await _cartDetailRepository.GetCurrentCart((long)accountId);
-
-            return new DataResponse(_mapper.Map<IList<CartDetailResponse>>(cartDetails));
+            Dictionary<long, ProductPromotion> productPromotions = await _productPromotionRepository.GetListPromotionFromListProductId(cartDetails.Select(c => c.ProductId.Value).ToList());
+            var mappedCartDetails = _mapper.Map<IList<CartDetailResponse>>(cartDetails);
+            foreach(var cd in mappedCartDetails)
+            {
+                if (productPromotions.ContainsKey(cd.Product.Id.Value))
+                {
+                    cd.Product.Promotion = _mapper.Map<SimpleProductPromotionDto>(productPromotions[cd.Product.Id.Value]);
+                }
+            }
+            return new DataResponse(mappedCartDetails);
         }
 
         public async Task<DataResponse> UpdateCartDetailQuantity(string authorization, UpdateCartDetailQuantityDto updateCartDetailQuantityDto)

@@ -5,6 +5,7 @@ using tlcn_dotnet.Dto.BillDto;
 using tlcn_dotnet.Entity;
 using tlcn_dotnet.IRepositories;
 using tlcn_dotnet.IServices;
+using tlcn_dotnet.Utils;
 
 namespace tlcn_dotnet.Services
 {
@@ -14,12 +15,14 @@ namespace tlcn_dotnet.Services
         private readonly IBillDetailRepository _billDetailRepository;
         private readonly IMapper _mapper;
         private readonly IPaymentService _momoPaymentService;
-        public BillService(IBillRepository billRepository, IBillDetailRepository billDetailRepository, IMapper mapper, IPaymentService momoPaymentService)
+        private readonly IProductPromotionRepository _productPromotionRepository;
+        public BillService(IBillRepository billRepository, IBillDetailRepository billDetailRepository, IMapper mapper, IPaymentService momoPaymentService, IProductPromotionRepository productPromotionRepository)
         {
             _billRepository = billRepository;
             _billDetailRepository = billDetailRepository;
             _mapper = mapper;
             _momoPaymentService = momoPaymentService;
+            _productPromotionRepository = productPromotionRepository;
         }
 
         public async Task<DataResponse> BillPaying(long id)
@@ -88,7 +91,8 @@ namespace tlcn_dotnet.Services
             decimal total = 0;
             foreach (CartDetail cartDetail in cartDetails)
             {
-                cartDetail.Price = cartDetail.Product.Price;
+                var promotion = _productPromotionRepository.GetPromotionByProductId(cartDetail.Product.Id.Value).Result;
+                cartDetail.Price = Util.CalculatePrice(cartDetail.Product.Price.Value, promotion);
                 total += cartDetail.Price.Value * (decimal)cartDetail.Quantity;
             }
             return total;

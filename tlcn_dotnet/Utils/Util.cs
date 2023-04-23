@@ -205,5 +205,22 @@ namespace tlcn_dotnet.Utils
                 result = result.ToUpper();
             return result;
         }
+
+        public static decimal CalculatePrice(decimal price, ProductPromotion promotion)
+        {
+            if(promotion != null)
+            {
+                switch(promotion.Type)
+                {
+                    case ProductPromotionType.PRICE:
+                        return price - promotion.Value;
+                    case ProductPromotionType.PERCENTAGE:
+                        return price * (100 - promotion.Value) / 100;
+                    default:
+                        return price;
+                }
+            }
+            return price;
+        }
     }
 }
