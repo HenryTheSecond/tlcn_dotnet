@@ -111,7 +111,7 @@ namespace tlcn_dotnet.Repositories
 							LEFT OUTER JOIN Category ON Product.CategoryId = Category.Id
 							LEFT OUTER JOIN Review ON Review.ProductId = Product.Id
                             OUTER APPLY (SELECT TOP 1 ProductImage.Id, ProductImage.FileName, ProductImage.Url FROM ProductImage where ProductImage.ProductId = Product.Id) as Image
-							OUTER APPLY (SELECT TOP 1 pp.Id, pp.Type, pp.CreatedDate, pp.ExpireDate, pp.IsEnable, pp.Value FROM ProductPromotion pp WHERE pp.ProductId = ProductId AND pp.ExpireDate > @Now AND pp.IsEnable = 1 ) AS Promotion
+							OUTER APPLY (SELECT TOP 1 pp.Id, pp.Type, pp.CreatedDate, pp.ExpireDate, pp.IsEnable, pp.Value FROM ProductPromotion pp WHERE pp.ProductId = Product.Id AND pp.ExpireDate > @Now AND pp.IsEnable = 1 ) AS Promotion
                             GROUP BY Product.Id, Product.Name, Product.Price, Product.MinPurchase, Product.Status, Product.Unit, Product.Quantity, Sales,
 			                            Image.Id, Image.Url, Image.FileName, Category.Id, Category.Name,
 										Promotion.Id, Promotion.Type, Promotion.CreatedDate, Promotion.ExpireDate, Promotion.IsEnable, Promotion.Value
@@ -152,7 +152,7 @@ namespace tlcn_dotnet.Repositories
 							LEFT OUTER JOIN Category ON Product.CategoryId = Category.Id
 							LEFT OUTER JOIN Review ON Review.ProductId = Product.Id
                             OUTER APPLY (SELECT TOP 1 ProductImage.Id, ProductImage.FileName, ProductImage.Url FROM ProductImage where ProductImage.ProductId = Product.Id) as Image
-							OUTER APPLY (SELECT TOP 1 pp.Id, pp.Type, pp.CreatedDate, pp.ExpireDate, pp.IsEnable, pp.Value FROM ProductPromotion pp WHERE pp.ProductId = ProductId AND pp.ExpireDate > @Now AND pp.IsEnable = 1 ) AS Promotion
+							OUTER APPLY (SELECT TOP 1 pp.Id, pp.Type, pp.CreatedDate, pp.ExpireDate, pp.IsEnable, pp.Value FROM ProductPromotion pp WHERE pp.ProductId = Product.Id AND pp.ExpireDate > @Now AND pp.IsEnable = 1 ) AS Promotion
                             GROUP BY Product.Id, Product.Name, Product.Price, Product.MinPurchase, Product.Status, Product.Unit, Product.Quantity, Sales,
 			                            Image.Id, Image.Url, Image.FileName, Category.Id, Category.Name,
 										Promotion.Id, Promotion.Type, Promotion.CreatedDate, Promotion.ExpireDate, Promotion.IsEnable, Promotion.Value
