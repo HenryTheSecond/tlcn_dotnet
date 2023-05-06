@@ -102,7 +102,7 @@ namespace tlcn_dotnet.Repositories
 
         public async Task<SingleImageProductDto> GetBestProduct()
         {
-            string query = $@"SELECT TOP 1 Product.Id, Product.Name, Product.Price, Product.MinPurchase, Product.Status, Product.Unit, Product.Quantity, Sales,
+            string query = $@"SELECT TOP 1 Product.Id, Product.Name, Product.Price, Product.MinPurchase, Product.Status, Product.Unit, Product.Quantity, Sales, Product.Description,
 										AVG(Review.Rating) as Rating,
 			                            Image.Id, Image.Url, Image.FileName,
 										Category.Id, Category.Name,
@@ -112,7 +112,8 @@ namespace tlcn_dotnet.Repositories
 							LEFT OUTER JOIN Review ON Review.ProductId = Product.Id
                             OUTER APPLY (SELECT TOP 1 ProductImage.Id, ProductImage.FileName, ProductImage.Url FROM ProductImage where ProductImage.ProductId = Product.Id) as Image
 							OUTER APPLY (SELECT TOP 1 pp.Id, pp.Type, pp.CreatedDate, pp.ExpireDate, pp.IsEnable, pp.Value FROM ProductPromotion pp WHERE pp.ProductId = Product.Id AND pp.ExpireDate > @Now AND pp.IsEnable = 1 ) AS Promotion
-                            GROUP BY Product.Id, Product.Name, Product.Price, Product.MinPurchase, Product.Status, Product.Unit, Product.Quantity, Sales,
+                            WHERE Product.IsDeleted = 0
+                            GROUP BY Product.Id, Product.Name, Product.Price, Product.MinPurchase, Product.Status, Product.Unit, Product.Quantity, Sales, Product.Description,
 			                            Image.Id, Image.Url, Image.FileName, Category.Id, Category.Name,
 										Promotion.Id, Promotion.Type, Promotion.CreatedDate, Promotion.ExpireDate, Promotion.IsEnable, Promotion.Value
                             ORDER BY CASE Product.MinPurchase
@@ -143,7 +144,7 @@ namespace tlcn_dotnet.Repositories
 
         public async Task<IList<SingleImageProductDto>> GetTop8Product()
         {
-            string query = $@"SELECT TOP 8 Product.Id, Product.Name, Product.Price, Product.MinPurchase, Product.Status, Product.Unit, Product.Quantity, Sales,
+            string query = $@"SELECT TOP 8 Product.Id, Product.Name, Product.Price, Product.MinPurchase, Product.Status, Product.Unit, Product.Quantity, Sales, Product.Description,
 										AVG(Review.Rating) as Rating,
 			                            Image.Id, Image.Url, Image.FileName,
 										Category.Id, Category.Name,
@@ -153,7 +154,8 @@ namespace tlcn_dotnet.Repositories
 							LEFT OUTER JOIN Review ON Review.ProductId = Product.Id
                             OUTER APPLY (SELECT TOP 1 ProductImage.Id, ProductImage.FileName, ProductImage.Url FROM ProductImage where ProductImage.ProductId = Product.Id) as Image
 							OUTER APPLY (SELECT TOP 1 pp.Id, pp.Type, pp.CreatedDate, pp.ExpireDate, pp.IsEnable, pp.Value FROM ProductPromotion pp WHERE pp.ProductId = Product.Id AND pp.ExpireDate > @Now AND pp.IsEnable = 1 ) AS Promotion
-                            GROUP BY Product.Id, Product.Name, Product.Price, Product.MinPurchase, Product.Status, Product.Unit, Product.Quantity, Sales,
+                            WHERE Product.IsDeleted = 0
+                            GROUP BY Product.Id, Product.Name, Product.Price, Product.MinPurchase, Product.Status, Product.Unit, Product.Quantity, Sales, Product.Description,
 			                            Image.Id, Image.Url, Image.FileName, Category.Id, Category.Name,
 										Promotion.Id, Promotion.Type, Promotion.CreatedDate, Promotion.ExpireDate, Promotion.IsEnable, Promotion.Value
                             ORDER BY CASE Product.MinPurchase
