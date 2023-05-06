@@ -62,13 +62,24 @@ namespace tlcn_dotnet.Repositories
                     Page = page,
                     PageSize = pageSize,
                 });
-                var reviews = await connection.QueryAsync<Review, Account, Review>(procedure, 
-                                            (review, account) => 
+                Dictionary<long, Review> dict = new Dictionary<long, Review>();
+                var reviews = (await connection.QueryAsync<Review, Account, ReviewResource, Review>(procedure, 
+                                            (review, account, reviewResource) => 
                                             {
-                                                review.Account = account;
-                                                return review;
+                                                /*review.Account = account;
+                                                return review;*/
+                                                if(!dict.ContainsKey(review.Id.Value))
+                                                {
+                                                    review.Account = account;
+                                                    review.ReviewResource = new List<ReviewResource>();
+                                                    dict.Add(review.Id.Value, review);
+                                                }
+                                                var reviewResult = dict[review.Id.Value];
+                                                if(reviewResource != null)
+                                                    reviewResult.ReviewResource.Add(reviewResource);
+                                                return reviewResult;
                                             }, param: parameters,
-                                            commandType: CommandType.StoredProcedure);
+                                            commandType: CommandType.StoredProcedure)).DistinctBy(review => review.Id.Value);
                 return reviews;
             }
         }

@@ -12,6 +12,7 @@ using tlcn_dotnet.Dto.ProductDto;
 using tlcn_dotnet.Dto.ProductImageDto;
 using tlcn_dotnet.Dto.ProductPromotionDto;
 using tlcn_dotnet.Dto.ReviewDto;
+using tlcn_dotnet.Dto.ReviewResponseDto;
 using tlcn_dotnet.Dto.SupplierDto;
 using tlcn_dotnet.Entity;
 
@@ -89,6 +90,8 @@ namespace tlcn_dotnet.Mapper
             CreateMap<BillDetail, BillDetailWithProductDto>();
 
             CreateMap<Review, ReviewResponse>();
+
+            CreateMap<ReviewResource, ReviewResourceResponse>();
 
             CreateMap<CartNotification, CartNotificationResponse>();
 

@@ -74,7 +74,7 @@ namespace tlcn_dotnet.Services
             Product product = await _productRepository.GetById(productId)
                 ?? throw new GeneralException("PRODUCT NOT FOUND", ApplicationConstant.NOT_FOUND_CODE);
             long accountId = Util.ReadJwtTokenAndGetAccountId(authorization);
-            Review review = _dbContext.Review.Where(review => review.Account.Id == accountId && review.Product.Id == productId).SingleOrDefault();
+            Review review = _dbContext.Review.Include(review => review.ReviewResource).Where(review => review.Account.Id == accountId && review.Product.Id == productId).SingleOrDefault();
             return new DataResponse(_mapper.Map<ReviewResponse>(review));
         }
 
@@ -126,14 +126,27 @@ namespace tlcn_dotnet.Services
                 query = query.Where(review => review.Review.ProductId == productId);
 
             int count = await query.CountAsync();
-            var resultQuery = await query.Skip((page - 1) * pageSize).Take(pageSize).ToListAsync();
-            resultQuery.ForEach(row =>
+            var resultQuery = await (from row in query.Skip((page - 1) * pageSize).Take(pageSize)
+                              join reviewResource in _dbContext.ReviewResource on row.Review.Id equals reviewResource.ReviewId into grpReviewResource
+                              from reviewResource in grpReviewResource.DefaultIfEmpty()
+                              select new { Row = row, ReviewResource = reviewResource}).ToListAsync();
+            Dictionary<long, Review> dictReview = new Dictionary<long, Review>();
+            resultQuery.ForEach(item =>
             {
-                row.Review.Account = row.Account;
-                row.Review.AccountId = row.Account.Id.Value;
+                /*row.Review.Account = row.Account;
+                row.Review.AccountId = row.Account.Id.Value;*/
+                if(!dictReview.ContainsKey(item.Row.Review.Id.Value))
+                {
+                    item.Row.Review.Account = item.Row.Account;
+                    item.Row.Review.AccountId = item.Row.Account.Id.Value;
+                    item.Row.Review.ReviewResource = new List<ReviewResource>();
+                    dictReview.Add(item.Row.Review.Id.Value, item.Row.Review);
+                }
+                if (item.ReviewResource != null)
+                    dictReview[item.Row.Review.Id.Value].ReviewResource.Add(item.ReviewResource);
             });
 
-            var result = resultQuery.Select(row => row.Review);
+            var result = dictReview.Values.ToList();
             return new DataResponse(new
             {
                 reviews = _mapper.Map<IEnumerable<ReviewResponse>>(result),

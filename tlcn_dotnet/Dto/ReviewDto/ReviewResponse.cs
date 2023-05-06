@@ -1,4 +1,5 @@
 ﻿using tlcn_dotnet.Dto.AccountDto;
+using tlcn_dotnet.Dto.ReviewResponseDto;
 
 namespace tlcn_dotnet.Dto.ReviewDto
 {
@@ -10,5 +11,6 @@ namespace tlcn_dotnet.Dto.ReviewDto
         public double Rating { get; set; }
         public DateTime PostDate { get; set; }
         public long ProductId { get; set; }
+        public IList<ReviewResourceResponse> ReviewResource { get; set; }
     }
 }

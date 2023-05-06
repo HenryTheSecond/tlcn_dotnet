@@ -19,5 +19,6 @@ namespace tlcn_dotnet.Entity
 
         public Product Product { get; set; }
         public long ProductId { get; set; }
+        public virtual IList<ReviewResource> ReviewResource { get; set; }
     }
 }

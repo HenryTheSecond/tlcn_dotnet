@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using tlcn_dotnet;
 
@@ -11,9 +12,10 @@ using tlcn_dotnet;
 namespace tlcn_dotnet.Migrations
 {
     [DbContext(typeof(MyDbContext))]
-    partial class MyDbContextModelSnapshot : ModelSnapshot
+    [Migration("20230506072448_add_index_review_resource")]
+    partial class add_index_review_resource
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -649,37 +651,6 @@ namespace tlcn_dotnet.Migrations
                     b.ToTable("Review");
                 });
 
-            modelBuilder.Entity("tlcn_dotnet.Entity.ReviewResource", b =>
-                {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"), 1L, 1);
-
-                    b.Property<string>("FileName")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<long>("ReviewId")
-                        .HasColumnType("bigint");
-
-                    b.Property<string>("Type")
-                        .IsRequired()
-                        .HasColumnType("varchar(50)");
-
-                    b.Property<string>("Url")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ReviewId", "Type")
-                        .IsUnique();
-
-                    b.ToTable("ReviewResource");
-                });
-
             modelBuilder.Entity("tlcn_dotnet.Entity.Supplier", b =>
                 {
                     b.Property<long?>("Id")
@@ -704,6 +675,29 @@ namespace tlcn_dotnet.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Supplier");
+                });
+
+            modelBuilder.Entity("tlcn_dotnet.Services.ReviewResource", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"), 1L, 1);
+
+                    b.Property<long>("ReviewId")
+                        .HasColumnType("bigint");
+
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .HasColumnType("varchar(50)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ReviewId", "Type")
+                        .IsUnique();
+
+                    b.ToTable("ReviewResource");
                 });
 
             modelBuilder.Entity("tlcn_dotnet.Entity.BillDetail", b =>
@@ -894,7 +888,7 @@ namespace tlcn_dotnet.Migrations
                     b.Navigation("Product");
                 });
 
-            modelBuilder.Entity("tlcn_dotnet.Entity.ReviewResource", b =>
+            modelBuilder.Entity("tlcn_dotnet.Services.ReviewResource", b =>
                 {
                     b.HasOne("tlcn_dotnet.Entity.Review", "Review")
                         .WithMany("ReviewResource")
