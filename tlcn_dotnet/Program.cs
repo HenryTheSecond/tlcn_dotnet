@@ -78,6 +78,7 @@ try
     builder.Services.AddScoped<IGoogleAccountService, GoogleAccountService>();
     builder.Services.AddScoped<ICartNotificationService, CartNotificationService>();
     builder.Services.AddScoped<IProductPromotionService, ProductPromotionService>();
+    builder.Services.AddScoped<IReviewResourceService, ReviewResourceService>();
 
     //Add repositories
     builder.Services.AddScoped<IInventoryRepository, InventoryRepository>();

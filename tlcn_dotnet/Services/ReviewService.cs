@@ -2,10 +2,12 @@
 using DocumentFormat.OpenXml.Spreadsheet;
 using Microsoft.EntityFrameworkCore;
 using System.Data.SqlClient;
+using System.Text.Json;
 using tlcn_dotnet.Constant;
 using tlcn_dotnet.CustomException;
 using tlcn_dotnet.Dto.AccountDto;
 using tlcn_dotnet.Dto.ReviewDto;
+using tlcn_dotnet.Dto.ReviewResponseDto;
 using tlcn_dotnet.Entity;
 using tlcn_dotnet.IRepositories;
 using tlcn_dotnet.IServices;
@@ -19,12 +21,15 @@ namespace tlcn_dotnet.Services
         private readonly IProductRepository _productRepository;
         private readonly IMapper _mapper;
         private readonly MyDbContext _dbContext;
-        public ReviewService(IReviewRepository reviewRepository, IMapper mapper, IProductRepository productRepository, MyDbContext dbContext)
+        private readonly IReviewResourceService _reviewResourceService;
+        public ReviewService(IReviewRepository reviewRepository, IMapper mapper,
+            IProductRepository productRepository, MyDbContext dbContext, IReviewResourceService reviewResourceService)
         {
             _reviewRepository = reviewRepository;
             _mapper = mapper;
             _productRepository = productRepository;
             _dbContext = dbContext;
+            _reviewResourceService = reviewResourceService;
         }
 
         public async Task<DataResponse> AdminDeleteReview(long id)
@@ -32,6 +37,7 @@ namespace tlcn_dotnet.Services
             var review = await _dbContext.Review.FindAsync(id);
             if (review == null)
                 throw new GeneralException("REVIEW NOT FOUND", ApplicationConstant.NOT_FOUND_CODE);
+            await _reviewResourceService.AdminDeleteReviewResourceByReviewId(review.Id.Value);
             _dbContext.Review.Remove(review);
             int rowAffected = await _dbContext.SaveChangesAsync();
             return new DataResponse(rowAffected > 0 ? true : false);
@@ -40,6 +46,7 @@ namespace tlcn_dotnet.Services
         public async Task<DataResponse> DeleteReview(string authorization, long id)
         {
             long accountId = Util.ReadJwtTokenAndGetAccountId(authorization);
+            await _reviewResourceService.DeleteReviewResourceByReviewId(id, accountId);
             int affectedRow = await _reviewRepository.DeleteReview(id, accountId);
             if (affectedRow == 0)
                 throw new GeneralException("REVIEW NOT FOUND", ApplicationConstant.NOT_FOUND_CODE);
@@ -53,6 +60,44 @@ namespace tlcn_dotnet.Services
                 ?? throw new GeneralException("REVIEW NOT FOUND", ApplicationConstant.NOT_FOUND_CODE);
 
             review.Account = Util.ReadJwtTokenAndParseToAccount(authorization);
+            return new DataResponse(_mapper.Map<ReviewResponse>(review));
+        }
+
+        public async Task<DataResponse> EditReview(string authorization, long id, IFormFileCollection video, IFormFileCollection image, string strReviewRequest)
+        {
+            //Validate input data
+            ReviewRequest reviewRequest = JsonSerializer.Deserialize<ReviewRequest>(strReviewRequest, new JsonSerializerOptions
+            {
+                PropertyNameCaseInsensitive = true
+            }) ?? throw new GeneralException("REVIEW IS INVALID", ApplicationConstant.BAD_REQUEST_CODE);
+            if (video.Count > 1)
+                throw new GeneralException("ONLY 1 VIDEO IS ALLOWED", ApplicationConstant.BAD_REQUEST_CODE);
+            if (image.Count > 1)
+                throw new GeneralException("ONLY 1 IMAGE IS ALLOWED", ApplicationConstant.BAD_REQUEST_CODE);
+            IFormFile videoFile = video.Count > 0 ? video[0] : null;
+            IFormFile imageFile = image.Count > 0 ? image[0] : null;
+            if (videoFile != null && !videoFile.ContentType.Contains("video"))
+                throw new GeneralException("VIDEO IS INCORRECT FORMAT", ApplicationConstant.BAD_REQUEST_CODE);
+            if (imageFile != null && !imageFile.ContentType.Contains("image"))
+                throw new GeneralException("IMAGE IS INCORRECT FORMAT", ApplicationConstant.BAD_REQUEST_CODE);
+
+            long accountId = Util.ReadJwtTokenAndGetAccountId(authorization);
+            Review review = await _reviewRepository.EditReview(accountId, id, reviewRequest)
+                ?? throw new GeneralException("REVIEW NOT FOUND", ApplicationConstant.NOT_FOUND_CODE);
+
+            review.Account = Util.ReadJwtTokenAndParseToAccount(authorization);
+            
+            if(imageFile != null)
+            {
+                await _reviewResourceService.UpdateReviewResource(imageFile, review.Id.Value);
+            }
+            if(videoFile != null)
+            {
+                await _reviewResourceService.UpdateReviewResource(videoFile, review.Id.Value);
+            }
+
+            review.ReviewResource = await _dbContext.ReviewResource.Where(reviewResource => reviewResource.ReviewId == review.Id.Value).ToListAsync();
+
             return new DataResponse(_mapper.Map<ReviewResponse>(review));
         }
 
@@ -107,6 +152,68 @@ namespace tlcn_dotnet.Services
                 PostDate = DateTime.Now,
                 ProductId = productId,
                 Rating = reviewRequest.Rating
+            };
+            return new DataResponse(reviewResponse);
+        }
+
+        public async Task<DataResponse> ReviewProduct(string authorization, long productId, IFormFileCollection video, IFormFileCollection image, string strReviewRequest)
+        {
+            //Validate input data
+            ReviewRequest reviewRequest = JsonSerializer.Deserialize<ReviewRequest>(strReviewRequest, new JsonSerializerOptions
+            {
+                PropertyNameCaseInsensitive = true
+            }) ?? throw new GeneralException("REVIEW IS INVALID", ApplicationConstant.BAD_REQUEST_CODE);
+            if (video.Count > 1)
+                throw new GeneralException("ONLY 1 VIDEO IS ALLOWED", ApplicationConstant.BAD_REQUEST_CODE);
+            if (image.Count > 1)
+                throw new GeneralException("ONLY 1 IMAGE IS ALLOWED", ApplicationConstant.BAD_REQUEST_CODE);
+            IFormFile videoFile = video.Count > 0 ? video[0] : null;
+            IFormFile imageFile = image.Count > 0 ? image[0] : null;
+            if(videoFile != null && !videoFile.ContentType.Contains("video"))
+                throw new GeneralException("VIDEO IS INCORRECT FORMAT", ApplicationConstant.BAD_REQUEST_CODE);
+            if(imageFile != null && !imageFile.ContentType.Contains("image"))
+                throw new GeneralException("IMAGE IS INCORRECT FORMAT", ApplicationConstant.BAD_REQUEST_CODE);
+
+            Product product = await _productRepository.GetById(productId)
+                ?? throw new GeneralException("PRODUCT NOT FOUND", ApplicationConstant.NOT_FOUND_CODE);
+            long accountId = Util.ReadJwtTokenAndGetAccountId(authorization);
+
+            if (!(await _productRepository.CheckAccountBuyItem(accountId, productId)))
+                throw new GeneralException("Bạn chưa thể bình luận nếu chưa mua sản phẩm", ApplicationConstant.BAD_REQUEST_CODE);
+
+            long id = 0;
+            try
+            {
+                id = await _reviewRepository.InsertReview(accountId, productId, reviewRequest);
+            }
+            catch (SqlException e)
+            {
+                if (e.Message.Contains("duplicate"))
+                    throw new GeneralException("Bạn đã bình luận ở sản phẩm này", ApplicationConstant.FAILED_CODE);
+                throw e;
+            }
+            IList<ReviewResource> reviewResources = new List<ReviewResource>();
+            if(imageFile != null)
+            {
+                var reviewResource = await _reviewResourceService.AddReviewResource(imageFile, id);
+                reviewResources.Add(reviewResource);
+            }
+            if(videoFile != null)
+            {
+                var reviewResource = await _reviewResourceService.AddReviewResource(videoFile, id);
+                reviewResources.Add(reviewResource);
+            }
+
+            AccountReviewDto accountReviewDto = _mapper.Map<AccountReviewDto>(Util.ReadJwtTokenAndParseToAccount(authorization));
+            ReviewResponse reviewResponse = new ReviewResponse()
+            {
+                Id = id,
+                Account = accountReviewDto,
+                Content = reviewRequest.Content,
+                PostDate = DateTime.Now,
+                ProductId = productId,
+                Rating = reviewRequest.Rating,
+                ReviewResource = _mapper.Map<IList<ReviewResourceResponse>>(reviewResources)
             };
             return new DataResponse(reviewResponse);
         }

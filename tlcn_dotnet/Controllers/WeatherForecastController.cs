@@ -14,6 +14,8 @@ using tlcn_dotnet.Entity;
 using Microsoft.EntityFrameworkCore;
 using Account = CloudinaryDotNet.Account;
 using AutoMapper;
+using tlcn_dotnet.Dto.ReviewDto;
+using System.Text.Json;
 
 namespace tlcn_dotnet.Controllers
 {
@@ -184,5 +186,14 @@ namespace tlcn_dotnet.Controllers
             select new {Product = _mapper.Map<SimpleProductDto>(product), promo};
             var b = a.ToList();
         }
+
+        [HttpPost("abcxyz")]
+        public async Task TestForm([FromForm(Name = "video")] IFormFileCollection video, [FromForm(Name = "image")] IFormFileCollection image, [FromForm(Name = "review")] string request)
+        {
+            var a = JsonSerializer.Deserialize<ReviewRequest>(request, new JsonSerializerOptions
+            {
+                PropertyNameCaseInsensitive = true
+            });
+        }
     }
-}
+}   

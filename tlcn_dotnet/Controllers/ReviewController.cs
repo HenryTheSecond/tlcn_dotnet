@@ -38,24 +38,46 @@ namespace tlcn_dotnet.Controllers
             return await _reviewService.GetAllProductReview(productId.Value, numberPage, numberPageSize);
         }
 
+        /*        [HttpPost("product/{strId}")]
+                [CustomAuthorize]
+                public async Task<DataResponse> ReviewProduct([FromHeader(Name = "Authorization")] string authorization, string strId,
+                    [FromBody] ReviewRequest reviewRequest)
+                {
+                    long? id = Util.ParseId(strId) ??
+                        throw new GeneralException(ApplicationConstant.INVALID_ID, ApplicationConstant.BAD_REQUEST_CODE);
+                    return await _reviewService.ReviewProduct(authorization, id.Value, reviewRequest);
+                }*/
+
         [HttpPost("product/{strId}")]
         [CustomAuthorize]
         public async Task<DataResponse> ReviewProduct([FromHeader(Name = "Authorization")] string authorization, string strId,
-            [FromBody] ReviewRequest reviewRequest)
+    [FromForm(Name = "video")] IFormFileCollection video, [FromForm(Name = "image")] IFormFileCollection image, 
+    [FromForm(Name = "review")] string reviewRequest)
         {
             long? id = Util.ParseId(strId) ??
                 throw new GeneralException(ApplicationConstant.INVALID_ID, ApplicationConstant.BAD_REQUEST_CODE);
-            return await _reviewService.ReviewProduct(authorization, id.Value, reviewRequest);
+            return await _reviewService.ReviewProduct(authorization, id.Value, video, image, reviewRequest);
         }
+
+        /*        [HttpPut("product/{strId}")]
+                [CustomAuthorize]
+                public async Task<DataResponse> EditReview([FromHeader(Name = "Authorization")] string authorization,
+                    string strId, [FromBody] ReviewRequest reviewRequest)
+                {
+                    long? id = Util.ParseId(strId) ??
+                        throw new GeneralException(ApplicationConstant.INVALID_ID, ApplicationConstant.BAD_REQUEST_CODE);
+                    return await _reviewService.EditReview(authorization, id.Value, reviewRequest);
+                }*/
 
         [HttpPut("product/{strId}")]
         [CustomAuthorize]
         public async Task<DataResponse> EditReview([FromHeader(Name = "Authorization")] string authorization,
-            string strId, [FromBody] ReviewRequest reviewRequest)
+          string strId, [FromForm(Name = "video")] IFormFileCollection video, [FromForm(Name = "image")] IFormFileCollection image,
+    [FromForm(Name = "review")] string reviewRequest)
         {
             long? id = Util.ParseId(strId) ??
                 throw new GeneralException(ApplicationConstant.INVALID_ID, ApplicationConstant.BAD_REQUEST_CODE);
-            return await _reviewService.EditReview(authorization, id.Value, reviewRequest);
+            return await _reviewService.EditReview(authorization, id.Value, video, image, reviewRequest);
         }
 
         [HttpDelete("product/{strId}")]
