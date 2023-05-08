@@ -85,6 +85,7 @@ namespace tlcn_dotnet.Services
                 ms.Seek(0, SeekOrigin.Begin);
                 ImageUploadResult result = await UploadToCloudinary(ms, reviewResource.FileName, reviewResource.Type);
                 reviewResource.Url = result.Url.ToString();
+                await _dbContext.SaveChangesAsync();
                 return reviewResource;
             }
         }
