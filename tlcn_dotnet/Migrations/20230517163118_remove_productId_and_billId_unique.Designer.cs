@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using tlcn_dotnet;
 
@@ -11,9 +12,10 @@ using tlcn_dotnet;
 namespace tlcn_dotnet.Migrations
 {
     [DbContext(typeof(MyDbContext))]
-    partial class MyDbContextModelSnapshot : ModelSnapshot
+    [Migration("20230517163118_remove_productId_and_billId_unique")]
+    partial class remove_productId_and_billId_unique
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -242,7 +244,9 @@ namespace tlcn_dotnet.Migrations
 
                     b.HasIndex("GiftCartId");
 
-                    b.HasIndex("ProductId");
+                    b.HasIndex("ProductId", "CartId")
+                        .IsUnique()
+                        .HasFilter("[ProductId] IS NOT NULL AND [CartId] IS NOT NULL");
 
                     b.ToTable("CartDetail");
                 });

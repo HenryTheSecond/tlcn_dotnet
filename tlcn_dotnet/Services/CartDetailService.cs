@@ -56,18 +56,27 @@ namespace tlcn_dotnet.Services
             if (addCartDetailDto.Quantity > productDb.Quantity)
                 throw new GeneralException("QUANTITY IS NOT ENOUGH", ApplicationConstant.BAD_REQUEST_CODE);
 
-            long cartDetailExistId = await _cartDetailRepository.CheckCurrentCartHavingProduct((long)accountId, addCartDetailDto.ProductId);
+            long cartDetailExistId = await _cartDetailRepository.CheckCurrentCartHavingProduct((long)accountId, addCartDetailDto.ProductId, addCartDetailDto.GiftCartId);
             CartDetail cartDetail;
 
             if (cartDetailExistId == 0)
             {
-                cartDetail = await _cartDetailRepository.AddCartDetail(new
+                /*cartDetail = await _cartDetailRepository.AddCartDetail(new
                 {
                     Status = CartDetailStatus.UNPAID.GetDisplayName(),
                     Unit = productDb.Unit.GetDisplayName(),
                     Quantity = addCartDetailDto.Quantity,
                     ProductId = addCartDetailDto.ProductId,
                     AccountId = accountId,
+                });*/
+                cartDetail = await _cartDetailRepository.AddCartDetail(new CartDetail
+                {
+                    Status = CartDetailStatus.UNPAID,
+                    Unit = productDb.Unit,
+                    Quantity = addCartDetailDto.Quantity,
+                    ProductId = addCartDetailDto.ProductId,
+                    AccountId = (long)accountId,
+                    GiftCartId = addCartDetailDto.GiftCartId
                 });
             }
             else
@@ -115,12 +124,13 @@ namespace tlcn_dotnet.Services
 
         public async Task<DataResponse> UpdateCartDetailQuantity(string authorization, UpdateCartDetailQuantityDto updateCartDetailQuantityDto)
         {
-            JwtSecurityToken jwtToken = Util.ReadJwtToken(authorization);
-            object accountId;
-            jwtToken.Payload.TryGetValue("userId", out accountId);
-            accountId = Convert.ToInt64(accountId);
+            long accountId = Util.ReadJwtTokenAndGetAccountId(authorization);
 
-            Product product = await _productRepository.GetById(updateCartDetailQuantityDto.ProductId);
+            CartDetail cartDetail = await _cartDetailRepository.FindByIdAndAccountId(updateCartDetailQuantityDto.Id, accountId);
+            if (cartDetail == null || cartDetail.Status == CartDetailStatus.PAID || cartDetail.CartId != null)
+                throw new GeneralException("CART DETAIL NOT FOUND", ApplicationConstant.BAD_REQUEST_CODE);
+
+            Product product = cartDetail.Product;
 
             if(product.IsDeleted)
                 throw new GeneralException("PRODUCT NOT FOUND", ApplicationConstant.NOT_FOUND_CODE);
@@ -134,10 +144,10 @@ namespace tlcn_dotnet.Services
             if (updateCartDetailQuantityDto.Quantity > product.Quantity)
                 throw new GeneralException("QUANTITY IS NOT ENOUGH", ApplicationConstant.BAD_REQUEST_CODE);
 
-            CartDetail cartDetail = await _cartDetailRepository.UpdateCartDetailQuantity(updateCartDetailQuantityDto.ProductId, updateCartDetailQuantityDto.Quantity, (long)accountId)
+            CartDetail cartDetailUpdated = await _cartDetailRepository.UpdateCartDetailQuantity(updateCartDetailQuantityDto.Id, updateCartDetailQuantityDto.Quantity)
                 ?? throw new GeneralException("CART DETAIL NOT FOUND", ApplicationConstant.NOT_FOUND_CODE);
             var promotion = await _productPromotionRepository.GetPromotionByProductId(cartDetail.ProductId.Value);
-            var mappedCartDetail = _mapper.Map<CartDetailResponse>(cartDetail);
+            var mappedCartDetail = _mapper.Map<CartDetailResponse>(cartDetailUpdated);
             mappedCartDetail.Product.Promotion = _mapper.Map<SimpleProductPromotionDto>(promotion);
             return new DataResponse(mappedCartDetail);
         }

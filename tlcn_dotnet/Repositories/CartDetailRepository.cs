@@ -1,5 +1,6 @@
 ﻿using CloudinaryDotNet;
 using Dapper;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Extensions;
 using System.Data;
 using System.Reflection.Metadata.Ecma335;
@@ -14,18 +15,22 @@ namespace tlcn_dotnet.Repositories
 {
     public class CartDetailRepository : ICartDetailRepository
     {
-        private readonly string CART_DETAIL_SELECT = @"SELECT CartDetail.Id, CartDetail.Price, CartDetail.Status, CartDetail.Unit, CartDetail.Quantity,
+        private readonly string CART_DETAIL_SELECT = @"SELECT CartDetail.Id, CartDetail.Price, CartDetail.Status, CartDetail.Unit, CartDetail.Quantity, CartDetail.GiftCartId,
 		                                                        Product.Id, Product.Name, Product.Price, Product.Unit, Product.MinPurchase, Product.Status, Product.Description, Product.Quantity, Product.IsDeleted,
 		                                                        Category.Id, Category.Name,
-		                                                        Image.Id, Image.Url, Image.FileName
+		                                                        Image.Id, Image.Url, Image.FileName,
+                                                                GiftCart.Id, GiftCart.Name, GiftCart.IsActive, GiftCart.AccountId
                                                         FROM ((CartDetail left outer join Product on CartDetail.ProductId = Product.Id)
 		                                                        left outer join Category on Product.CategoryId = Category.Id)
-		                                                        outer apply (SELECT TOP 1 ProductImage.Id, ProductImage.FileName, ProductImage.Url from ProductImage where ProductImage.ProductId = Product.Id) as Image ";
+		                                                        outer apply (SELECT TOP 1 ProductImage.Id, ProductImage.FileName, ProductImage.Url from ProductImage where ProductImage.ProductId = Product.Id) as Image 
+                                                                LEFT OUTER JOIN GiftCart ON CartDetail.GiftCartId = GiftCart.Id";
 
         private readonly DapperContext _dapperContext;
-        public CartDetailRepository(DapperContext dapperContext)
+        private readonly MyDbContext _dbContext;
+        public CartDetailRepository(DapperContext dapperContext, MyDbContext dbContext)
         {
             _dapperContext = dapperContext;
+            _dbContext = dbContext;
         }
         public async Task<CartDetail> AddCartDetail(dynamic parameters)
         {
@@ -77,14 +82,15 @@ namespace tlcn_dotnet.Repositories
             using (var connection = _dapperContext.CreateConnection())
             {
                 string query = CART_DETAIL_SELECT + " WHERE CartDetail.Id = @Id ";
-                var cartDetails = await connection.QueryAsync<CartDetail, Product, Category, ProductImage, CartDetail>(query,
-                    (cartDetail, product, category, productImage) =>
+                var cartDetails = await connection.QueryAsync<CartDetail, Product, Category, ProductImage, GiftCart, CartDetail>(query,
+                    (cartDetail, product, category, productImage, giftCart) =>
                     {
                         if (productImage != null)
                             product.ProductImages.Add(productImage);
                         product.Category = category;
                         cartDetail.Product = product;
                         cartDetail.ProductId = product.Id;
+                        cartDetail.GiftCart = giftCart;
                         return cartDetail;
                     }, splitOn: "Id",
                     param: new { Id = id});
@@ -97,15 +103,16 @@ namespace tlcn_dotnet.Repositories
         {
             using (var connection = _dapperContext.CreateConnection())
             {
-                string query = CART_DETAIL_SELECT + " WHERE AccountId = @AccountId AND CartId IS NULL";
-                var cartDetails = await connection.QueryAsync<CartDetail, Product, Category, ProductImage, CartDetail>(query,
-                    (cartDetail, product, category, productImage) =>
+                string query = CART_DETAIL_SELECT + " WHERE CartDetail.AccountId = @AccountId AND CartDetail.CartId IS NULL";
+                var cartDetails = await connection.QueryAsync<CartDetail, Product, Category, ProductImage, GiftCart, CartDetail>(query,
+                    (cartDetail, product, category, productImage, giftCart) =>
                     {
                         if (productImage != null)
                             product.ProductImages.Add(productImage);
                         product.Category = category;
                         cartDetail.Product = product;
                         cartDetail.ProductId = product.Id;
+                        cartDetail.GiftCart = giftCart;
                         return cartDetail;
                     }, splitOn: "Id",
                     param: new { AccountId = accountId});
@@ -120,14 +127,15 @@ namespace tlcn_dotnet.Repositories
             {
                 string query = CART_DETAIL_SELECT +
                     " WHERE CartDetail.Id in @ListId AND CartDetail.AccountId = @AccountId AND CartDetail.CartId IS NULL";
-                var cartDetails = await connection.QueryAsync<CartDetail, Product, Category, ProductImage, CartDetail>(query,
-                    (cartDetail, product, category, productImage) =>
+                var cartDetails = await connection.QueryAsync<CartDetail, Product, Category, ProductImage, GiftCart, CartDetail>(query,
+                    (cartDetail, product, category, productImage, giftCart) =>
                     {
                         if (productImage != null)
                             product.ProductImages.Add(productImage);
                         product.Category = category;
                         cartDetail.Product = product;
                         cartDetail.ProductId = product.Id;
+                        cartDetail.GiftCart = giftCart;
                         return cartDetail;
                     }, splitOn: "Id",
                     param: new 
@@ -201,6 +209,29 @@ namespace tlcn_dotnet.Repositories
                                                 WHERE CartId IS NULL AND Product.IsDeleted = 1 AND CartDetail.AccountId = @AccountId",
                                             new { AccountId = accountId });
             }
+        }
+
+        public async Task<long> CheckCurrentCartHavingProduct(long accountId, long productId, long? giftCartId)
+        {
+            var cartDetail = await  _dbContext.CartDetail
+                .Where(cartDetail => cartDetail.Account.Id == accountId && cartDetail.ProductId == productId && cartDetail.CartId == null && cartDetail.GiftCartId == giftCartId).FirstOrDefaultAsync();
+            if (cartDetail == null)
+                return 0;
+            return cartDetail.Id.Value;
+        }
+
+        public async Task<CartDetail> AddCartDetail(CartDetail cartDetail)
+        {
+            await _dbContext.CartDetail.AddAsync(cartDetail);
+            await _dbContext.SaveChangesAsync();
+            return await GetById(cartDetail.Id.Value);
+        }
+
+        public async Task<CartDetail> FindByIdAndAccountId(long id, long accountId)
+        {
+            CartDetail cartDetail = await _dbContext.CartDetail.Include(cd => cd.Product)
+                .FirstOrDefaultAsync(cd => cd.Id == id && cd.AccountId == accountId);
+            return cartDetail;
         }
     }
 }

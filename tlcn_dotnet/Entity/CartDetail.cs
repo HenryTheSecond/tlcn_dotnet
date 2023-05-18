@@ -5,7 +5,7 @@ using tlcn_dotnet.Constant;
 
 namespace tlcn_dotnet.Entity
 {
-    [Index(nameof(ProductId), nameof(CartId), IsUnique = true)]
+    //[Index(nameof(ProductId), nameof(CartId), IsUnique = true)]
     public class CartDetail
     {
         [Key]
@@ -23,5 +23,8 @@ namespace tlcn_dotnet.Entity
         public long? CartId { get; set; }
 
         public Account Account { get; set; }
+        public long AccountId { get; set; }
+        public GiftCart? GiftCart { get; set; }
+        public long? GiftCartId { get; set; }
     }
 }

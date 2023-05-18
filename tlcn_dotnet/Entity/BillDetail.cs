@@ -6,7 +6,7 @@ using tlcn_dotnet.Constant;
 
 namespace tlcn_dotnet.Entity
 {
-    [Index(nameof(BillId), nameof(ProductId), IsUnique = true)] //BillId and ProductId are unique
+    //[Index(nameof(BillId), nameof(ProductId), IsUnique = true)] //BillId and ProductId are unique
     public class BillDetail
     {
         [Key]

@@ -7,5 +7,6 @@ namespace tlcn_dotnet.Dto.CartDetailDto
         public long ProductId { get; set; }
         [Range(0, Double.MaxValue)]
         public double Quantity { get; set; }
+        public long? GiftCartId { get; set; }
     }
 }

@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using tlcn_dotnet;
 
@@ -11,9 +12,10 @@ using tlcn_dotnet;
 namespace tlcn_dotnet.Migrations
 {
     [DbContext(typeof(MyDbContext))]
-    partial class MyDbContextModelSnapshot : ModelSnapshot
+    [Migration("20230514165047_add_gift_cart_table")]
+    partial class add_gift_cart_table
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -134,9 +136,11 @@ namespace tlcn_dotnet.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("BillId");
-
                     b.HasIndex("ProductId");
+
+                    b.HasIndex("BillId", "ProductId")
+                        .IsUnique()
+                        .HasFilter("[BillId] IS NOT NULL AND [ProductId] IS NOT NULL");
 
                     b.ToTable("BillDetail");
                 });
@@ -214,9 +218,6 @@ namespace tlcn_dotnet.Migrations
                     b.Property<long?>("CartId")
                         .HasColumnType("bigint");
 
-                    b.Property<long?>("GiftCartId")
-                        .HasColumnType("bigint");
-
                     b.Property<decimal?>("Price")
                         .HasColumnType("decimal(18,2)");
 
@@ -240,9 +241,9 @@ namespace tlcn_dotnet.Migrations
 
                     b.HasIndex("CartId");
 
-                    b.HasIndex("GiftCartId");
-
-                    b.HasIndex("ProductId");
+                    b.HasIndex("ProductId", "CartId")
+                        .IsUnique()
+                        .HasFilter("[ProductId] IS NOT NULL AND [CartId] IS NOT NULL");
 
                     b.ToTable("CartDetail");
                 });
@@ -774,10 +775,6 @@ namespace tlcn_dotnet.Migrations
                         .WithMany("CartDetails")
                         .HasForeignKey("CartId");
 
-                    b.HasOne("tlcn_dotnet.Entity.GiftCart", "GiftCart")
-                        .WithMany()
-                        .HasForeignKey("GiftCartId");
-
                     b.HasOne("tlcn_dotnet.Entity.Product", "Product")
                         .WithMany("CartDetails")
                         .HasForeignKey("ProductId");
@@ -785,8 +782,6 @@ namespace tlcn_dotnet.Migrations
                     b.Navigation("Account");
 
                     b.Navigation("Cart");
-
-                    b.Navigation("GiftCart");
 
                     b.Navigation("Product");
                 });

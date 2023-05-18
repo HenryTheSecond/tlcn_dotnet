@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using tlcn_dotnet;
 
@@ -11,9 +12,10 @@ using tlcn_dotnet;
 namespace tlcn_dotnet.Migrations
 {
     [DbContext(typeof(MyDbContext))]
-    partial class MyDbContextModelSnapshot : ModelSnapshot
+    [Migration("20230514165200_add_gift_cart")]
+    partial class add_gift_cart
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -134,9 +136,11 @@ namespace tlcn_dotnet.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("BillId");
-
                     b.HasIndex("ProductId");
+
+                    b.HasIndex("BillId", "ProductId")
+                        .IsUnique()
+                        .HasFilter("[BillId] IS NOT NULL AND [ProductId] IS NOT NULL");
 
                     b.ToTable("BillDetail");
                 });
@@ -242,7 +246,9 @@ namespace tlcn_dotnet.Migrations
 
                     b.HasIndex("GiftCartId");
 
-                    b.HasIndex("ProductId");
+                    b.HasIndex("ProductId", "CartId")
+                        .IsUnique()
+                        .HasFilter("[ProductId] IS NOT NULL AND [CartId] IS NOT NULL");
 
                     b.ToTable("CartDetail");
                 });

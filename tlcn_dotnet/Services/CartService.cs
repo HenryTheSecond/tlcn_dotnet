@@ -32,9 +32,10 @@ namespace tlcn_dotnet.Services
         private readonly IProductRepository _productRepository;
         private readonly ICartNotificationService _cartNotificationService;
         private readonly MyDbContext _dbContext;
+        private readonly IGiftCartRepository _giftCartRepository;
         public CartService(MyDbContext dbContext, ICartDetailRepository cartDetailRepository, IBillService billService,
             ICartRepository cartRepository, IMapper mapper, IDeliveryService deliveryService, 
-            IBillRepository billRepository, IProductRepository productRepository, ICartNotificationService cartNotificationService)
+            IBillRepository billRepository, IProductRepository productRepository, ICartNotificationService cartNotificationService, IGiftCartRepository giftCartRepository)
         {
             _dbContext = dbContext;
             _cartDetailRepository = cartDetailRepository;
@@ -45,6 +46,7 @@ namespace tlcn_dotnet.Services
             _billRepository = billRepository;
             _productRepository = productRepository;
             _cartNotificationService = cartNotificationService;
+            _giftCartRepository = giftCartRepository;
         }
 
         public async Task<DataResponse> PayCurrentCart(string authorization, CartPaymentDto cartPaymentDto)
@@ -58,6 +60,7 @@ namespace tlcn_dotnet.Services
             object accountId;
             jwtToken.Payload.TryGetValue("userId", out accountId);
             accountId = Convert.ToInt64(accountId);
+
             await _cartDetailRepository.DeleteCartDetailHavingDeletedProductByAccountId((long)accountId);
             IList<CartDetail> cartDetails = await _cartDetailRepository.GetListCart((long)accountId, cartPaymentDto.ListCartDetailId);
             if (cartDetails.Count < 1)
@@ -70,6 +73,12 @@ namespace tlcn_dotnet.Services
                 if (cartDetail.Quantity > cartDetail.Product.Quantity)
                     throw new GeneralException($"ITEM {cartDetail.Product.Name} IS NOT ENOUGH");
             }
+
+            IList<long> listGiftCartId = new List<long>();
+            foreach (var cd in cartDetails)
+                if (cd.GiftCartId != null)
+                    listGiftCartId.Add(cd.GiftCartId.Value);
+            await _giftCartRepository.InactiveGiftCart(listGiftCartId);
 
             SimpleBillDto simpleBillDto = null;
             string paymentUrl = null;

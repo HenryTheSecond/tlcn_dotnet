@@ -79,6 +79,7 @@ try
     builder.Services.AddScoped<ICartNotificationService, CartNotificationService>();
     builder.Services.AddScoped<IProductPromotionService, ProductPromotionService>();
     builder.Services.AddScoped<IReviewResourceService, ReviewResourceService>();
+    builder.Services.AddScoped<IGiftCartService, GiftCartService>();
 
     //Add repositories
     builder.Services.AddScoped<IInventoryRepository, InventoryRepository>();
@@ -95,6 +96,7 @@ try
     builder.Services.AddScoped<IReviewRepository, ReviewRepository>();
     builder.Services.AddScoped<IStatisticsRepository, StatisticsRepository>();
     builder.Services.AddScoped<IProductPromotionRepository, ProductPromotionRepository>();
+    builder.Services.AddScoped<IGiftCartRepository, GiftCartRepository>();
 
     /*builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         .AddJwtBearer(options => {

@@ -7,6 +7,7 @@ using tlcn_dotnet.Dto.BillDto;
 using tlcn_dotnet.Dto.CartDetailDto;
 using tlcn_dotnet.Dto.CartNotificationDto;
 using tlcn_dotnet.Dto.CategoryDto;
+using tlcn_dotnet.Dto.GiftCartDto;
 using tlcn_dotnet.Dto.InventoryDto;
 using tlcn_dotnet.Dto.ProductDto;
 using tlcn_dotnet.Dto.ProductImageDto;
@@ -99,7 +100,8 @@ namespace tlcn_dotnet.Mapper
             CreateMap<ProductPromotion, ProductPromotionResponse>()
                 .ForMember(p => p.ProductName, opt => opt.MapFrom(src => src.Product.Name));
             CreateMap<ProductPromotion, SimpleProductPromotionDto>();
-            
+
+            CreateMap<GiftCart, GiftCartResponse>();
         }
     }
 }

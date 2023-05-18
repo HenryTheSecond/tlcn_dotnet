@@ -35,5 +35,6 @@ namespace tlcn_dotnet
         public DbSet<InventoryNotification> InventoryNotification { get; set; }
         public DbSet<ProductPromotion> ProductPromotion { get; set; }
         public DbSet<ReviewResource> ReviewResource { get; set; }
+        public DbSet<GiftCart> GiftCart { get; set; }
     }
 }
