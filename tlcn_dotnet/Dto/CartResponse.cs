@@ -23,5 +23,7 @@ namespace tlcn_dotnet.Dto
         public IEnumerable<CartDetailResponse> CartDetails { get; set; }
         public SimpleBillDto Bill { get; set; }
         public string PaymentUrl { get; set; }
+        public decimal? ShippingFee { get; set; } = 0;
+        public GhnServiceTypeEnum GhnServiceType { get; set; } = GhnServiceTypeEnum.CHUAN;
     }
 }

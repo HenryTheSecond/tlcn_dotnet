@@ -55,5 +55,12 @@ namespace tlcn_dotnet.Services
             IList<GiftCart> giftCarts = await _giftCartRepository.GetAllActiveGiftCartByAccountId(Util.ReadJwtTokenAndGetAccountId(authorization), keyword);
             return new DataResponse(_mapper.Map<IList<GiftCartResponse>>(giftCarts));
         }
+
+        public async Task<DataResponse> GetAllGiftCartWithProductId(string authorization, long productId)
+        {
+            long accountId = Util.ReadJwtTokenAndGetAccountId(authorization);
+            var result = await _giftCartRepository.GetGiftCartAndCartDetailIdByProduct(accountId, productId);
+            return new DataResponse(result);
+        }
     }
 }

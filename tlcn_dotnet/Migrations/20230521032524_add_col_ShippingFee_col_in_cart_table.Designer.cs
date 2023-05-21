@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using tlcn_dotnet;
 
@@ -11,9 +12,10 @@ using tlcn_dotnet;
 namespace tlcn_dotnet.Migrations
 {
     [DbContext(typeof(MyDbContext))]
-    partial class MyDbContextModelSnapshot : ModelSnapshot
+    [Migration("20230521032524_add_col_ShippingFee_col_in_cart_table")]
+    partial class add_col_ShippingFee_col_in_cart_table
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -166,10 +168,6 @@ namespace tlcn_dotnet.Migrations
                     b.Property<string>("DistrictId")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("GhnServiceType")
-                        .IsRequired()
-                        .HasColumnType("varchar(50)");
 
                     b.Property<string>("Name")
                         .IsRequired()

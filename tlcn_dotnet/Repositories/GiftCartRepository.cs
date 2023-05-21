@@ -15,7 +15,7 @@ namespace tlcn_dotnet.Repositories
 
         public async Task<GiftCart> CreateGiftCart(long accountId, GiftCartCreateRequest request)
         {
-            GiftCart giftCart = new GiftCart { Name = request.Name, AccountId = accountId};
+            GiftCart giftCart = new GiftCart { Name = request.Name, AccountId = accountId };
             await _dbContext.GiftCart.AddAsync(giftCart);
             await _dbContext.SaveChangesAsync();
             return giftCart;
@@ -41,6 +41,24 @@ namespace tlcn_dotnet.Repositories
             if (keyword != null)
                 query = query.Where(giftCart => giftCart.Name.Contains(keyword));
             return await query.ToListAsync();
+        }
+
+        public async Task<IList<GiftCartAndCartDetailIdDto>> GetGiftCartAndCartDetailIdByProduct(long accountId, long productId)
+        {
+            var result = await (from gc in _dbContext.GiftCart
+                                join cd in _dbContext.CartDetail.Where(cd => cd.ProductId == productId) on gc.Id equals cd.GiftCartId into grpCartDetail
+                                from cd in grpCartDetail.DefaultIfEmpty()
+                                where gc.IsActive == true && gc.AccountId == accountId
+                                select new GiftCartAndCartDetailIdDto
+                                {
+                                    AccountId = accountId,
+                                    CartDetailId = cd == null ? null : cd.Id,
+                                    Id = gc.Id,
+                                    IsActive = gc.IsActive,
+                                    Name = gc.Name
+                                }).ToListAsync();
+
+            return result;
         }
 
         public async Task<int> InactiveGiftCart(IList<long> listId)

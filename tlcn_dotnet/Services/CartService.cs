@@ -34,7 +34,7 @@ namespace tlcn_dotnet.Services
         private readonly MyDbContext _dbContext;
         private readonly IGiftCartRepository _giftCartRepository;
         public CartService(MyDbContext dbContext, ICartDetailRepository cartDetailRepository, IBillService billService,
-            ICartRepository cartRepository, IMapper mapper, IDeliveryService deliveryService, 
+            ICartRepository cartRepository, IMapper mapper, IDeliveryService deliveryService,
             IBillRepository billRepository, IProductRepository productRepository, ICartNotificationService cartNotificationService, IGiftCartRepository giftCartRepository)
         {
             _dbContext = dbContext;
@@ -150,8 +150,8 @@ namespace tlcn_dotnet.Services
                 await _billRepository.UpdateBillPurchaseDate(cart.Bill.Id.Value, null);
                 cart.Bill.PurchaseDate = null;
 
-/*                await _billRepository.DeleteBillById(cart.Bill.Id.Value);
-                cart.Bill = null;*/
+                /*                await _billRepository.DeleteBillById(cart.Bill.Id.Value);
+                                cart.Bill = null;*/
 
                 //TODO Refund payment
             }
@@ -248,14 +248,14 @@ namespace tlcn_dotnet.Services
             dynamic result = await _cartRepository.GetUserCartHistory(accountId, status, paymentMethod, fromDate, toDate,
                 fromTotal, toTotal, sortBy, order, page.Value, pageSize.Value);
             return new DataResponse
-                (
-            new
-            {
-                carts = _mapper.Map<IList<CartResponse>>(result.carts),
-                maxPage = Util.CalculateMaxPage(result.count, pageSize.Value),
-                currentPage = page
-            }
-                );
+            (
+                new
+                {
+                    carts = _mapper.Map<IList<CartResponse>>(result.carts),
+                    maxPage = Util.CalculateMaxPage(result.count, pageSize.Value),
+                    currentPage = page
+                }
+            );
         }
 
         public async Task<DataResponse> CancelCart(string authorization, long id)
@@ -341,10 +341,10 @@ namespace tlcn_dotnet.Services
                 .Where(cart => cart.Id == id && cart.CartDetails[0].Account.Id == accountId).AnyAsync();*/
 
             bool isCartExisted = await (from cart in _dbContext.Cart
-                                  join cartDetail in _dbContext.CartDetail on cart.Id equals cartDetail.CartId
-                                  join account in _dbContext.Account on cartDetail.Account.Id equals account.Id
-                                  where cart.Id == id && account.Id == accountId
-                                  select cart).AnyAsync();
+                                        join cartDetail in _dbContext.CartDetail on cart.Id equals cartDetail.CartId
+                                        join account in _dbContext.Account on cartDetail.Account.Id equals account.Id
+                                        where cart.Id == id && account.Id == accountId
+                                        select cart).AnyAsync();
             if (isCartExisted == false)
                 throw new GeneralException("CART NOT FOUND", ApplicationConstant.NOT_FOUND_CODE);
             return new DataResponse(_mapper.Map<CartResponse>(await _cartRepository.ProcessCartById(id)));

@@ -40,5 +40,12 @@ namespace tlcn_dotnet.Controllers
         {
             return await _giftCartService.ChangeGiftCartName(authorization, id, request);
         }
+
+        [HttpGet("product/{productId}")]
+        [CustomAuthorize]
+        public async Task<DataResponse> GetAllGiftCartWithProductId([FromHeader(Name = "Authorization")] string authorization, long productId)
+        {
+            return await _giftCartService.GetAllGiftCartWithProductId(authorization, productId);
+        }
     }
 }

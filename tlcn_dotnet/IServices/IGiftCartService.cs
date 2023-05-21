@@ -8,5 +8,6 @@ namespace tlcn_dotnet.IServices
         public Task<DataResponse> GetAllActiveGiftCart(string authorization, string keyword);
         public Task<DataResponse> DeleteGiftCart(string authorization, long id);
         public Task<DataResponse> ChangeGiftCartName(string authorization, long id, GiftCartCreateRequest request);
+        public Task<DataResponse> GetAllGiftCartWithProductId(string authorization, long productId);
     }
 }

@@ -79,7 +79,6 @@ namespace tlcn_dotnet.Controllers
             CartStatus? status, PaymentMethod? paymentMethod, string? fromDate, string? toDate,
             string? fromTotal, string? toTotal, string? sortBy = "PURCHASEDATE", string? order = "DESC", string? page = "1", string? pageSize = "5")
         {
-            Console.WriteLine($"CHECKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKK {status}");
             return await _cartService.GetCartHistory(authorization, status, paymentMethod,
                 fromDate, toDate, fromTotal, toTotal, sortBy, order, page, pageSize);
         }

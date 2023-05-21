@@ -29,5 +29,8 @@ namespace tlcn_dotnet.Entity
 
         public string? ProcessDescription { get; set; }
         public Account? ProcessAccount { get; set; }
+        public decimal? ShippingFee { get; set; } = 0;
+        [Column(TypeName = "varchar(50)")]
+        public GhnServiceTypeEnum GhnServiceType { get; set; } = GhnServiceTypeEnum.CHUAN;
     }
 }
