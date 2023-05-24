@@ -45,8 +45,12 @@ namespace tlcn_dotnet.Services
             }), Encoding.UTF8, "application/json");
             var response = await _httpClient.SendAsync(request, CancellationToken.None);
             var jsonResult = await response.Content.ReadFromJsonAsync<JsonNode>();
-            return jsonResult["data"]["total"].GetValue<decimal>();
-            //return decimal.Parse(jsonResult["data"]["total"].ToString());
+            decimal fee = jsonResult["data"]["total"].GetValue<decimal>();
+            if (serviceType == GhnServiceTypeEnum.CHUAN)
+                fee = decimal.Multiply(fee, (decimal)1.2);
+            else if (serviceType == GhnServiceTypeEnum.NHANH)
+                fee = decimal.Multiply(fee, (decimal)1.5);
+            return fee;
         }
 
         public async Task<HttpResponseMessage> SendDeliveryRequest(Dictionary<string, object> parameters)
