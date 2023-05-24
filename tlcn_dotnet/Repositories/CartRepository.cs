@@ -299,6 +299,7 @@ namespace tlcn_dotnet.Repositories
                                                 {where}
                                                 {orderBy} OFFSET @Skip ROWS FETCH NEXT @Take ROWS ONLY) as CartBill
                                         JOIN CartDetail ON CartBill.Id = CartDetail.CartId
+                                        LEFT OUTER JOIN GiftCart ON CartDetail.GiftCartId = GiftCart.Id
                                         JOIN Product ON CartDetail.ProductId = Product.Id
                                         JOIN Account ON Account.Id = CartDetail.AccountId
                                         OUTER APPLY(SELECT TOP 1 * FROM ProductImage WHERE ProductImage.ProductId = Product.Id) as img ";
@@ -306,6 +307,7 @@ namespace tlcn_dotnet.Repositories
                                        CartBill.DetailLocation, CartBill.Status, CartBill.CreatedDate, CartBill.ProcessDescription, ProcessAccountId, CartBill.ShippingFee, CartBill.GhnServiceType,
                                        CartBill.BillId as Id, CartBill.PurchaseDate, CartBill.Total, CartBill.PaymentMethod, CartBill.OrderCode,
 	                                   CartDetail.Id, CartDetail.Price, CartDetail.Status, CartDetail.Unit, CartDetail.Quantity,
+                                       GiftCart.Id, GiftCart.Name, GiftCart.IsActive, GiftCart.AccountId,
 	                                   Product.Id, Product.Name, Product.Price, Product.Unit, Product.MinPurchase, Product.Status, Product.Description, Product.Quantity,
 	                                   Account.Id, Account.Phone, Account.Email, Account.FirstName, Account.LastName, Account.CityId, Account.DistrictId, Account.WardId,
 	                                   img.Id, img.Url, img.FileName
@@ -316,15 +318,17 @@ namespace tlcn_dotnet.Repositories
             using (var connection = _dapperContext.CreateConnection())
             {
                 var cartDictionary = new Dictionary<long, Cart>();
-                IList<Cart> carts = (await connection.QueryAsync<Cart, Bill, CartDetail, Product, Account, ProductImage, Cart>
+                IList<Cart> carts = (await connection.QueryAsync<Cart, Bill, CartDetail, GiftCart, Product, Account, ProductImage, Cart>
                     (
                         query,
-                        (cart, bill, cartDetail, product, account, productImage) =>
+                        (cart, bill, cartDetail, giftCart, product, account, productImage) =>
                         {
                             product.ProductImages.Add(productImage);
                             cartDetail.Account = account;
                             cartDetail.Product = product;
                             cartDetail.ProductId = product.Id;
+                            cartDetail.GiftCart = giftCart;
+                            cartDetail.GiftCartId = giftCart == null ? null : giftCart.Id;
 
                             Cart cartEntry;
                             if (cartDictionary.TryGetValue(cart.Id.Value, out cartEntry) == false)
@@ -392,6 +396,7 @@ namespace tlcn_dotnet.Repositories
             using (var connection = _dapperContext.CreateConnection())
             {
                 string from = @" FROM Cart JOIN CartDetail ON Cart.Id = CartDetail.CartId
+                                    LEFT OUTER JOIN GiftCart ON CartDetail.GiftCartId = GiftCart.Id
                                     LEFT OUTER JOIN Bill ON Bill.Id = Cart.BillId
                                     JOIN Product ON CartDetail.ProductId = Product.Id
                                     JOIN Account ON Account.Id = CartDetail.AccountId
@@ -454,15 +459,17 @@ namespace tlcn_dotnet.Repositories
                 Console.WriteLine(query);
 
                 var cartDictionary = new Dictionary<long, Cart>();
-                IList<Cart> carts = (await connection.QueryAsync<Cart, CartDetail, Bill, Product, Account, ProductImage, Cart>
+                IList<Cart> carts = (await connection.QueryAsync<Cart, CartDetail, GiftCart, Bill, Product, Account, ProductImage, Cart>
                     (
                         query,
-                        (cart, cartDetail, bill, product, account, productImage) =>
+                        (cart, cartDetail, giftCart, bill, product, account, productImage) =>
                         {
                             product.ProductImages.Add(productImage);
                             cartDetail.Account = account;
                             cartDetail.Product = product;
                             cartDetail.ProductId = product.Id;
+                            cartDetail.GiftCart = giftCart;
+                            cartDetail.GiftCartId = giftCart == null ? null : giftCart.Id;
 
                             Cart cartEntry;
                             if (cartDictionary.TryGetValue(cart.Id.Value, out cartEntry) == false)
@@ -491,12 +498,13 @@ namespace tlcn_dotnet.Repositories
             using (var connection = _dapperContext.CreateConnection())
             {
                 string query = @"Insert into Cart (BillId, Phone, CityId, DistrictId, WardId, 
-                                                    DetailLocation, Status, CreatedDate, Name)
+                                                    DetailLocation, Status, CreatedDate, Name, ShippingFee, GhnServiceType)
                                 OUTPUT inserted.Id
                                 values (@BillId, @Phone, @CityId, @DistrictId, @WardId, 
-                                        @DetailLocation, @Status, @CreatedDate, @Name)";
+                                        @DetailLocation, @Status, @CreatedDate, @Name, @ShippingFee, @GhnServiceType)";
                 DynamicParameters parameters = new DynamicParameters(cart);
                 parameters.Add("Status", cart.Status.GetDisplayName());
+                parameters.Add("GhnServiceType", cart.GhnServiceType.ToString().ToUpper());
                 long id = await connection.ExecuteScalarAsync<long>(query, parameters);
                 return id;
             }
@@ -543,6 +551,7 @@ namespace tlcn_dotnet.Repositories
                                        CartBill.DetailLocation, CartBill.Status, CartBill.CreatedDate, CartBill.ProcessDescription, ProcessAccountId, CartBill.ShippingFee, CartBill.GhnServiceType,
                                        CartBill.BillId as Id, CartBill.PurchaseDate, CartBill.Total, CartBill.PaymentMethod, CartBill.OrderCode,
 	                                   CartDetail.Id, CartDetail.Price, CartDetail.Status, CartDetail.Unit, CartDetail.Quantity,
+                                       GiftCart.Id, GiftCart.Name, GiftCart.IsActive, GiftCart.AccountId,
 	                                   Product.Id, Product.Name, Product.Price, Product.Unit, Product.MinPurchase, Product.Status, Product.Description, Product.Quantity,
 	                                   Account.Id, Account.Phone, Account.Email, Account.FirstName, Account.LastName, Account.CityId, Account.DistrictId, Account.WardId,
 	                                   img.Id, img.Url, img.FileName ";
@@ -551,17 +560,20 @@ namespace tlcn_dotnet.Repositories
                                                     Bill.Id as BillId, Bill.PurchaseDate, Bill.Total, Bill.PaymentMethod, Bill.OrderCode
                                                 FROM Cart LEFT OUTER JOIN Bill ON Cart.BillId = Bill.Id) as CartBill
                                         JOIN CartDetail ON CartBill.Id = CartDetail.CartId
+                                        LEFT OUTER JOIN GiftCart ON CartDetail.GiftCartId = GiftCart.Id
                                         JOIN Product ON CartDetail.ProductId = Product.Id
                                         JOIN Account ON Account.Id = CartDetail.AccountId
                                         OUTER APPLY(SELECT TOP 1 * FROM ProductImage WHERE ProductImage.ProductId = Product.Id) as img ";
                 string where = " WHERE CartBill.Id = @Id ";
                 var cartDictionary = new Dictionary<long, Cart>();
-                Cart cart = (await connection.QueryAsync<Cart, Bill, CartDetail, Product, Account, ProductImage, Cart>(query + from + where, (cart, bill, cartDetail, product, account, productImage) =>
+                Cart cart = (await connection.QueryAsync<Cart, Bill, CartDetail, GiftCart, Product, Account, ProductImage, Cart>(query + from + where, (cart, bill, cartDetail, giftCart, product, account, productImage) =>
                 {
                     product.ProductImages.Add(productImage);
                     cartDetail.Account = account;
                     cartDetail.Product = product;
                     cartDetail.ProductId = product.Id;
+                    cartDetail.GiftCart = giftCart;
+                    cartDetail.GiftCartId = giftCart == null ? null : giftCart.Id;
 
                     Cart cartEntry;
                     if (cartDictionary.TryGetValue(cart.Id.Value, out cartEntry) == false)
@@ -579,7 +591,7 @@ namespace tlcn_dotnet.Repositories
                     Console.WriteLine($"CHECK {cart.BillId}");
                     return cartEntry;
                 }, param: new { Id = id },
-                splitOn: "Id, Id, Id, Id, Id, Id ")).Distinct().SingleOrDefault();
+                splitOn: "Id, Id, Id, Id, Id, Id, Id ")).Distinct().SingleOrDefault();
                 return cart;
             }
         }

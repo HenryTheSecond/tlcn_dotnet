@@ -51,10 +51,10 @@ namespace tlcn_dotnet.Services
 
         public async Task<DataResponse> PayCurrentCart(string authorization, CartPaymentDto cartPaymentDto)
         {
-            string checkAddress = await Util.CheckVietnameseAddress(cartPaymentDto.CityId,
+/*            string checkAddress = await Util.CheckVietnameseAddress(cartPaymentDto.CityId,
                 cartPaymentDto.DistrictId, cartPaymentDto.WardId);
             if (checkAddress != null)
-                throw new GeneralException(checkAddress, ApplicationConstant.BAD_REQUEST_CODE);
+                throw new GeneralException(checkAddress, ApplicationConstant.BAD_REQUEST_CODE);*/
 
             JwtSecurityToken jwtToken = Util.ReadJwtToken(authorization);
             object accountId;
@@ -101,6 +101,8 @@ namespace tlcn_dotnet.Services
                 DetailLocation = cartPaymentDto.DetailLocation,
                 Status = CartStatus.PENDING,
                 CreatedDate = DateTime.Now,
+                GhnServiceType = cartPaymentDto.ServiceType,
+                ShippingFee = await _deliveryService.CalculateShippingFee(int.Parse(cartPaymentDto.DistrictId), cartPaymentDto.WardId, (int)cartDetails.Sum(cd => cd.Quantity), cartPaymentDto.ServiceType)
             };
 
             long id = await _cartRepository.InsertCart(cart);

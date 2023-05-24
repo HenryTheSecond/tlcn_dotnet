@@ -19,5 +19,6 @@ namespace tlcn_dotnet.Dto.CartDetailDto
         public string DetailLocation { get; set; }
         public PaymentMethod PaymentMethod { get; set; }
         public IList<long> ListCartDetailId { get; set; }
+        public GhnServiceTypeEnum ServiceType { get; set; }
     }
 }

@@ -16,6 +16,8 @@ using Account = CloudinaryDotNet.Account;
 using AutoMapper;
 using tlcn_dotnet.Dto.ReviewDto;
 using System.Text.Json;
+using tlcn_dotnet.Services;
+using tlcn_dotnet.Constant;
 
 namespace tlcn_dotnet.Controllers
 {
@@ -29,14 +31,16 @@ namespace tlcn_dotnet.Controllers
         private readonly ICartRepository _cartRepository;
         private readonly MyDbContext _dbContext;
         private readonly IMapper _mapper;
+        private readonly IDeliveryService _ghnDeliveryService;
 
-        public WeatherForecastController(ILogger<WeatherForecastController> logger, IPaymentService paymentService, ICartRepository cartRepository, MyDbContext dbContext, IMapper mapper)
+        public WeatherForecastController(ILogger<WeatherForecastController> logger, IPaymentService paymentService, ICartRepository cartRepository, MyDbContext dbContext, IMapper mapper, IDeliveryService deliveryService)
         {
             _logger = logger;
             _paymentService = paymentService;
             _cartRepository = cartRepository;
             _dbContext = dbContext;
             _mapper = mapper;
+            _ghnDeliveryService = deliveryService;
         }
 
         [HttpGet(Name = "GetWeatherForecast")]
@@ -194,6 +198,12 @@ namespace tlcn_dotnet.Controllers
             {
                 PropertyNameCaseInsensitive = true
             });
+        }
+
+        [HttpGet("calculateFee")]
+        public async Task<decimal> CalculateFee(GhnServiceTypeEnum serviceTypeEnum, int toDistrictId, string toWardCodeId, int amount)
+        {
+            return await _ghnDeliveryService.CalculateShippingFee(toDistrictId, toWardCodeId, amount, serviceTypeEnum);
         }
     }
 }   
