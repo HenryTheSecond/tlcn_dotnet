@@ -25,5 +25,6 @@ namespace tlcn_dotnet.Dto
         public string PaymentUrl { get; set; }
         public decimal? ShippingFee { get; set; } = 0;
         public GhnServiceTypeEnum GhnServiceType { get; set; } = GhnServiceTypeEnum.CHUAN;
+        public DateTime DeliveryTime { get; set; }
     }
 }

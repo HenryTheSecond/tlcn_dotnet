@@ -205,5 +205,12 @@ namespace tlcn_dotnet.Controllers
         {
             return await _ghnDeliveryService.CalculateShippingFee(toDistrictId, toWardCodeId, amount, serviceTypeEnum);
         }
+
+        [HttpGet("testDeliver")]
+        public async Task<DateTime> CalculateDateTime([FromQuery] int toDistrictCode, [FromQuery] string toWardCode, [FromQuery] GhnServiceTypeEnum type)
+        {
+            var res = await _ghnDeliveryService.CalculateDeliveryTime(toDistrictCode, toWardCode, type);
+            return res;
+        }
     }
 }   

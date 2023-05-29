@@ -293,7 +293,7 @@ namespace tlcn_dotnet.Repositories
                 where += " WHERE " + string.Join(" AND ", conditions);
             }
             string from = $@" FROM (SELECT Cart.Id, Cart.Phone, Cart.Name, Cart.CityId, Cart.DistrictId, Cart.WardId,
-                                                    Cart.DetailLocation, Cart.Status, Cart.CreatedDate, Cart.ProcessDescription, ProcessAccountId, Cart.ShippingFee, Cart.GhnServiceType,
+                                                    Cart.DetailLocation, Cart.Status, Cart.CreatedDate, Cart.ProcessDescription, ProcessAccountId, Cart.ShippingFee, Cart.GhnServiceType, Cart.DeliveryTime,
                                                     Bill.Id as BillId, Bill.PurchaseDate, Bill.Total, Bill.PaymentMethod, Bill.OrderCode
                                                 FROM Cart LEFT OUTER JOIN Bill ON Cart.BillId = Bill.Id 
                                                 {where}
@@ -304,7 +304,7 @@ namespace tlcn_dotnet.Repositories
                                         JOIN Account ON Account.Id = CartDetail.AccountId
                                         OUTER APPLY(SELECT TOP 1 * FROM ProductImage WHERE ProductImage.ProductId = Product.Id) as img ";
             string query = $@" SELECT  CartBill.Id, CartBill.Phone, CartBill.Name, CartBill.CityId, CartBill.DistrictId, CartBill.WardId,
-                                       CartBill.DetailLocation, CartBill.Status, CartBill.CreatedDate, CartBill.ProcessDescription, ProcessAccountId, CartBill.ShippingFee, CartBill.GhnServiceType,
+                                       CartBill.DetailLocation, CartBill.Status, CartBill.CreatedDate, CartBill.ProcessDescription, ProcessAccountId, CartBill.ShippingFee, CartBill.GhnServiceType, CartBill.DeliveryTime,
                                        CartBill.BillId as Id, CartBill.PurchaseDate, CartBill.Total, CartBill.PaymentMethod, CartBill.OrderCode,
 	                                   CartDetail.Id, CartDetail.Price, CartDetail.Status, CartDetail.Unit, CartDetail.Quantity,
                                        GiftCart.Id, GiftCart.Name, GiftCart.IsActive, GiftCart.AccountId,
@@ -548,7 +548,7 @@ namespace tlcn_dotnet.Repositories
             using (var connection = _dapperContext.CreateConnection())
             {
                 string query = @$" SELECT  CartBill.Id, CartBill.Phone, CartBill.Name, CartBill.CityId, CartBill.DistrictId, CartBill.WardId,
-                                       CartBill.DetailLocation, CartBill.Status, CartBill.CreatedDate, CartBill.ProcessDescription, ProcessAccountId, CartBill.ShippingFee, CartBill.GhnServiceType,
+                                       CartBill.DetailLocation, CartBill.Status, CartBill.CreatedDate, CartBill.ProcessDescription, ProcessAccountId, CartBill.ShippingFee, CartBill.GhnServiceType, CartBill.DeliveryTime,
                                        CartBill.BillId as Id, CartBill.PurchaseDate, CartBill.Total, CartBill.PaymentMethod, CartBill.OrderCode,
 	                                   CartDetail.Id, CartDetail.Price, CartDetail.Status, CartDetail.Unit, CartDetail.Quantity,
                                        GiftCart.Id, GiftCart.Name, GiftCart.IsActive, GiftCart.AccountId,
@@ -556,7 +556,7 @@ namespace tlcn_dotnet.Repositories
 	                                   Account.Id, Account.Phone, Account.Email, Account.FirstName, Account.LastName, Account.CityId, Account.DistrictId, Account.WardId,
 	                                   img.Id, img.Url, img.FileName ";
                 string from = $@" FROM (SELECT Cart.Id, Cart.Phone, Cart.Name, Cart.CityId, Cart.DistrictId, Cart.WardId,
-                                                    Cart.DetailLocation, Cart.Status, Cart.CreatedDate, Cart.ProcessDescription, ProcessAccountId, Cart.ShippingFee, Cart.GhnServiceType,
+                                                    Cart.DetailLocation, Cart.Status, Cart.CreatedDate, Cart.ProcessDescription, ProcessAccountId, Cart.ShippingFee, Cart.GhnServiceType, Cart.DeliveryTime,
                                                     Bill.Id as BillId, Bill.PurchaseDate, Bill.Total, Bill.PaymentMethod, Bill.OrderCode
                                                 FROM Cart LEFT OUTER JOIN Bill ON Cart.BillId = Bill.Id) as CartBill
                                         JOIN CartDetail ON CartBill.Id = CartDetail.CartId

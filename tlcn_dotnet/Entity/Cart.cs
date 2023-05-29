@@ -32,5 +32,6 @@ namespace tlcn_dotnet.Entity
         public decimal? ShippingFee { get; set; } = 0;
         [Column(TypeName = "varchar(50)")]
         public GhnServiceTypeEnum GhnServiceType { get; set; } = GhnServiceTypeEnum.CHUAN;
+        public DateTime? DeliveryTime { get; set; }
     }
 }
