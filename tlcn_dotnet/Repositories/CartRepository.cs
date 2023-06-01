@@ -498,10 +498,10 @@ namespace tlcn_dotnet.Repositories
             using (var connection = _dapperContext.CreateConnection())
             {
                 string query = @"Insert into Cart (BillId, Phone, CityId, DistrictId, WardId, 
-                                                    DetailLocation, Status, CreatedDate, Name, ShippingFee, GhnServiceType)
+                                                    DetailLocation, Status, CreatedDate, Name, ShippingFee, GhnServiceType, DeliveryTime)
                                 OUTPUT inserted.Id
                                 values (@BillId, @Phone, @CityId, @DistrictId, @WardId, 
-                                        @DetailLocation, @Status, @CreatedDate, @Name, @ShippingFee, @GhnServiceType)";
+                                        @DetailLocation, @Status, @CreatedDate, @Name, @ShippingFee, @GhnServiceType, @DeliveryTime)";
                 DynamicParameters parameters = new DynamicParameters(cart);
                 parameters.Add("Status", cart.Status.GetDisplayName());
                 parameters.Add("GhnServiceType", cart.GhnServiceType.ToString().ToUpper());

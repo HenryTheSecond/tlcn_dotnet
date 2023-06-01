@@ -102,7 +102,8 @@ namespace tlcn_dotnet.Services
                 Status = CartStatus.PENDING,
                 CreatedDate = DateTime.Now,
                 GhnServiceType = cartPaymentDto.ServiceType,
-                ShippingFee = await _deliveryService.CalculateShippingFee(int.Parse(cartPaymentDto.DistrictId), cartPaymentDto.WardId, (int)cartDetails.Sum(cd => cd.Quantity), cartPaymentDto.ServiceType)
+                ShippingFee = await _deliveryService.CalculateShippingFee(int.Parse(cartPaymentDto.DistrictId), cartPaymentDto.WardId, (int)cartDetails.Sum(cd => cd.Quantity), cartPaymentDto.ServiceType),
+                DeliveryTime = await _deliveryService.CalculateDeliveryTime(int.Parse(cartPaymentDto.DistrictId), cartPaymentDto.WardId, cartPaymentDto.ServiceType)
             };
 
             long id = await _cartRepository.InsertCart(cart);
@@ -186,7 +187,8 @@ namespace tlcn_dotnet.Services
             parameters.Add("to_name", cart.Name);
             parameters.Add("to_phone", cart.Phone);
             parameters.Add("to_address", cart.DetailLocation);
-            VietnamLocationDto location = await Util.FindVietnamLocation(cart.CityId, cart.DistrictId, cart.WardId);
+            //VietnamLocationDto location = await Util.FindVietnamLocation(cart.CityId, cart.DistrictId, cart.WardId);
+            var location = await _deliveryService.FindVietnamLocation(cart.CityId, cart.DistrictId, cart.WardId);
             parameters.Add("to_ward_name", location.Ward);
             parameters.Add("to_district_name", location.District);
             parameters.Add("to_province_name", location.City);

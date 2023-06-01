@@ -4,6 +4,7 @@ using System.Text;
 using System.Text.Json.Nodes;
 using tlcn_dotnet.Constant;
 using tlcn_dotnet.Dto.GhnItemDto;
+using tlcn_dotnet.Dto.LocationDto;
 using tlcn_dotnet.IServices;
 using tlcn_dotnet.Utils;
 
@@ -17,6 +18,9 @@ namespace tlcn_dotnet.Services
         private readonly HttpClient _httpClient;
         private readonly string _calculateFeeEndPoint;
         private readonly string _calculateDeliveryTimeEndPoint;
+        private readonly string _provinceEndPoint;
+        private readonly string _districtEndPoint;
+        private readonly string _wardEndPoint;
         public GhnDeliveryService(IConfiguration configuration, HttpClient httpClient)
         {
             _httpClient = httpClient;
@@ -26,6 +30,9 @@ namespace tlcn_dotnet.Services
             _apiEndPoint = ghnSection.GetSection("ApiEndPoint").Value;
             _calculateFeeEndPoint = ghnSection.GetSection("CalculateFeeEndPoint").Value;
             _calculateDeliveryTimeEndPoint = ghnSection.GetSection("CalculateDeliveryTime").Value;
+            _provinceEndPoint = ghnSection.GetSection("Province").Value;
+            _districtEndPoint = ghnSection.GetSection("District").Value;
+            _wardEndPoint = ghnSection.GetSection("Ward").Value;
         }
 
         public async Task<DateTime> CalculateDeliveryTime(int toDistrictId, string toWardCode, GhnServiceTypeEnum serviceTypeEnum = GhnServiceTypeEnum.CHUAN)
@@ -79,6 +86,66 @@ namespace tlcn_dotnet.Services
             else if (serviceType == GhnServiceTypeEnum.NHANH)
                 fee = decimal.Multiply(fee, (decimal)1.5);
             return fee;
+        }
+
+        public async Task<VietnamLocationDto> FindVietnamLocation(string cityId, string districtId, string wardId)
+        {
+            VietnamLocationDto location = new VietnamLocationDto();
+
+            var request = new HttpRequestMessage(HttpMethod.Get, _provinceEndPoint);
+            request.Headers.Accept.Clear();
+            request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+            request.Headers.Add("Token", _token);
+
+            var response = await _httpClient.SendAsync(request, CancellationToken.None);
+            var jsonResult = await response.Content.ReadFromJsonAsync<JsonNode>();
+            foreach(var node in jsonResult["data"].AsArray())
+            {
+                if (node["ProvinceID"].GetValue<int>() == int.Parse(cityId))
+                {
+                    location.City = node["ProvinceName"].GetValue<string>();
+                    break;
+                }
+            }
+
+            request = new HttpRequestMessage(HttpMethod.Get, _districtEndPoint);
+            request.Headers.Accept.Clear();
+            request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+            request.Headers.Add("Token", _token);
+            request.Content = new StringContent(JsonConvert.SerializeObject(new
+            {
+                province_id = int.Parse(cityId)
+            }), Encoding.UTF8, "application/json");
+            response = await _httpClient.SendAsync(request, CancellationToken.None);
+            jsonResult = await response.Content.ReadFromJsonAsync<JsonNode>();
+            foreach (var node in jsonResult["data"].AsArray())
+            {
+                if (node["DistrictID"].GetValue<int>() == int.Parse(districtId))
+                {
+                    location.District = node["DistrictName"].GetValue<string>();
+                    break;
+                }
+            }
+
+            request = new HttpRequestMessage(HttpMethod.Get, _wardEndPoint);
+            request.Headers.Accept.Clear();
+            request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+            request.Headers.Add("Token", _token);
+            request.Content = new StringContent(JsonConvert.SerializeObject(new
+            {
+                district_id = int.Parse(districtId)
+            }), Encoding.UTF8, "application/json");
+            response = await _httpClient.SendAsync(request, CancellationToken.None);
+            jsonResult = await response.Content.ReadFromJsonAsync<JsonNode>();
+            foreach (var node in jsonResult["data"].AsArray())
+            {
+                if (node["WardCode"].GetValue<string>() == wardId)
+                {
+                    location.Ward = node["WardName"].GetValue<string>();
+                    break;
+                }
+            }
+            return location;
         }
 
         public async Task<HttpResponseMessage> SendDeliveryRequest(Dictionary<string, object> parameters)
