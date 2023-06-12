@@ -20,5 +20,6 @@ namespace tlcn_dotnet.Dto.CartDetailDto
         public PaymentMethod PaymentMethod { get; set; }
         public IList<long> ListCartDetailId { get; set; }
         public GhnServiceTypeEnum ServiceType { get; set; }
+        public ShippingFeePayer ShippingFeePayer { get; set; } = ShippingFeePayer.BUYER;
     }
 }

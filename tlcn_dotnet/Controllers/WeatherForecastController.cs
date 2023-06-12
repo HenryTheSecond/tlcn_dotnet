@@ -18,6 +18,7 @@ using tlcn_dotnet.Dto.ReviewDto;
 using System.Text.Json;
 using tlcn_dotnet.Services;
 using tlcn_dotnet.Constant;
+using Google.Cloud.Firestore;
 
 namespace tlcn_dotnet.Controllers
 {
@@ -32,8 +33,12 @@ namespace tlcn_dotnet.Controllers
         private readonly MyDbContext _dbContext;
         private readonly IMapper _mapper;
         private readonly IDeliveryService _ghnDeliveryService;
+        private readonly FirestoreDb _firebaseDb;
+        private readonly ICartNotificationService _cartNotificationService;
 
-        public WeatherForecastController(ILogger<WeatherForecastController> logger, IPaymentService paymentService, ICartRepository cartRepository, MyDbContext dbContext, IMapper mapper, IDeliveryService deliveryService)
+        public WeatherForecastController(ILogger<WeatherForecastController> logger, IPaymentService paymentService, 
+            ICartRepository cartRepository, MyDbContext dbContext, IMapper mapper, 
+            IDeliveryService deliveryService, FirestoreDb firestoreDb, ICartNotificationService cartNotificationService)
         {
             _logger = logger;
             _paymentService = paymentService;
@@ -41,6 +46,8 @@ namespace tlcn_dotnet.Controllers
             _dbContext = dbContext;
             _mapper = mapper;
             _ghnDeliveryService = deliveryService;
+            _firebaseDb = firestoreDb;
+            _cartNotificationService = cartNotificationService;
         }
 
         [HttpGet(Name = "GetWeatherForecast")]
@@ -211,6 +218,25 @@ namespace tlcn_dotnet.Controllers
         {
             var res = await _ghnDeliveryService.CalculateDeliveryTime(toDistrictCode, toWardCode, type);
             return res;
+        }
+
+        [HttpGet("firestore")]
+        public async Task<IActionResult> TestFirestore()
+        {
+            Console.WriteLine(_firebaseDb);
+            return Ok();
+        }
+
+        [HttpGet("testCartFirestore")]
+        public async Task<IActionResult> TestCartNotiFirestore()
+        {
+            await _cartNotificationService.CreateCartNotification(new Cart
+            {
+                Id = 55,
+                DeliveryTime = DateTime.Now,
+                Status = CartStatus.DELIVERIED
+            });
+            return Ok();
         }
     }
 }   

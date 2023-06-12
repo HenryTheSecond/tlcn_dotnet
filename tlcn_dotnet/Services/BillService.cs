@@ -32,7 +32,7 @@ namespace tlcn_dotnet.Services
             return new DataResponse(_mapper.Map<SimpleBillDto>(bill));
         }
 
-        public async Task<DataResponse> CreateBill(IEnumerable<CartDetail> cartDetails, PaymentMethod paymentMethod)
+        public async Task<DataResponse> CreateBill(IEnumerable<CartDetail> cartDetails, PaymentMethod paymentMethod, decimal shippingFee)
         {
             decimal total = CalculateCart(cartDetails);
             long billId = await _billRepository.InsertBill(total, paymentMethod);
@@ -66,8 +66,8 @@ namespace tlcn_dotnet.Services
                 Bill billDb = await _billRepository.UpdatePurchaseDate(billId, now);
                 Dictionary<string, object> momoRequestParameters = new Dictionary<string, object>();
                 momoRequestParameters.Add("orderId", billDb.Id.ToString() + "_" + now.Ticks.ToString());
-                momoRequestParameters.Add("amount", billDb.Total.Value);
-                momoRequestParameters.Add("orderInfo", "Thanks for buying at One Winged Angel Fruit Shop");
+                momoRequestParameters.Add("amount", billDb.Total.Value + shippingFee);
+                momoRequestParameters.Add("orderInfo", "Thanks for buying at Fruit Shop");
                 momoRequestParameters.Add("requestId", billDb.Id.ToString() + "_" + now.Ticks.ToString());
                 HttpResponseMessage response = await _momoPaymentService.SendPaymentRequest(momoRequestParameters);
                 SimpleBillDto payingMomoBill = _mapper.Map<SimpleBillDto>(billDb);

@@ -1,3 +1,4 @@
+using Google.Cloud.Firestore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -24,6 +25,9 @@ var logger = NLog.LogManager.Setup().LoadConfigurationFromAppSettings().GetCurre
 
 try
 {
+    string path = AppDomain.CurrentDomain.BaseDirectory + @"chat-app-ba422-firebase-adminsdk-a4kog-dcdf579130.json";
+    Environment.SetEnvironmentVariable("GOOGLE_APPLICATION_CREDENTIALS", path);
+
     var builder = WebApplication.CreateBuilder(args);
 
     // Add services to the container.
@@ -76,10 +80,13 @@ try
     builder.Services.AddScoped<IDeliveryService, GhnDeliveryService>();
     builder.Services.AddScoped<IStatisticsService, StatisticsService>();
     builder.Services.AddScoped<IGoogleAccountService, GoogleAccountService>();
-    builder.Services.AddScoped<ICartNotificationService, CartNotificationService>();
+    //builder.Services.AddScoped<ICartNotificationService, CartNotificationService>();
+    builder.Services.AddScoped<ICartNotificationService, CartNotificationFirebaseService>();
     builder.Services.AddScoped<IProductPromotionService, ProductPromotionService>();
     builder.Services.AddScoped<IReviewResourceService, ReviewResourceService>();
     builder.Services.AddScoped<IGiftCartService, GiftCartService>();
+
+    builder.Services.AddSingleton(_ => FirestoreDb.Create("chat-app-ba422"));
 
     //Add repositories
     builder.Services.AddScoped<IInventoryRepository, InventoryRepository>();

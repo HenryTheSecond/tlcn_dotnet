@@ -80,9 +80,16 @@ namespace tlcn_dotnet.Services
                     listGiftCartId.Add(cd.GiftCartId.Value);
             await _giftCartRepository.InactiveGiftCart(listGiftCartId);
 
+            //Calculate shipping fee
+            decimal shippingFee = await _deliveryService.CalculateShippingFee(int.Parse(cartPaymentDto.DistrictId), cartPaymentDto.WardId, (int)cartDetails.Sum(cd => cd.Quantity), cartPaymentDto.ServiceType);
+            decimal momoShippingFee = 0;
+            if (cartPaymentDto.PaymentMethod == PaymentMethod.MOMO && cartPaymentDto.ShippingFeePayer == ShippingFeePayer.SHOP)
+                momoShippingFee = shippingFee;
+
+
             SimpleBillDto simpleBillDto = null;
             string paymentUrl = null;
-            var createBillResponseData = (await _billService.CreateBill(cartDetails, cartPaymentDto.PaymentMethod)).Data;
+            var createBillResponseData = (await _billService.CreateBill(cartDetails, cartPaymentDto.PaymentMethod, momoShippingFee)).Data;
             if (createBillResponseData.GetType() == typeof(SimpleBillDto))
                 simpleBillDto = (SimpleBillDto)createBillResponseData;
             else
@@ -102,7 +109,7 @@ namespace tlcn_dotnet.Services
                 Status = CartStatus.PENDING,
                 CreatedDate = DateTime.Now,
                 GhnServiceType = cartPaymentDto.ServiceType,
-                ShippingFee = await _deliveryService.CalculateShippingFee(int.Parse(cartPaymentDto.DistrictId), cartPaymentDto.WardId, (int)cartDetails.Sum(cd => cd.Quantity), cartPaymentDto.ServiceType),
+                ShippingFee = shippingFee,
                 DeliveryTime = await _deliveryService.CalculateDeliveryTime(int.Parse(cartPaymentDto.DistrictId), cartPaymentDto.WardId, cartPaymentDto.ServiceType)
             };
 
