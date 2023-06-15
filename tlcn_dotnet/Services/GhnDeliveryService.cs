@@ -53,9 +53,9 @@ namespace tlcn_dotnet.Services
             long timestamp = jsonResult["data"]["leadtime"].GetValue<long>();
             long timestampNow = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
             if (serviceTypeEnum == GhnServiceTypeEnum.CHUAN)
-                timestamp += (long)((timestamp - timestampNow) * 1.25);
+                timestampNow += (long)((timestamp - timestampNow) * 1.25);
             else if(serviceTypeEnum == GhnServiceTypeEnum.TIETKIEM)
-                timestamp += (long)((timestamp - timestampNow) * 1.7);
+                timestampNow += (long)((timestamp - timestampNow) * 1.7);
             var dateTime = Util.ConvertTimestampToDateTime(timestamp);
             return dateTime;
         }
