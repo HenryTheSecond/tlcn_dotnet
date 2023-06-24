@@ -103,6 +103,14 @@ namespace tlcn_dotnet.Controllers
             return await _authService.GetAccountById(id.Value);
         }
 
+        [HttpGet("admin/employee/{strId}")]
+        [CustomAuthorize(Roles = "ROLE_ADMIN")]
+        public async Task<DataResponse> AdminGetEmployeeById(string strId)
+        {
+            long? id = Util.ParseId(strId) ?? throw new GeneralException(ApplicationConstant.INVALID_ID, ApplicationConstant.BAD_REQUEST_CODE);
+            return await _authService.GetEmployeeById(id.Value);
+        }
+
         [HttpGet("profile")]
         [CustomAuthorize]
         public async Task<DataResponse> GetProfile([FromHeader(Name = "Authorization")] string authorization)

@@ -12,6 +12,7 @@ namespace tlcn_dotnet.Services
         public Task<DataResponse> ChangePassword(ChangePasswordRequest changePasswordRequest);
         public Task<DataResponse> ConfirmChangePassword(string token);
         public Task<DataResponse> GetAccountById(long id);
+        public Task<DataResponse> GetEmployeeById(long id);
         public Task<DataResponse> GetProfile(string authorization);
         public Task<DataResponse> UploadPhoto(string authorization, IFormFile photo);
         public Task<DataResponse> UpdateProfile(string authorization, UpdateProfileRequest request);

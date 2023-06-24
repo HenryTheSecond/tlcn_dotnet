@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using tlcn_dotnet.Constant;
+using tlcn_dotnet.Dto.AccountDto;
 using tlcn_dotnet.Entity;
 using tlcn_dotnet.IRepositories;
 
@@ -52,6 +53,31 @@ namespace tlcn_dotnet.Repositories
         public string GetVerifyTokenById(long id)
         {
             return  _dbContext.Account.Find(id).VerifyToken;
+        }
+
+        public async Task<EmployeeWithProviderResponse> GetEmployeeById(long id)
+        {
+            var employee = await _dbContext.Account
+            .Include(account => account.Employee)
+            .Where(account => account.Id == id && (account.Role == Role.ROLE_EMPLOYEE || account.Role == Role.ROLE_ADMIN))
+            .Select(account => new EmployeeWithProviderResponse
+            {
+                CityId = account.CityId,
+                WardId = account.WardId,
+                DetailLocation = account.DetailLocation,
+                DistrictId = account.DistrictId,
+                Email = account.Email,
+                FirstName = account.FirstName,
+                Id = account.Id,
+                LastName = account.LastName,
+                Phone = account.Phone,
+                PhotoUrl = account.PhotoUrl,
+                Role = account.Role,
+                Salary = account.Employee != null ? account.Employee.Salary.Value : 0,
+                Status = account.Status,
+                VerifyToken = account.VerifyToken
+            }).FirstOrDefaultAsync();
+            return employee;
         }
     }
 }

@@ -1,4 +1,5 @@
 ﻿using tlcn_dotnet.Constant;
+using tlcn_dotnet.Dto.AccountDto;
 using tlcn_dotnet.Entity;
 
 namespace tlcn_dotnet.IRepositories
@@ -8,6 +9,6 @@ namespace tlcn_dotnet.IRepositories
         public Task<dynamic> GetAccount(string keyword, AccountKeywordType keywordType, string role, int page, int pageSize);
         public string GetVerifyTokenById(long id);
         public Task<Account> FindByEmail(string email);
-
+        public Task<EmployeeWithProviderResponse> GetEmployeeById(long id);
     }
 }

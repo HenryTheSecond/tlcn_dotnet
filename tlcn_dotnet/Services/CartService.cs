@@ -69,9 +69,9 @@ namespace tlcn_dotnet.Services
             foreach (CartDetail cartDetail in cartDetails)
             {
                 if (cartDetail.Product.Status == ProductStatus.UNSOLD)
-                    throw new GeneralException($"PRODUCT {cartDetail.Product.Name} IS UNSOLD");
+                    throw new GeneralException($"PRODUCT {cartDetail.Product.Name} IS UNSOLD", ApplicationConstant.BAD_REQUEST_CODE);
                 if (cartDetail.Quantity > cartDetail.Product.Quantity)
-                    throw new GeneralException($"ITEM {cartDetail.Product.Name} IS NOT ENOUGH");
+                    throw new GeneralException($"ITEM {cartDetail.Product.Name} IS NOT ENOUGH", ApplicationConstant.BAD_REQUEST_CODE);
             }
 
             IList<long> listGiftCartId = new List<long>();

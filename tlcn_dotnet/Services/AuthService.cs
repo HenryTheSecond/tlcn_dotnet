@@ -461,5 +461,20 @@ namespace tlcn_dotnet.ServicesImpl
             return new DataResponse(userListCartDto);
 
         }
+
+        public async Task<DataResponse> GetEmployeeById(long id)
+        {
+            var employee = await _accountRepository.GetEmployeeById(id) ??
+                throw new GeneralException("EMPLOYEE NOT FOUND", ApplicationConstant.NOT_FOUND_CODE);
+
+            GoogleAccount googleAccount = await _dbContext.GoogleAccount.FirstOrDefaultAsync(googleAccount => googleAccount.Account.Id == employee.Id);
+            if (googleAccount != null)
+            {
+                employee.Email = googleAccount.Email;
+                employee.Provider = "Google";
+            }
+            return new DataResponse(employee);
+
+        }
     }
 }
