@@ -61,6 +61,7 @@ namespace tlcn_dotnet.ServicesImpl
             product.Description = editProductDto.Description != null ? editProductDto.Description : product.Description;
             product.Quantity = editProductDto.Quantity != null ? editProductDto.Quantity : product.Quantity;
             product.Category = category;
+            product.Weight = editProductDto.Weight != null ? editProductDto.Weight.Value : product.Weight;
 
             IEnumerable<SimpleProductImageDto> productImages = await _productImageService.EditProductImage(product, editProductDto.EditImageStatus, files);
             ProductWithImageDto productWithImageDto = _mapper.Map<ProductWithImageDto>(product);

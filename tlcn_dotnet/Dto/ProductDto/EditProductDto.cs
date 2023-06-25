@@ -25,6 +25,7 @@ namespace tlcn_dotnet.Dto.ProductDto
         public string? Description { get; set; }
         public double? Quantity { get; set; }
         public long? CategoryId { get; set; }
+        public int? Weight { get; set; }
         public IList<ProductImageEditStatus> EditImageStatus { get; set; }
     }
 }

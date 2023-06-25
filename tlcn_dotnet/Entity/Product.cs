@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using System.Collections;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using tlcn_dotnet.Constant;
@@ -35,6 +36,8 @@ namespace tlcn_dotnet.Entity
         public double Sales { get; set; } = 0;
 
         public double SalesUntilCheckExpire { get; set; } = 0;
+        [DefaultValue(0)]
+        public int Weight { get; set; } = 0;
 
         public virtual Category? Category { get; set; }
         

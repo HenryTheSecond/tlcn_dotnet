@@ -34,7 +34,7 @@ namespace tlcn_dotnet.Jobs
 
                     var expireNotification = new InventoryNotification
                     {
-                        Content = $"{-sales} product {group.Product.Name} has expired",
+                        Content = $"{-sales} sản phẩm {group.Product.Name} đã hết hạn",
                         CreatedDate = DateTime.Now.Date,
                         IsRead = false,
                         Type = Constant.InventoryNotificationType.Expire
@@ -56,7 +56,7 @@ namespace tlcn_dotnet.Jobs
                 if (grp.Product.Quantity - grp.Quantity > 0)
                     _dbContext.InventoryNotification.Add(new InventoryNotification
                     {
-                        Content = $"{grp.Product.Quantity - grp.Quantity} product {grp.Product.Name} almost expire",
+                        Content = $"{grp.Product.Quantity - grp.Quantity} sản phẩm {grp.Product.Name} gần hết hạn",
                         CreatedDate= DateTime.Now.Date,
                         IsRead = false,
                         Type = Constant.InventoryNotificationType.AlmostExpire

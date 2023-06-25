@@ -104,6 +104,17 @@ namespace tlcn_dotnet.Services
         public async Task<DataResponse> GetAllProductReview(long productId, int page = 1, int pageSize = 5)
         {
             var reviews = await _reviewRepository.GetAllProductReview(productId, page, pageSize);
+
+            //Get Avatar of user
+            var accountIdAndPhoto = await _dbContext.Account
+                .Where(account => reviews.Select(rv => rv.Account.Id).Contains(account.Id.Value))
+                .Select(account => new { account.Id, account.PhotoUrl }).ToDictionaryAsync(item => item.Id.Value);
+            foreach(var review in reviews)
+            {
+                if(accountIdAndPhoto.ContainsKey(review.Account.Id.Value))
+                    review.Account.PhotoUrl = accountIdAndPhoto[review.Account.Id.Value].PhotoUrl;
+            }
+
             var count = await _reviewRepository.CountProductReview(productId);
             var reviewResponses = _mapper.Map<IEnumerable<ReviewResponse>>(reviews);
             return new DataResponse(new 

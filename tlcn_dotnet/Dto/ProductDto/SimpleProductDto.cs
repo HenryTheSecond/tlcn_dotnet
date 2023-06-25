@@ -24,5 +24,6 @@ namespace tlcn_dotnet.Dto.ProductDto
         public double? Sales { get; set; } = 0;
         public bool IsDeleted { get; set; }
         public SimpleProductPromotionDto Promotion { get; set; }
+        public int Weight { get; set; } = 0;
     }
 }
