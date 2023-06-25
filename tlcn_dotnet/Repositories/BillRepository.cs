@@ -100,14 +100,14 @@ namespace tlcn_dotnet.Repositories
         {
             string selectFrom = @" select Product.Id, Product.Name, Product.Unit,
 		                                sum(BillDetail.Quantity * BillDetail.Price) as Profit,
-		                                Sales as Sale
+		                                sum(BillDetail.Quantity) as Sale
                                 from (Product left outer join BillDetail on Product.Id = BillDetail.ProductId)
 	                                left outer join Bill on BillDetail.BillId = Bill.Id
                                     left outer join Cart on Cart.BillId = Bill.Id ";
             List<string> conditions = new List<string>();
             DynamicParameters parameters = new DynamicParameters();
             string where = "  ";
-            string groupBy = " group by Product.Id, Product.Name, Product.Unit, Sales ";
+            string groupBy = " group by Product.Id, Product.Name, Product.Unit ";
             string orderBy = $" {order} ";
 
             if (sortBy == "PROFIT")
