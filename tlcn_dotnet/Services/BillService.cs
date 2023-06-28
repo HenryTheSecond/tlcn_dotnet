@@ -66,7 +66,7 @@ namespace tlcn_dotnet.Services
                 Bill billDb = await _billRepository.UpdatePurchaseDate(billId, now);
                 Dictionary<string, object> momoRequestParameters = new Dictionary<string, object>();
                 momoRequestParameters.Add("orderId", billDb.Id.ToString() + "_" + now.Ticks.ToString());
-                momoRequestParameters.Add("amount", billDb.Total.Value + shippingFee);
+                momoRequestParameters.Add("amount", Math.Round((billDb.Total.Value + shippingFee) / 100, 0) * 100);
                 momoRequestParameters.Add("orderInfo", "Thanks for buying at Fruit Shop");
                 momoRequestParameters.Add("requestId", billDb.Id.ToString() + "_" + now.Ticks.ToString());
                 HttpResponseMessage response = await _momoPaymentService.SendPaymentRequest(momoRequestParameters);
