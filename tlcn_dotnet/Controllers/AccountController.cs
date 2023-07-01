@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using System.Web.Http.Results;
 using tlcn_dotnet.AuthorizationAttributes;
 using tlcn_dotnet.Constant;
 using tlcn_dotnet.CustomException;
@@ -8,6 +9,7 @@ using tlcn_dotnet.Dto.AccountDto;
 using tlcn_dotnet.Entity;
 using tlcn_dotnet.Services;
 using tlcn_dotnet.Utils;
+using RedirectResult = Microsoft.AspNetCore.Mvc.RedirectResult;
 
 namespace tlcn_dotnet.Controllers
 {
@@ -29,9 +31,14 @@ namespace tlcn_dotnet.Controllers
         }
 
         [HttpGet("confirm")]
-        public async Task<DataResponse> ConfirmAccount(string token)
+        public async Task<object> ConfirmAccount(string token)
         {
-            return await _authService.ConfirmAccount(token);
+            var result = await _authService.ConfirmAccount(token);
+            var accountResponse = result.Data as AccountResponse;
+            if (accountResponse != null)
+                return Redirect("http://localhost:3000/");
+            else
+                return result;
         }
 
         [HttpPost("login")]
@@ -90,9 +97,14 @@ namespace tlcn_dotnet.Controllers
         }
 
         [HttpGet("changePassword")]
-        public async Task<DataResponse> ConfirmChangePassword(string token)
-        { 
-            return await _authService.ConfirmChangePassword(token);
+        public async Task<object> ConfirmChangePassword(string token)
+        {
+            var result = await _authService.ConfirmChangePassword(token);
+            var accountResponse = result.Data as AccountResponse;
+            if (accountResponse != null)
+                return Redirect("http://localhost:3000/");
+            else
+                return result;
         }
 
         [HttpGet("admin/account/{strId}")]
