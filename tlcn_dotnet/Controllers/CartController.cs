@@ -123,5 +123,12 @@ namespace tlcn_dotnet.Controllers
         {
             return await _cartService.DeleteCurrentCart(authorization);
         }
+
+        [CustomAuthorize]
+        [HttpGet("validateQuantity")]
+        public async Task<DataResponse> ValidateQuantity([FromHeader(Name = "Authorization")] string authorization)
+        {
+            return await _cartService.ValidateQuantity(authorization);
+        }
     }
 }

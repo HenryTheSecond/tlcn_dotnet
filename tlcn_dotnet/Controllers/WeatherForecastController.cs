@@ -19,6 +19,7 @@ using System.Text.Json;
 using tlcn_dotnet.Services;
 using tlcn_dotnet.Constant;
 using Google.Cloud.Firestore;
+using HttpMethod = System.Net.Http.HttpMethod;
 
 namespace tlcn_dotnet.Controllers
 {
@@ -35,10 +36,11 @@ namespace tlcn_dotnet.Controllers
         private readonly IDeliveryService _ghnDeliveryService;
         private readonly FirestoreDb _firebaseDb;
         private readonly ICartNotificationService _cartNotificationService;
+        private readonly HttpClient _httpClient;
 
         public WeatherForecastController(ILogger<WeatherForecastController> logger, IPaymentService paymentService, 
             ICartRepository cartRepository, MyDbContext dbContext, IMapper mapper, 
-            IDeliveryService deliveryService, FirestoreDb firestoreDb, ICartNotificationService cartNotificationService)
+            IDeliveryService deliveryService, FirestoreDb firestoreDb, ICartNotificationService cartNotificationService, HttpClient httpClient)
         {
             _logger = logger;
             _paymentService = paymentService;
@@ -48,6 +50,7 @@ namespace tlcn_dotnet.Controllers
             _ghnDeliveryService = deliveryService;
             _firebaseDb = firestoreDb;
             _cartNotificationService = cartNotificationService;
+            _httpClient = httpClient; 
         }
 
         [HttpGet(Name = "GetWeatherForecast")]
@@ -237,6 +240,23 @@ namespace tlcn_dotnet.Controllers
                 Status = CartStatus.DELIVERIED
             });
             return Ok();
+        }
+
+
+        [HttpGet("testTwilio/{body}")]
+        public async Task<IActionResult> TestTwilio(string body)
+        {
+            var dict = new Dictionary<string, string>();
+            dict.Add("To", "+840964147757");
+            dict.Add("From", "+19123729879");
+            dict.Add("Body", body);
+            
+            var request = new HttpRequestMessage(HttpMethod.Post, "https://api.twilio.com/2010-04-01/Accounts/AC2de7639eaf115bcb2195774eb91a3b6f/Messages.json");
+            request.Headers.Accept.Clear();
+            request.Headers.Add("Authorization", "Basic QUMyZGU3NjM5ZWFmMTE1YmNiMjE5NTc3NGViOTFhM2I2Zjo3ZDNlNGJhMTZiNDNiOWNiZWU3NjI0ODIxZjc4OTNmOQ==");
+            request.Content = new FormUrlEncodedContent(dict);
+            var response = await _httpClient.SendAsync(request, CancellationToken.None);
+            return Ok(response);
         }
     }
 }   

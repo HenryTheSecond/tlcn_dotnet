@@ -85,6 +85,7 @@ try
     builder.Services.AddScoped<IProductPromotionService, ProductPromotionService>();
     builder.Services.AddScoped<IReviewResourceService, ReviewResourceService>();
     builder.Services.AddScoped<IGiftCartService, GiftCartService>();
+    builder.Services.AddScoped<ISmsService, TwilioSmsService>();
 
     builder.Services.AddSingleton(_ => FirestoreDb.Create("chat-app-ba422"));
 

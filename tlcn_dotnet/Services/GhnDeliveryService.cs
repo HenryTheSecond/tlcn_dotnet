@@ -24,7 +24,7 @@ namespace tlcn_dotnet.Services
         public GhnDeliveryService(IConfiguration configuration, HttpClient httpClient)
         {
             _httpClient = httpClient;
-            var ghnSection = configuration.GetSection("GHN-PROD");
+            var ghnSection = configuration.GetSection("GHN");
             _shopId = ghnSection.GetSection("ShopId").Value;
             _token = ghnSection.GetSection("Token").Value;
             _apiEndPoint = ghnSection.GetSection("ApiEndPoint").Value;

@@ -3,6 +3,7 @@ using CloudinaryDotNet.Actions;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 using System.IdentityModel.Tokens.Jwt;
+using System.Text;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 using tlcn_dotnet.Constant;
@@ -33,9 +34,11 @@ namespace tlcn_dotnet.Services
         private readonly ICartNotificationService _cartNotificationService;
         private readonly MyDbContext _dbContext;
         private readonly IGiftCartRepository _giftCartRepository;
+        private readonly ISmsService _smsService;
         public CartService(MyDbContext dbContext, ICartDetailRepository cartDetailRepository, IBillService billService,
             ICartRepository cartRepository, IMapper mapper, IDeliveryService deliveryService,
-            IBillRepository billRepository, IProductRepository productRepository, ICartNotificationService cartNotificationService, IGiftCartRepository giftCartRepository)
+            IBillRepository billRepository, IProductRepository productRepository, 
+            ICartNotificationService cartNotificationService, IGiftCartRepository giftCartRepository, ISmsService smsService)
         {
             _dbContext = dbContext;
             _cartDetailRepository = cartDetailRepository;
@@ -47,6 +50,7 @@ namespace tlcn_dotnet.Services
             _productRepository = productRepository;
             _cartNotificationService = cartNotificationService;
             _giftCartRepository = giftCartRepository;
+            _smsService = smsService;
         }
 
         public async Task<DataResponse> PayCurrentCart(string authorization, CartPaymentDto cartPaymentDto)
@@ -66,6 +70,7 @@ namespace tlcn_dotnet.Services
             if (cartDetails.Count < 1)
                 throw new GeneralException("NO ITEM TO PAY", ApplicationConstant.BAD_REQUEST_CODE);
 
+            //Handle product unsold or product quantity is not enough
             foreach (CartDetail cartDetail in cartDetails)
             {
                 if (cartDetail.Product.Status == ProductStatus.UNSOLD)
@@ -90,12 +95,18 @@ namespace tlcn_dotnet.Services
             SimpleBillDto simpleBillDto = null;
             string paymentUrl = null;
             var createBillResponseData = (await _billService.CreateBill(cartDetails, cartPaymentDto.PaymentMethod, momoShippingFee)).Data;
+
+            long billId = 0;
             if (createBillResponseData.GetType() == typeof(SimpleBillDto))
+            {
                 simpleBillDto = (SimpleBillDto)createBillResponseData;
+                billId = simpleBillDto.Id.Value;
+            }
             else
             {
                 simpleBillDto = ((PayingMomoBill)createBillResponseData).Bill;
                 paymentUrl = ((PayingMomoBill)createBillResponseData).MomoPaymentLink;
+                billId = simpleBillDto.Id.Value;
             }
             Cart cart = new Cart()
             {
@@ -113,6 +124,15 @@ namespace tlcn_dotnet.Services
                 DeliveryTime = await _deliveryService.CalculateDeliveryTime(int.Parse(cartPaymentDto.DistrictId), cartPaymentDto.WardId, cartPaymentDto.ServiceType)
             };
 
+            //Update quantity after user pay the cart
+            var cartDetailEF = await _dbContext.CartDetail.Where(cartDetail => cartPaymentDto.ListCartDetailId.Contains(cartDetail.Id.Value) && cartDetail.AccountId == (long)accountId && cartDetail.CartId == null)
+                .Include(cartDetail => cartDetail.Product).ToListAsync();
+            foreach(var cd in cartDetailEF)
+            {
+                cd.Product.Quantity -= cd.Quantity;
+            }
+            await _dbContext.SaveChangesAsync();
+            
             long id = await _cartRepository.InsertCart(cart);
             List<Task<int>> insertPriceAndCartIdTasks = new List<Task<int>>();
             foreach (CartDetail cartDetail in cartDetails)
@@ -166,6 +186,7 @@ namespace tlcn_dotnet.Services
                 //TODO Refund payment
             }
             await _cartNotificationService.CreateCartNotification(cart);
+            await _smsService.SendCartNotificationSms(cart);
             return new DataResponse(_mapper.Map<CartResponse>(cart));
         }
 
@@ -359,6 +380,44 @@ namespace tlcn_dotnet.Services
             if (isCartExisted == false)
                 throw new GeneralException("CART NOT FOUND", ApplicationConstant.NOT_FOUND_CODE);
             return new DataResponse(_mapper.Map<CartResponse>(await _cartRepository.ProcessCartById(id)));
+        }
+
+        public async Task<DataResponse> ValidateQuantity(string authorization)
+        {
+            long accountId = Util.ReadJwtTokenAndGetAccountId(authorization);
+            var groupProduct = await _dbContext.CartDetail
+                .Include(cd => cd.Product)
+                .Where(cd => cd.AccountId == accountId && cd.CartId == null)
+                .GroupBy(cd => new { Quantity = cd.Product.Quantity, Name = cd.Product.Name}).Select(grp => new 
+                {
+                    Require = grp.Sum(item => item.Quantity),
+                    Quantity = grp.Key.Quantity,
+                    Name = grp.Key.Name
+                }).ToListAsync();
+            List<string> messages = new List<string>();
+            foreach(var grp in groupProduct)
+            {
+                if (grp.Require > grp.Quantity)
+                {
+                    messages.Add($"Bạn đang mua {grp.Require} sản phẩm {grp.Name}, nhưng chỉ còn {grp.Quantity}");
+                }
+            }
+            if(messages.Count > 0)
+            {
+                return new DataResponse
+                {
+                    Message = string.Join("\n", messages),
+                    Status = ApplicationConstant.BAD_REQUEST_CODE,
+                    Data = messages
+                };
+            }
+            return new DataResponse
+            {
+                Status = ApplicationConstant.SUCCESSFUL_CODE,
+                Message = string.Empty,
+                DetailMessage = string.Empty,
+                Data = messages
+            };
         }
     }
 }
