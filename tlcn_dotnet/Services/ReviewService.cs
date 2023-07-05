@@ -232,6 +232,7 @@ namespace tlcn_dotnet.Services
         public async Task<DataResponse> SearchReview(string keyword, long? productId, int page, int pageSize)
         {
             var query = from review in _dbContext.Review
+                        join product in _dbContext.Product on review.ProductId equals product.Id.Value
                         join account in _dbContext.Account on review.AccountId equals account.Id
                         join googleAccount in _dbContext.GoogleAccount on account.Id equals googleAccount.Account.Id into grpGGAccount
                         from googleAccount in grpGGAccount.DefaultIfEmpty()
@@ -239,7 +240,7 @@ namespace tlcn_dotnet.Services
                                 account.Email.Contains(keyword) ||
                                 googleAccount.Email.Contains(keyword) ||
                                 (account.FirstName + " " + account.LastName).Contains(keyword))
-                        select new { Review = review, Account = account, GoogleAccount = googleAccount };
+                        select new { Review = review, Account = account, GoogleAccount = googleAccount, Product = product };
             if(productId != null)
                 query = query.Where(review => review.Review.ProductId == productId);
 
@@ -255,6 +256,7 @@ namespace tlcn_dotnet.Services
                 row.Review.AccountId = row.Account.Id.Value;*/
                 if(!dictReview.ContainsKey(item.Row.Review.Id.Value))
                 {
+                    item.Row.Review.Product = item.Row.Product;
                     item.Row.Review.Account = item.Row.Account;
                     item.Row.Review.AccountId = item.Row.Account.Id.Value;
                     item.Row.Review.ReviewResource = new List<ReviewResource>();
@@ -267,7 +269,7 @@ namespace tlcn_dotnet.Services
             var result = dictReview.Values.ToList();
             return new DataResponse(new
             {
-                reviews = _mapper.Map<IEnumerable<ReviewResponse>>(result),
+                reviews = _mapper.Map<IEnumerable<ReviewWithProductResponse>>(result),
                 maxPage = Util.CalculateMaxPage(count, pageSize),
                 currentPage = page
             });

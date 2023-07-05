@@ -91,6 +91,7 @@ namespace tlcn_dotnet.Mapper
             CreateMap<BillDetail, BillDetailWithProductDto>();
 
             CreateMap<Review, ReviewResponse>();
+            CreateMap<Review, ReviewWithProductResponse>();
 
             CreateMap<ReviewResource, ReviewResourceResponse>();
 

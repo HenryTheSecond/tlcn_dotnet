@@ -124,12 +124,14 @@ namespace tlcn_dotnet.Services
                 DeliveryTime = await _deliveryService.CalculateDeliveryTime(int.Parse(cartPaymentDto.DistrictId), cartPaymentDto.WardId, cartPaymentDto.ServiceType)
             };
 
-            //Update quantity after user pay the cart
+            //Update quantity and sales after user pay the cart
             var cartDetailEF = await _dbContext.CartDetail.Where(cartDetail => cartPaymentDto.ListCartDetailId.Contains(cartDetail.Id.Value) && cartDetail.AccountId == (long)accountId && cartDetail.CartId == null)
                 .Include(cartDetail => cartDetail.Product).ToListAsync();
             foreach(var cd in cartDetailEF)
             {
                 cd.Product.Quantity -= cd.Quantity;
+                cd.Product.Sales += cd.Quantity;
+                cd.Product.SalesUntilCheckExpire += cd.Quantity;
             }
             await _dbContext.SaveChangesAsync();
             
@@ -159,7 +161,7 @@ namespace tlcn_dotnet.Services
                 ?? throw new GeneralException("CART NOT FOUND", ApplicationConstant.NOT_FOUND_CODE);
             if (cart.Status == CartStatus.DELIVERIED)
             {
-                await _billRepository.UpdateProductQuantityAfterProcess(cart.Bill.Id.Value);
+                //await _billRepository.UpdateProductQuantityAfterProcess(cart.Bill.Id.Value);
                 HttpResponseMessage response = await _deliveryService.SendDeliveryRequest(await GhnParameters(cart, processCartDto));
                 var data = (await response.Content.ReadFromJsonAsync<JsonNode>());
                 Console.WriteLine(System.Text.Json.JsonSerializer.Serialize(data));
@@ -173,7 +175,7 @@ namespace tlcn_dotnet.Services
                     cart.Bill.PurchaseDate = now;
                 }
                 cart.Bill.OrderCode = orderCode;
-                await UpdateProductSales(cart.CartDetails);
+                //await UpdateProductSales(cart.CartDetails);
             }
             else if (cart.Status == CartStatus.CANCELLED)
             {
@@ -182,12 +184,32 @@ namespace tlcn_dotnet.Services
 
                 /*                await _billRepository.DeleteBillById(cart.Bill.Id.Value);
                                 cart.Bill = null;*/
+                await UpdateProductWhenCancelCart(cart.CartDetails);
 
                 //TODO Refund payment
             }
             await _cartNotificationService.CreateCartNotification(cart);
             await _smsService.SendCartNotificationSms(cart);
             return new DataResponse(_mapper.Map<CartResponse>(cart));
+        }
+
+        private async Task UpdateProductWhenCancelCart(IList<CartDetail> cartDetails)
+        {
+            var listProductId = cartDetails.Select(x => x.Product.Id);
+            var products = _dbContext.Product.Where(p => listProductId.Contains(p.Id)).ToDictionary(p => p.Id, p => p);
+            foreach (var cartDetail in cartDetails)
+            {
+                products[cartDetail.ProductId].Quantity += cartDetail.Quantity;
+                products[cartDetail.ProductId].Sales -= cartDetail.Quantity;
+                products[cartDetail.ProductId].SalesUntilCheckExpire -= cartDetail.Quantity;
+                if (products[cartDetail.ProductId].SalesUntilCheckExpire < 0)
+                    products[cartDetail.ProductId].SalesUntilCheckExpire = 0;
+
+                cartDetail.Product.Sales = products[cartDetail.ProductId].Sales;
+                cartDetail.Product.SalesUntilCheckExpire = products[cartDetail.ProductId].SalesUntilCheckExpire;
+                cartDetail.Product.Quantity = products[cartDetail.ProductId].Quantity;
+            }
+            await _dbContext.SaveChangesAsync();
         }
 
         private async Task UpdateProductSales(IList<CartDetail> cartDetails)
