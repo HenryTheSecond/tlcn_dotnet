@@ -15,14 +15,14 @@ namespace tlcn_dotnet.Services
         {
             var dict = new Dictionary<string, string>();
             dict.Add("To", $"+84{cart.Phone}");
-            dict.Add("From", "+19123729879");
+            dict.Add("From", "+16204903663");
             dict.Add("Body", $"Đơn hàng với mã số {cart.Id} đã được vận chuyển vào thời gian {cart.DeliveryTime.Value.ToString("dd/MM/yyyy")}");
             if (cart.Status == Constant.CartStatus.CANCELLED)
                 dict["Body"] = $"Rất tiếc, đơn hàng với mã số {cart.Id} đã bị từ chối";
 
-            var request = new HttpRequestMessage(HttpMethod.Post, "https://api.twilio.com/2010-04-01/Accounts/AC2de7639eaf115bcb2195774eb91a3b6f/Messages.json");
+            var request = new HttpRequestMessage(HttpMethod.Post, "https://api.twilio.com/2010-04-01/Accounts/AC042b01fafe5f963c46ce8f17079c0115/Messages.json");
             request.Headers.Accept.Clear();
-            request.Headers.Add("Authorization", "Basic QUMyZGU3NjM5ZWFmMTE1YmNiMjE5NTc3NGViOTFhM2I2Zjo3ZDNlNGJhMTZiNDNiOWNiZWU3NjI0ODIxZjc4OTNmOQ==");
+            request.Headers.Add("Authorization", "Basic QUMwNDJiMDFmYWZlNWY5NjNjNDZjZThmMTcwNzljMDExNTphY2MzZDMxMDYzOTZiODA2ZWI1YzcyYWNjMjMyM2E2MA==");
             request.Content = new FormUrlEncodedContent(dict);
             await _httpClient.SendAsync(request, CancellationToken.None);
         }
