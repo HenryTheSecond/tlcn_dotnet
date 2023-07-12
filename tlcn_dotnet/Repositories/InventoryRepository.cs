@@ -94,8 +94,8 @@ namespace tlcn_dotnet.RepositoriesImpl
 
                 if (keyword != null)
                 {
-                    conditions += " AND i.Description LIKE '%@keyword%' ";
-                    parameters.Add("keyword", keyword);
+                    conditions += " AND i.Description LIKE @keyword ";
+                    parameters.Add("keyword", $"%{keyword}%");
 
                 }
                 if (productId != null)
