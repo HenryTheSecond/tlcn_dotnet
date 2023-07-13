@@ -137,18 +137,25 @@ namespace tlcn_dotnet.Services
             IList<dynamic> productStatistics = await _billRepository.ProductStatistic(keyword, fromDate, toDate, sortBy, order);
 
             DataTable dataTable = new DataTable($"Product Statistics");
-            dataTable.Columns.AddRange(new DataColumn[5]
+            dataTable.Columns.AddRange(new DataColumn[4]
             {
                 new DataColumn("Id"),
                 new DataColumn("Name"),
-                new DataColumn("Unit"),
                 new DataColumn("Profit"),
                 new DataColumn("Sales")
             });
+            double totalProfit = 0;
+            double totalSale = 0;
             foreach (var product in productStatistics)
             {
-                dataTable.Rows.Add(product.Id, product.Name, product.Unit, product.Profit, product.Sale);
+                dataTable.Rows.Add(product.Id, product.Name, product.Profit, product.Sale);
+                totalProfit += product.Profit;
+                totalSale += product.Sale;
             }
+            dataTable.Rows.Add();
+            dataTable.Rows.Add("Total profit", totalProfit);
+            dataTable.Rows.Add("Total sale", totalSale);
+
             using (XLWorkbook workbook = new XLWorkbook())
             {
                 workbook.Worksheets.Add(dataTable);
