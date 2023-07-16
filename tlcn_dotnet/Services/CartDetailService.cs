@@ -54,7 +54,7 @@ namespace tlcn_dotnet.Services
                 throw new GeneralException("QUANTITY IS NOT VALID", ApplicationConstant.BAD_REQUEST_CODE);
 
             if (addCartDetailDto.Quantity > productDb.Quantity)
-                throw new GeneralException("QUANTITY IS NOT ENOUGH", ApplicationConstant.BAD_REQUEST_CODE);
+                throw new GeneralException("Số lượng sản phẩm không đủ", ApplicationConstant.BAD_REQUEST_CODE);
 
             long cartDetailExistId = await _cartDetailRepository.CheckCurrentCartHavingProduct((long)accountId, addCartDetailDto.ProductId, addCartDetailDto.GiftCartId);
             CartDetail cartDetail;
