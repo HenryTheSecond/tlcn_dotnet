@@ -98,14 +98,14 @@ namespace ServiceTests
         public async void AddCartDetail_CheckCurrentCartHavingProductReturn0_ShouldAdd()
         {
             _productRepository.Setup(x => x.GetById(It.IsAny<long>()))
-               .ReturnsAsync(new Product
+               .Returns(Task.FromResult<Product>(new Product
                {
                    IsDeleted = false,
                    Status = tlcn_dotnet.Constant.ProductStatus.SELLING,
                    Unit = tlcn_dotnet.Constant.ProductUnit.UNIT,
                    MinPurchase = 1,
                    Quantity = 100
-               });
+               }));
             _cartDetailRepository.Setup(x => x.CheckCurrentCartHavingProduct(It.IsAny<long>(),
                 It.IsAny<long>(), It.IsAny<long?>()))
                 .ReturnsAsync(0);
@@ -114,10 +114,11 @@ namespace ServiceTests
                 .ReturnsAsync(new CartDetail
                 {
                     Id = 1,
-                    ProductId = 1
+                    ProductId = 1,
+                    Product = new Product()
                 });
             _productPromotionRepository.Setup(x => x.GetPromotionByProductId(It.IsAny<long>()))
-                .ReturnsAsync(new ProductPromotion());
+                .ReturnsAsync(new ProductPromotion { Product = new Product()});
 
             var result = (await _cartDetailService.AddCartDetail(TOKEN, new AddCartDetailRequest
             {
